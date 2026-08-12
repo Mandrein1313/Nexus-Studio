@@ -116,4 +116,40 @@ public class FileSystemManager {
             destChannel.transferFrom(srcChannel, 0, srcChannel.size());
         }
     }
+    /**
+ * ค้นหาไฟล์ตามชื่อ (บางส่วนของชื่อก็ได้) ทั่วทั้งโปรเจกต์
+ * ข้ามโฟลเดอร์ที่ไม่จำเป็น เช่น .git, build, .gradle
+ */
+public static List<File> searchFilesByName(File rootDir, String query) {
+    List<File> results = new ArrayList<>();
+    if (rootDir == null || !rootDir.exists() || query == null || query.trim().isEmpty()) {
+        return results;
+    }
+    String q = query.trim().toLowerCase();
+    searchRecursive(rootDir, q, results, 0);
+    return results;
+}
+
+private static void searchRecursive(File dir, String queryLower, List<File> out, int depth) {
+    if (depth > 20 || out.size() >= 100) return; // กันลึกเกิน / ผลลัพธ์เยอะเกิน
+    File[] files = dir.listFiles();
+    if (files == null) return;
+
+    for (File f : files) {
+        String name = f.getName();
+        if (name.startsWith(".") && (name.equals(".git") || name.equals(".gradle") || name.equals(".idea"))) {
+            continue;
+        }
+        if (f.isDirectory()) {
+            if (name.equals("build") || name.equals("node_modules") || name.equals(".thumbnails")) {
+                continue;
+            }
+            searchRecursive(f, queryLower, out, depth + 1);
+        } else {
+            if (name.toLowerCase().contains(queryLower)) {
+                out.add(f);
+            }
+        }
+    }
+}
 }

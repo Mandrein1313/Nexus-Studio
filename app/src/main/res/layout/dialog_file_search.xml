@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#1E1E1E"
+    android:padding="12dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🔍 ค้นหาไฟล์"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:paddingBottom="8dp" />
+
+    <EditText
+        android:id="@+id/etFileSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="พิมพ์ชื่อไฟล์ เช่น MainActivity"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#707070"
+        android:backgroundTint="#BB86FC"
+        android:inputType="text"
+        android:imeOptions="actionSearch"
+        android:padding="12dp" />
+
+    <TextView
+        android:id="@+id/tvSearchHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="พิมพ์อย่างน้อย 1 ตัวอักษร"
+        android:textColor="#8C8C8C"
+        android:textSize="12sp"
+        android:paddingTop="8dp"
+        android:paddingBottom="4dp" />
+
+    <ListView
+        android:id="@+id/lvFileSearchResults"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="#333333"
+        android:dividerHeight="1dp" />
+
+</LinearLayout>
