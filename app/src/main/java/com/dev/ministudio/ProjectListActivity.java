@@ -70,97 +70,96 @@ protected void onDestroy() {
 }
 
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getWindow().setStatusBarColor(android.graphics.Color.parseColor("#1E1E1E"));
-        setContentView(R.layout.activity_project_list);
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-        ListView listView = findViewById(R.id.projectListView);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        drawerLayout = findViewById(R.id.drawer_layout);
+    // กันเนื้อหาไม่ให้ทับ status bar / navigation bar (Android 15+)
+    androidx.core.view.WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
+    getWindow().setStatusBarColor(android.graphics.Color.parseColor("#1E1E1E"));
+    getWindow().setNavigationBarColor(android.graphics.Color.parseColor("#1E1E1E"));
 
-        fabMenu = findViewById(R.id.multiple_actions);
-        fabCreate = findViewById(R.id.action_create);
-        fabGithub = findViewById(R.id.action_github);
+    setContentView(R.layout.activity_project_list);
 
-        setSupportActionBar(toolbar);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawerLayout, toolbar, android.R.string.ok, android.R.string.cancel);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
+    ListView listView = findViewById(R.id.projectListView);
+    Toolbar toolbar = findViewById(R.id.toolbar);
+    drawerLayout = findViewById(R.id.drawer_layout);
 
-        // 1. ตั้งค่าปุ่ม Fab ผ่านเมธอดแยก (สะอาดและดูดีขึ้น)
-        setupFabButtons();
+    fabMenu = findViewById(R.id.multiple_actions);
+    fabCreate = findViewById(R.id.action_create);
+    fabGithub = findViewById(R.id.action_github);
 
-        // 2. โหลดข้อมูลต่างๆ
-        checkPermissions();
-        refreshProjectList();
+    setSupportActionBar(toolbar);
+    ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+            this, drawerLayout, toolbar, android.R.string.ok, android.R.string.cancel);
+    drawerLayout.addDrawerListener(toggle);
+    toggle.syncState();
 
-        // 3. ตั้งค่า Adapter
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, projects) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-                TextView text = (TextView) view.findViewById(android.R.id.text1);
-                text.setTextColor(android.graphics.Color.WHITE);
-                text.setTextSize(18);
-                text.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.sym_def_app_icon, 0, 0, 0);
-                text.setCompoundDrawablePadding(30);
-                return view;
-            }
-        };
-        listView.setAdapter(adapter);
+    // 1. ตั้งค่าปุ่ม Fab ผ่านเมธอดแยก (สะอาดและดูดีขึ้น)
+    setupFabButtons();
 
-        listView.setOnItemClickListener((parent, view, position, id) -> {
-            Intent intent = new Intent(ProjectListActivity.this, MainActivity.class);
-            intent.putExtra("projectName", projects.get(position));
-            startActivity(intent);
-        });
+    // 2. โหลดข้อมูลต่างๆ
+    checkPermissions();
+    refreshProjectList();
 
- listView.setOnItemLongClickListener((parent, view, position, id) -> {
-    String projectName = projects.get(position);
-    File projectDir = new File("/sdcard/MiniStudio/" + projectName);
-
-    new AlertDialog.Builder(ProjectListActivity.this)
-        .setTitle("ลบโปรเจกต์")
-        .setMessage("คุณต้องการลบ " + projectName + " ใช่หรือไม่?")
-        .setPositiveButton("ลบ", (dialog, which) -> {
-            // 1. เรียกฟังก์ชันลบ
-            deleteRecursive(projectDir);
-
-            // 2. ตรวจสอบว่าลบสำเร็จจริงๆ หรือไม่ (ไฟล์ต้องไม่อยู่แล้ว)
-            if (!projectDir.exists()) {
-                projects.remove(position);
-                adapter.notifyDataSetChanged();
-                Toast.makeText(ProjectListActivity.this, "ลบโปรเจกต์ " + projectName + " เรียบร้อยครับ", Toast.LENGTH_SHORT).show();
-            } else {
-                // ถ้าไฟล์ยังอยู่ (อาจเพราะติด Permission หรือติดไฟล์ที่เปิดค้าง)
-                Toast.makeText(ProjectListActivity.this, "ไม่สามารถลบไฟล์ได้ โปรดตรวจสอบสิทธิ์", Toast.LENGTH_SHORT).show();
-            }
-        })
-        .setNegativeButton("ยกเลิก", null)
-        .show();
-    return true;
-});
-
-
-        // 4. ระบบตรวจสอบ GitHub
-        SharedPreferences prefs = getSharedPreferences("GitHubPrefs", Context.MODE_PRIVATE);
-        if (!prefs.getBoolean("is_github_setup", false)) {
-            new android.os.Handler().postDelayed(this::showGitHubSettingsDialog, 600);
-            
+    // 3. ตั้งค่า Adapter
+    adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, projects) {
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view = super.getView(position, convertView, parent);
+            TextView text = (TextView) view.findViewById(android.R.id.text1);
+            text.setTextColor(android.graphics.Color.WHITE);
+            text.setTextSize(18);
+            text.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.sym_def_app_icon, 0, 0, 0);
+            text.setCompoundDrawablePadding(30);
+            return view;
         }
-        
-        // เพิ่มตัวรับแจ้งเตือนเมื่อ Service ทำงานเสร็จ
-IntentFilter filter = new IntentFilter(GitHubCloneService.ACTION_CLONE_COMPLETE);
-if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-    registerReceiver(cloneReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
-} else {
-    registerReceiver(cloneReceiver, filter);
-}
+    };
+    listView.setAdapter(adapter);
 
+    listView.setOnItemClickListener((parent, view, position, id) -> {
+        Intent intent = new Intent(ProjectListActivity.this, MainActivity.class);
+        intent.putExtra("projectName", projects.get(position));
+        startActivity(intent);
+    });
+
+    listView.setOnItemLongClickListener((parent, view, position, id) -> {
+        String projectName = projects.get(position);
+        File projectDir = new File("/sdcard/MiniStudio/" + projectName);
+
+        new AlertDialog.Builder(ProjectListActivity.this)
+            .setTitle("ลบโปรเจกต์")
+            .setMessage("คุณต้องการลบ " + projectName + " ใช่หรือไม่?")
+            .setPositiveButton("ลบ", (dialog, which) -> {
+                deleteRecursive(projectDir);
+
+                if (!projectDir.exists()) {
+                    projects.remove(position);
+                    adapter.notifyDataSetChanged();
+                    Toast.makeText(ProjectListActivity.this, "ลบโปรเจกต์ " + projectName + " เรียบร้อยครับ", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(ProjectListActivity.this, "ไม่สามารถลบไฟล์ได้ โปรดตรวจสอบสิทธิ์", Toast.LENGTH_SHORT).show();
+                }
+            })
+            .setNegativeButton("ยกเลิก", null)
+            .show();
+        return true;
+    });
+
+    // 4. ระบบตรวจสอบ GitHub
+    SharedPreferences prefs = getSharedPreferences("GitHubPrefs", Context.MODE_PRIVATE);
+    if (!prefs.getBoolean("is_github_setup", false)) {
+        new android.os.Handler().postDelayed(this::showGitHubSettingsDialog, 600);
     }
+
+    // เพิ่มตัวรับแจ้งเตือนเมื่อ Service ทำงานเสร็จ
+    IntentFilter filter = new IntentFilter(GitHubCloneService.ACTION_CLONE_COMPLETE);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        registerReceiver(cloneReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+    } else {
+        registerReceiver(cloneReceiver, filter);
+    }
+}
 
     private void setupFabButtons() {
         fabCreate.setOnClickListener(v -> {

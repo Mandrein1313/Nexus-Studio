@@ -53,6 +53,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.transport.URIish;
 import android.os.Build;
+import androidx.core.view.WindowCompat;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -115,18 +116,21 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getWindow().setStatusBarColor(android.graphics.Color.parseColor("#1E1E1E"));
-        setContentView(R.layout.activity_main);
-        
-        buildEnvManager = new BuildEnvironmentManager(this);
-        
-        initViews();
-        setupLogic();
-    }
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
+    WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
+    getWindow().setStatusBarColor(android.graphics.Color.parseColor("#1E1E1E"));
+    getWindow().setNavigationBarColor(android.graphics.Color.parseColor("#1E1E1E"));
+
+    setContentView(R.layout.activity_main);
+    
+    buildEnvManager = new BuildEnvironmentManager(this);
+    
+    initViews();
+    setupLogic();
+}
     private void initViews() {
         etFind = findViewById(R.id.etFind);
         etReplace = findViewById(R.id.etReplace);
