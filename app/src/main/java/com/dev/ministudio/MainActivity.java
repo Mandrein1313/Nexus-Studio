@@ -54,7 +54,9 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.transport.URIish;
 import android.os.Build;
 import androidx.core.view.WindowCompat;
-
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.graphics.Insets;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -113,9 +115,6 @@ public class MainActivity extends AppCompatActivity {
    private String lastReceivedSuggestion = "";
    private String pendingProjectName = "";
    
-
-
-
 @Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -125,6 +124,21 @@ protected void onCreate(Bundle savedInstanceState) {
     getWindow().setNavigationBarColor(android.graphics.Color.parseColor("#1E1E1E"));
 
     setContentView(R.layout.activity_main);
+
+    // ดันเนื้อหา drawer ให้อยู่ใต้ status bar
+    View drawerContent = findViewById(R.id.drawer_content);
+    if (drawerContent != null) {
+        ViewCompat.setOnApplyWindowInsetsListener(drawerContent, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars());
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    insets.top + (int) (8 * getResources().getDisplayMetrics().density),
+                    v.getPaddingRight(),
+                    v.getPaddingBottom()
+            );
+            return windowInsets;
+        });
+    }
     
     buildEnvManager = new BuildEnvironmentManager(this);
     

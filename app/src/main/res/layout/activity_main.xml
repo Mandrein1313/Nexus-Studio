@@ -358,8 +358,8 @@
             android:visibility="gone" />
 
     </LinearLayout>
-
 <com.google.android.material.navigation.NavigationView
+    android:id="@+id/nav_view"
     android:layout_width="280dp"
     android:layout_height="match_parent"
     android:layout_gravity="start"
@@ -367,12 +367,11 @@
     android:fitsSystemWindows="true">
 
     <LinearLayout
+        android:id="@+id/drawer_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="8dp"
-        android:paddingTop="40dp"
-        android:fitsSystemWindows="true"
         android:clipToPadding="false">
 
         <TextView
