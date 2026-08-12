@@ -1007,35 +1007,108 @@ private void showFileSearchDialog() {
         return;
     }
 
-    android.app.Dialog dialog = new android.app.Dialog(this);
+    android.app.Dialog dialog = new android.app.Dialog(this, android.R.style.Theme_Black_NoTitleBar);
     dialog.setContentView(R.layout.dialog_file_search);
+
     if (dialog.getWindow() != null) {
-        dialog.getWindow().setLayout(
+        android.view.Window window = dialog.getWindow();
+        window.setLayout(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                (int) (getResources().getDisplayMetrics().heightPixels * 0.7)
+                ViewGroup.LayoutParams.MATCH_PARENT
         );
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, true);
+        window.setStatusBarColor(android.graphics.Color.parseColor("#1E1E1E"));
+        window.setNavigationBarColor(android.graphics.Color.parseColor("#121212"));
     }
 
     android.widget.EditText etSearch = dialog.findViewById(R.id.etFileSearch);
     android.widget.TextView tvHint = dialog.findViewById(R.id.tvSearchHint);
     android.widget.ListView lvResults = dialog.findViewById(R.id.lvFileSearchResults);
+    android.widget.ImageButton btnBack = dialog.findViewById(R.id.btnSearchBack);
+    android.widget.ImageButton btnClear = dialog.findViewById(R.id.btnSearchClear);
+
+    btnBack.setOnClickListener(v -> dialog.dismiss());
+    btnClear.setOnClickListener(v -> etSearch.setText(""));
 
     java.util.List<java.io.File> resultFiles = new java.util.ArrayList<>();
-    android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<String>(
-            this, android.R.layout.simple_list_item_1, new java.util.ArrayList<>()) {
+    java.io.File root = new java.io.File(currentProject.getRootPath());
+    final String rootPath = root.getAbsolutePath();
+
+    android.widget.BaseAdapter adapter = new android.widget.BaseAdapter() {
+        @Override public int getCount() { return resultFiles.size(); }
+        @Override public Object getItem(int position) { return resultFiles.get(position); }
+        @Override public long getItemId(int position) { return position; }
+
         @Override
         public android.view.View getView(int position, android.view.View convertView, android.view.ViewGroup parent) {
-            android.view.View v = super.getView(position, convertView, parent);
-            android.widget.TextView tv = (android.widget.TextView) v.findViewById(android.R.id.text1);
-            tv.setTextColor(android.graphics.Color.WHITE);
-            tv.setTextSize(14);
-            return v;
+            if (convertView == null) {
+                convertView = getLayoutInflater().inflate(R.layout.item_file_search_result, parent, false);
+            }
+            java.io.File file = resultFiles.get(position);
+
+            android.widget.TextView tvName = convertView.findViewById(R.id.tvFileName);
+            android.widget.TextView tvMeta = convertView.findViewById(R.id.tvFileMeta);
+            android.widget.TextView tvPath = convertView.findViewById(R.id.tvFilePath);
+            android.widget.ImageView imgIcon = convertView.findViewById(R.id.imgFileIcon);
+
+            String name = file.getName();
+            String q = etSearch.getText().toString().trim();
+            // ไฮไลต์ส่วนที่ตรงกับคำค้น (ถ้ามี)
+            if (!q.isEmpty() && name.toLowerCase().contains(q.toLowerCase())) {
+                android.text.SpannableString span = new android.text.SpannableString(name);
+                int start = name.toLowerCase().indexOf(q.toLowerCase());
+                span.setSpan(
+                        new android.text.style.BackgroundColorSpan(android.graphics.Color.parseColor("#FDD835")),
+                        start, start + q.length(),
+                        android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                );
+                span.setSpan(
+                        new android.text.style.ForegroundColorSpan(android.graphics.Color.parseColor("#212121")),
+                        start, start + q.length(),
+                        android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                );
+                tvName.setText(span);
+            } else {
+                tvName.setText(name);
+            }
+
+            long size = file.length();
+            String sizeStr;
+            if (size < 1024) sizeStr = size + " B";
+            else if (size < 1024 * 1024) sizeStr = String.format("%.2f KB", size / 1024.0);
+            else sizeStr = String.format("%.2f MB", size / (1024.0 * 1024.0));
+
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yy HH:mm", java.util.Locale.getDefault());
+            String dateStr = sdf.format(new java.util.Date(file.lastModified()));
+            tvMeta.setText(sizeStr + "    " + dateStr);
+
+            String path = file.getAbsolutePath();
+            if (path.startsWith(rootPath)) {
+                path = path.substring(rootPath.length());
+                if (path.startsWith("/")) path = path.substring(1);
+            }
+            // ตัดชื่อไฟล์ออก เหลือแค่โฟลเดอร์
+            int lastSlash = path.lastIndexOf('/');
+            if (lastSlash >= 0) path = path.substring(0, lastSlash + 1);
+            else path = "/";
+            tvPath.setText(path);
+
+            String lower = name.toLowerCase();
+            if (lower.endsWith(".java")) {
+                imgIcon.setColorFilter(android.graphics.Color.parseColor("#00E5FF"));
+            } else if (lower.endsWith(".xml")) {
+                imgIcon.setColorFilter(android.graphics.Color.parseColor("#FF6D00"));
+            } else if (lower.endsWith(".gradle") || lower.endsWith(".properties")) {
+                imgIcon.setColorFilter(android.graphics.Color.parseColor("#78909C"));
+            } else {
+                imgIcon.setColorFilter(android.graphics.Color.parseColor("#B0BEC5"));
+            }
+
+            return convertView;
         }
     };
     lvResults.setAdapter(adapter);
 
-    java.io.File root = new java.io.File(currentProject.getRootPath());
     android.os.Handler searchHandler = new android.os.Handler(android.os.Looper.getMainLooper());
     final Runnable[] searchTask = new Runnable[1];
 
@@ -1044,13 +1117,15 @@ private void showFileSearchDialog() {
         @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
         @Override
         public void afterTextChanged(android.text.Editable s) {
+            String q = s.toString().trim();
+            btnClear.setVisibility(q.isEmpty() ? android.view.View.GONE : android.view.View.VISIBLE);
+
             if (searchTask[0] != null) searchHandler.removeCallbacks(searchTask[0]);
-            final String q = s.toString().trim();
             searchTask[0] = () -> {
                 if (q.isEmpty()) {
                     resultFiles.clear();
-                    adapter.clear();
-                    tvHint.setText("พิมพ์อย่างน้อย 1 ตัวอักษร");
+                    adapter.notifyDataSetChanged();
+                    tvHint.setText("ผลการค้นหา");
                     return;
                 }
                 tvHint.setText("กำลังค้นหา...");
@@ -1060,23 +1135,14 @@ private void showFileSearchDialog() {
                     runOnUiThread(() -> {
                         resultFiles.clear();
                         resultFiles.addAll(found);
-                        adapter.clear();
-                        String rootPath = root.getAbsolutePath();
-                        for (java.io.File f : found) {
-                            String path = f.getAbsolutePath();
-                            if (path.startsWith(rootPath)) {
-                                path = path.substring(rootPath.length());
-                                if (path.startsWith("/")) path = path.substring(1);
-                            }
-                            adapter.add(path);
-                        }
+                        adapter.notifyDataSetChanged();
                         tvHint.setText(found.isEmpty()
                                 ? "ไม่พบไฟล์ที่ตรงกับ \"" + q + "\""
-                                : "พบ " + found.size() + " ไฟล์");
+                                : "ผลการค้นหา · " + found.size() + " ไฟล์");
                     });
                 }).start();
             };
-            searchHandler.postDelayed(searchTask[0], 250); // debounce 250ms
+            searchHandler.postDelayed(searchTask[0], 250);
         }
     });
 
@@ -1091,6 +1157,11 @@ private void showFileSearchDialog() {
 
     dialog.show();
     etSearch.requestFocus();
+    android.view.inputmethod.InputMethodManager imm =
+            (android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+    if (imm != null) {
+        imm.showSoftInput(etSearch, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+    }
 }
 
     private void triggerTreeRefresh(FileNode parentNode) { 
