@@ -359,31 +359,38 @@
 
     </LinearLayout>
 
-    <com.google.android.material.navigation.NavigationView
-        android:layout_width="280dp"
+<com.google.android.material.navigation.NavigationView
+    android:layout_width="280dp"
+    android:layout_height="match_parent"
+    android:layout_gravity="start"
+    android:background="#252526"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:background="#252526"
-        android:fitsSystemWindows="true">
-        <LinearLayout
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:paddingTop="40dp"
+        android:fitsSystemWindows="true"
+        android:clipToPadding="false">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="โครงสร้างโปรเจกต์"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:padding="8dp" />
+
+        <ListView
+            android:id="@+id/treeView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="8dp">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="โครงสร้างโปรเจกต์"
-                android:textColor="#FFFFFF"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:padding="8dp" />
-            <ListView
-                android:id="@+id/treeView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:divider="@null" />
-        </LinearLayout>
-    </com.google.android.material.navigation.NavigationView>
+            android:divider="@null"
+            android:clipToPadding="false" />
+    </LinearLayout>
 
+</com.google.android.material.navigation.NavigationView>
 </androidx.drawerlayout.widget.DrawerLayout>
