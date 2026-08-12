@@ -8,9 +8,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-
 import androidx.core.content.ContextCompat;
-
 import java.io.File;
 
 public class DownloadTaskManager {
@@ -24,12 +22,10 @@ public class DownloadTaskManager {
     private final String projectName;
     private final DownloadListener listener;
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
-
     private final int COLOR_INFO = Color.parseColor("#4FC3F7");
     private final int COLOR_SUCCESS = Color.parseColor("#81C784");
     private final int COLOR_ERROR = Color.parseColor("#FF8A80");
     private final int COLOR_WARNING = Color.parseColor("#FFB74D");
-
     private BroadcastReceiver downloadReceiver;
 
     public DownloadTaskManager(Context context, String projectName, DownloadListener listener) {

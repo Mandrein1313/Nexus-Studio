@@ -8,7 +8,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.dev.ministudio.model.ProjectModel; 
 import java.io.File;
 
