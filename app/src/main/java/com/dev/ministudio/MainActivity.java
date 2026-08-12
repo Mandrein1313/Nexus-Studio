@@ -125,23 +125,25 @@ protected void onCreate(Bundle savedInstanceState) {
 
     setContentView(R.layout.activity_main);
 
-    // ดันเนื้อหา drawer ให้อยู่ใต้ status bar
+    // ดัน drawer ลงมาใต้ status bar (ใช้ความสูงจริงจากระบบ)
     View drawerContent = findViewById(R.id.drawer_content);
     if (drawerContent != null) {
-        ViewCompat.setOnApplyWindowInsetsListener(drawerContent, (v, windowInsets) -> {
-            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars());
-            v.setPadding(
-                    v.getPaddingLeft(),
-                    insets.top + (int) (8 * getResources().getDisplayMetrics().density),
-                    v.getPaddingRight(),
-                    v.getPaddingBottom()
-            );
-            return windowInsets;
-        });
+        int statusBarHeight = 0;
+        int resId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resId > 0) {
+            statusBarHeight = getResources().getDimensionPixelSize(resId);
+        }
+        int extra = (int) (8 * getResources().getDisplayMetrics().density);
+        drawerContent.setPadding(
+                drawerContent.getPaddingLeft(),
+                statusBarHeight + extra,
+                drawerContent.getPaddingRight(),
+                drawerContent.getPaddingBottom()
+        );
     }
-    
+
     buildEnvManager = new BuildEnvironmentManager(this);
-    
+
     initViews();
     setupLogic();
 }
