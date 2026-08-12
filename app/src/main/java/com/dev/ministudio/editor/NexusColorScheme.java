@@ -7,6 +7,12 @@ import io.github.rosemoe.sora.widget.schemes.EditorColorScheme;
  */
 public class NexusColorScheme extends EditorColorScheme {
 
+    // กำหนด Constant ID สำหรับสีกำหนดเองที่ไม่มีในคลาสแม่ (EditorColorScheme)
+    public static final int TEXT_INJECTED = 1001;
+    public static final int DIAGNOSTIC_ERROR = 1002;
+    public static final int DIAGNOSTIC_WARNING = 1003;
+    public static final int DIAGNOSTIC_TIP = 1004;
+
     @Override
     public void applyDefault() {
         super.applyDefault();
