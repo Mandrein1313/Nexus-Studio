@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace 'com.dev.ministudio'
-    compileSdk 35
+    compileSdk 36          // ← เปลี่ยนจาก 35 เป็น 36
 
     defaultConfig {
         applicationId 'com.dev.ministudio'
         minSdk 24
-        targetSdk 35
+        targetSdk 35       // เก็บ 35 ได้ ไม่บังคับต้องขึ้นพร้อม compileSdk
         versionCode 2
         versionName '1.1.0'
     }
