@@ -56,6 +56,8 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.graphics.Insets;
+import com.dev.ministudio.editor.NexusColorScheme;
+
 
 public class MainActivity extends AppCompatActivity {
 
