@@ -32,7 +32,6 @@ import android.graphics.drawable.RippleDrawable;
 import android.content.res.ColorStateList;
 import io.github.rosemoe.sora.widget.CodeEditor;
 import io.github.rosemoe.sora.langs.java.JavaLanguage;
-import io.github.rosemoe.sora.widget.schemes.SchemeDarcula;
 import io.github.rosemoe.sora.event.ContentChangeEvent;
 import com.dev.ministudio.fs.FileSystemManager;
 import com.dev.ministudio.model.ProjectModel;
@@ -188,7 +187,7 @@ protected void onCreate(Bundle savedInstanceState) {
         });
 
         codeEditor.setEditorLanguage(new JavaLanguage()); 
-        codeEditor.setColorScheme(new SchemeDarcula()); 
+        codeEditor.setColorScheme(new com.dev.ministudio.editor.NexusColorScheme()); 
         codeEditor.setTextSize(currentCodeFontSize); 
         codeEditor.setTypefaceText(android.graphics.Typeface.MONOSPACE); 
         codeEditor.setLineSpacing(2f, 1.2f); 
