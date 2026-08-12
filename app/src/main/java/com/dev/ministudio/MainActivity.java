@@ -265,70 +265,74 @@ protected void onCreate(Bundle savedInstanceState) {
 
 
     // 🌟 ฟังก์ชันเปิดหน้าต่าง Dialog คอนโซลแบบเต็มหน้าจอ (เวอร์ชันแก้ไขให้เห็น Status Bar + ดักปิดเสียง AI)
-    private void showFullPanelDialog(int initialTabPosition) {
-        if (fullPanelDialog != null && fullPanelDialog.isShowing()) {
-            dialogViewPager.setCurrentItem(initialTabPosition, true);
-            return;
-        }
-
-        fullPanelDialog = new android.app.Dialog(this, android.R.style.Theme_Black_NoTitleBar);
-        fullPanelDialog.setContentView(R.layout.dialog_full_console_panel);
-        fullPanelDialog.setCancelable(true);
-
-        if (fullPanelDialog.getWindow() != null) {
-            fullPanelDialog.getWindow().setLayout(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT
-            );
-            fullPanelDialog.getWindow().setStatusBarColor(android.graphics.Color.parseColor("#1E1E1E"));
-        }
-
-        dialogTabLayout = fullPanelDialog.findViewById(R.id.tabLayout);
-        dialogViewPager = fullPanelDialog.findViewById(R.id.viewPager);
-        
-        fullPanelDialog.findViewById(R.id.btnCloseConsole).setOnClickListener(v -> fullPanelDialog.dismiss());
-        
-        View btnToggleExpand = fullPanelDialog.findViewById(R.id.btnToggleExpand);
-        if (btnToggleExpand != null) btnToggleExpand.setVisibility(View.GONE);
-
-        fullPanelDialog.findViewById(R.id.btnClearConsole).setOnClickListener(v -> {
-            if (dialogPanelAdapter != null) {
-                TextView consoleView = dialogPanelAdapter.getTvConsole();
-                android.webkit.WebView webView = dialogPanelAdapter.getWebAiOutput();
-                
-                if (consoleView != null) consoleView.setText("");
-                if (webView != null) {
-                    chatHistory = ""; 
-                    webView.loadDataWithBaseURL(null, "<html><body style='background-color:#1E1E1E;'></body></html>", "text/html", "utf-8", null);
-                }
-            }
-            if (tvConsole != null) tvConsole.setText("");
-        });
-
-        dialogPanelAdapter = new PanelPagerAdapter(this);
-        dialogViewPager.setAdapter(dialogPanelAdapter);
-        dialogViewPager.setUserInputEnabled(false); 
-
-        new TabLayoutMediator(dialogTabLayout, dialogViewPager, (tab, position) -> {
-            tab.setText(position == 0 ? "Console" : "AI");
-        }).attach();
-
-        dialogViewPager.post(() -> {
-            if (dialogPanelAdapter != null) {
-                tvConsole = dialogPanelAdapter.getTvConsole();
-                dialogViewPager.setCurrentItem(initialTabPosition, false);
-            }
-        });
-
-        // 🛠️ ดักฟังคำสั่งเมื่อหน้าต่างแชทโดนปิด ไม่ว่าจะกดปุ่มกากบาทหรือกด Back บนมือถือ เสียงจะเงียบทันทีครับ
-        fullPanelDialog.setOnDismissListener(dialog -> {
-            if (aiLayoutAnalyzer != null) {
-                aiLayoutAnalyzer.stopSpeaking(); 
-            }
-        });
-
-        fullPanelDialog.show();
+private void showFullPanelDialog(int initialTabPosition) {
+    if (fullPanelDialog != null && fullPanelDialog.isShowing()) {
+        dialogViewPager.setCurrentItem(initialTabPosition, true);
+        return;
     }
+
+    fullPanelDialog = new android.app.Dialog(this, android.R.style.Theme_Black_NoTitleBar);
+    fullPanelDialog.setContentView(R.layout.dialog_full_console_panel);
+    fullPanelDialog.setCancelable(true);
+
+    if (fullPanelDialog.getWindow() != null) {
+        android.view.Window window = fullPanelDialog.getWindow();
+        window.setLayout(
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT
+        );
+        // กันเนื้อหาไม่ให้ทับ status bar / navigation bar
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, true);
+        window.setStatusBarColor(android.graphics.Color.parseColor("#1E1E1E"));
+        window.setNavigationBarColor(android.graphics.Color.parseColor("#1E1E1E"));
+    }
+
+    dialogTabLayout = fullPanelDialog.findViewById(R.id.tabLayout);
+    dialogViewPager = fullPanelDialog.findViewById(R.id.viewPager);
+    
+    fullPanelDialog.findViewById(R.id.btnCloseConsole).setOnClickListener(v -> fullPanelDialog.dismiss());
+    
+    View btnToggleExpand = fullPanelDialog.findViewById(R.id.btnToggleExpand);
+    if (btnToggleExpand != null) btnToggleExpand.setVisibility(View.GONE);
+
+    fullPanelDialog.findViewById(R.id.btnClearConsole).setOnClickListener(v -> {
+        if (dialogPanelAdapter != null) {
+            TextView consoleView = dialogPanelAdapter.getTvConsole();
+            android.webkit.WebView webView = dialogPanelAdapter.getWebAiOutput();
+            
+            if (consoleView != null) consoleView.setText("");
+            if (webView != null) {
+                chatHistory = ""; 
+                webView.loadDataWithBaseURL(null, "<html><body style='background-color:#1E1E1E;'></body></html>", "text/html", "utf-8", null);
+            }
+        }
+        if (tvConsole != null) tvConsole.setText("");
+    });
+
+    dialogPanelAdapter = new PanelPagerAdapter(this);
+    dialogViewPager.setAdapter(dialogPanelAdapter);
+    dialogViewPager.setUserInputEnabled(false); 
+
+    new TabLayoutMediator(dialogTabLayout, dialogViewPager, (tab, position) -> {
+        tab.setText(position == 0 ? "Console" : "AI");
+    }).attach();
+
+    dialogViewPager.post(() -> {
+        if (dialogPanelAdapter != null) {
+            tvConsole = dialogPanelAdapter.getTvConsole();
+            dialogViewPager.setCurrentItem(initialTabPosition, false);
+        }
+    });
+
+    // ดักปิดเสียง AI เมื่อปิดหน้าต่าง
+    fullPanelDialog.setOnDismissListener(dialog -> {
+        if (aiLayoutAnalyzer != null) {
+            aiLayoutAnalyzer.stopSpeaking(); 
+        }
+    });
+
+    fullPanelDialog.show();
+}
 
     public void handleAiQuery() {
         if (fullPanelDialog == null || !fullPanelDialog.isShowing()) {

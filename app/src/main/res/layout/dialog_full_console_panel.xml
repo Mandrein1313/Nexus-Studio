@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#1E1E1E">
+    android:background="#1E1E1E"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,7 +19,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="🛠️ MiniStudio Terminal"
+            android:text="🛠️ Nexus Studio Terminal"
             android:textColor="#FFFFFF"
             android:textSize="15sp"
             android:textStyle="bold" />
