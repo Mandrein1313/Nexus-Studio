@@ -12,38 +12,39 @@ public class AiSettingsActivity extends AppCompatActivity {
 
     private EditText etApiKey;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ai_settings);
+ @Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-        etApiKey = findViewById(R.id.etApiKey);
-        Button btnSave = findViewById(R.id.btnSaveApi);
+    androidx.core.view.WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
+    getWindow().setStatusBarColor(android.graphics.Color.parseColor("#1E1E1E"));
+    getWindow().setNavigationBarColor(android.graphics.Color.parseColor("#1E1E1E"));
 
-        // 🌟 แก้ไขจุดสำคัญ: เปลี่ยนชื่อไฟล์จาก "AISettings" เป็น "ai_settings" ตัวเล็ก 
-        // เพื่อให้ตรงกับตัวดึงค่าในคลาส GeminiAssistant ครับน้า
-        SharedPreferences prefs =
-                getSharedPreferences("ai_settings", MODE_PRIVATE);
+    setContentView(R.layout.activity_ai_settings);
 
-        etApiKey.setText(
-                prefs.getString("groq_api_key", "")
-        );
+    etApiKey = findViewById(R.id.etApiKey);
+    Button btnSave = findViewById(R.id.btnSaveApi);
 
-        btnSave.setOnClickListener(v -> {
+    SharedPreferences prefs =
+            getSharedPreferences("ai_settings", MODE_PRIVATE);
 
-            String key = etApiKey.getText().toString().trim();
+    etApiKey.setText(
+            prefs.getString("groq_api_key", "")
+    );
 
-            prefs.edit()
-                    .putString("groq_api_key", key)
-                    .apply();
+    btnSave.setOnClickListener(v -> {
+        String key = etApiKey.getText().toString().trim();
 
-            Toast.makeText(
-                    this,
-                    "บันทึก API Key แล้ว",
-                    Toast.LENGTH_SHORT
-            ).show();
+        prefs.edit()
+                .putString("groq_api_key", key)
+                .apply();
 
-            finish();
-        });
-    }
+        Toast.makeText(
+                this,
+                "บันทึก API Key แล้ว",
+                Toast.LENGTH_SHORT
+        ).show();
+
+        finish();
+    });
 }

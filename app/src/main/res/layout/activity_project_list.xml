@@ -23,9 +23,7 @@
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="?attr/actionBarSize"
-                android:paddingTop="24dp"
+                android:layout_height="?attr/actionBarSize"
                 android:background="#1E1E1E"
                 app:title="Projects"
                 app:titleTextColor="#BB86FC"
