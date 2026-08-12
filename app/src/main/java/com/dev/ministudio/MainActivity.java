@@ -1010,16 +1010,32 @@ private void showFileSearchDialog() {
     android.app.Dialog dialog = new android.app.Dialog(this, android.R.style.Theme_Black_NoTitleBar);
     dialog.setContentView(R.layout.dialog_file_search);
 
-    if (dialog.getWindow() != null) {
-        android.view.Window window = dialog.getWindow();
-        window.setLayout(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-        );
-        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, true);
-        window.setStatusBarColor(android.graphics.Color.parseColor("#1E1E1E"));
-        window.setNavigationBarColor(android.graphics.Color.parseColor("#121212"));
+if (dialog.getWindow() != null) {
+    android.view.Window window = dialog.getWindow();
+    window.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+    );
+    androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, true);
+    window.setStatusBarColor(android.graphics.Color.parseColor("#1E1E1E"));
+    window.setNavigationBarColor(android.graphics.Color.parseColor("#121212"));
+}
+
+// ดันแถบค้นหาลงมาใต้ status bar
+View searchBarRoot = dialog.findViewById(R.id.searchBarRoot);
+if (searchBarRoot != null) {
+    int statusBarHeight = 0;
+    int resId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+    if (resId > 0) {
+        statusBarHeight = getResources().getDimensionPixelSize(resId);
     }
+    searchBarRoot.setPadding(
+            searchBarRoot.getPaddingLeft(),
+            statusBarHeight,
+            searchBarRoot.getPaddingRight(),
+            searchBarRoot.getPaddingBottom()
+    );
+}
 
     android.widget.EditText etSearch = dialog.findViewById(R.id.etFileSearch);
     android.widget.TextView tvHint = dialog.findViewById(R.id.tvSearchHint);
