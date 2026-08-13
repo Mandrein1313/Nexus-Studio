@@ -56,6 +56,7 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.graphics.Insets;
+import android.content.SharedPreferences;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -113,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
    private TextView tvAiSuggestionText;
    private String lastReceivedSuggestion = "";
    private String pendingProjectName = "";
+   private boolean isLightEditorTheme = false;
    
 @Override
 protected void onCreate(Bundle savedInstanceState) {
@@ -180,104 +182,113 @@ protected void onCreate(Bundle savedInstanceState) {
         previewContainer = findViewById(R.id.previewContainer);
     }
 
-    private void setupLogic() {
-        aiLayoutAnalyzer = new com.dev.ministudio.AiLayoutAnalyzer(this);
-        dialogManager = new ProjectDialogManager(this, parentNode -> {
-            triggerTreeRefresh(parentNode);
-        });
+private void setupLogic() {
+    aiLayoutAnalyzer = new com.dev.ministudio.AiLayoutAnalyzer(this);
+    dialogManager = new ProjectDialogManager(this, parentNode -> {
+        triggerTreeRefresh(parentNode);
+    });
 
-        codeEditor.setEditorLanguage(new JavaLanguage()); 
-        codeEditor.setColorScheme(new com.dev.ministudio.editor.NexusColorScheme()); 
-        codeEditor.setTextSize(currentCodeFontSize); 
-        codeEditor.setTypefaceText(android.graphics.Typeface.MONOSPACE); 
-        codeEditor.setLineSpacing(2f, 1.2f); 
-        codeEditor.setWordwrap(false); 
-        codeEditor.setUndoEnabled(true); 
-        codeEditor.setHighlightCurrentBlock(true); 
+    codeEditor.setEditorLanguage(new JavaLanguage());
 
-        // ===================================================================
-        // ✨ [เพิ่มใหม่]: ค้นหา View แผงคำแนะนำ AI จาก XML และผูกตัวจัดการ
-        // ===================================================================
-        aiSuggestionBar = findViewById(R.id.aiSuggestionBar);
-        tvAiSuggestionText = findViewById(R.id.tvAiSuggestionText);
-        Button btnAcceptAi = findViewById(R.id.btnAcceptAiSuggestion);
+    // โหลดธีมจากหน้า Projects (AppSettings)
+    SharedPreferences appPrefs = getSharedPreferences("AppSettings", MODE_PRIVATE);
+    boolean isLight = appPrefs.getBoolean("editor_light_theme", false);
+    if (isLight) {
+        codeEditor.setColorScheme(new com.dev.ministudio.editor.NexusLightColorScheme());
+    } else {
+        codeEditor.setColorScheme(new com.dev.ministudio.editor.NexusColorScheme());
+    }
+    isLightEditorTheme = isLight;
 
-        // เรียกตื่นตัวจัดการเดาคำศัพท์อัจฉริยะ
-        aiAutoCompleteManager = new AiAutoCompleteManager(this, codeEditor, aiLayoutAnalyzer);
+    codeEditor.setTextSize(currentCodeFontSize);
+    codeEditor.setTypefaceText(android.graphics.Typeface.MONOSPACE);
+    codeEditor.setLineSpacing(2f, 1.2f);
+    codeEditor.setWordwrap(false);
+    codeEditor.setUndoEnabled(true);
+    codeEditor.setHighlightCurrentBlock(true);
 
-        // ปุ่มกดเพื่อสวมโค้ดแนะนำลงหน้าจอแก้ไขตัวจริง
-        if (btnAcceptAi != null) {
-            btnAcceptAi.setOnClickListener(v -> {
-                if (codeEditor != null && !lastReceivedSuggestion.isEmpty()) {
-                    int line = codeEditor.getCursor().getLeftLine();
-                    int column = codeEditor.getCursor().getLeftColumn();
-                    
-                    // วางโค้ดแนะนำของ AI พุ่งตรงเข้าจุดกระพริบเคอร์เซอร์ทันที
-                    codeEditor.getText().insert(line, column, lastReceivedSuggestion);
-                    
-                    // วางเสร็จล้างแผงประจุข้อมูล และซ่อนตัวลงไปอย่างนุ่มนวล
-                    lastReceivedSuggestion = "";
-                    if (aiSuggestionBar != null) {
-                        aiSuggestionBar.setVisibility(View.GONE);
-                    }
-                    showToast("✨ เติมโค้ดสำเร็จ!");
+    // ===================================================================
+    // ✨ [เพิ่มใหม่]: ค้นหา View แผงคำแนะนำ AI จาก XML และผูกตัวจัดการ
+    // ===================================================================
+    aiSuggestionBar = findViewById(R.id.aiSuggestionBar);
+    tvAiSuggestionText = findViewById(R.id.tvAiSuggestionText);
+    Button btnAcceptAi = findViewById(R.id.btnAcceptAiSuggestion);
+
+    // เรียกตื่นตัวจัดการเดาคำศัพท์อัจฉริยะ
+    aiAutoCompleteManager = new AiAutoCompleteManager(this, codeEditor, aiLayoutAnalyzer);
+
+    // ปุ่มกดเพื่อสวมโค้ดแนะนำลงหน้าจอแก้ไขตัวจริง
+    if (btnAcceptAi != null) {
+        btnAcceptAi.setOnClickListener(v -> {
+            if (codeEditor != null && !lastReceivedSuggestion.isEmpty()) {
+                int line = codeEditor.getCursor().getLeftLine();
+                int column = codeEditor.getCursor().getLeftColumn();
+
+                // วางโค้ดแนะนำของ AI พุ่งตรงเข้าจุดกระพริบเคอร์เซอร์ทันที
+                codeEditor.getText().insert(line, column, lastReceivedSuggestion);
+
+                // วางเสร็จล้างแผงประจุข้อมูล และซ่อนตัวลงไปอย่างนุ่มนวล
+                lastReceivedSuggestion = "";
+                if (aiSuggestionBar != null) {
+                    aiSuggestionBar.setVisibility(View.GONE);
                 }
-            });
-        }
-
-        // ===================================================================
-        // 🛠️ [ปรับปรุง]: ควบรวมสตรีมตรวจจับการพิมพ์ (Auto-Save + AI Auto-Complete)
-        // ===================================================================
-        codeEditor.subscribeEvent(ContentChangeEvent.class, (event, unsubscribe) -> {
-            tvSaveStatus.setText("Editing...");
-            tvSaveStatus.setTextColor(android.graphics.Color.parseColor("#FFB74D"));
-
-            // 1. ระบบออโต้เซฟเดิมของน้า
-            autoSaveHandler.removeCallbacks(saveRunnable);
-            saveRunnable = () -> {
-                saveFile();
-                tvSaveStatus.setText("Saved");
-                tvSaveStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
-            };
-            autoSaveHandler.postDelayed(saveRunnable, 1500);
-
-            // 2. 🔥 [ระบบใหม่]: สั่งให้ AI วิเคราะห์คำศัพท์ต่อท้ายแบบเบื้องหลัง
-            if (codeEditor.getCursor() != null && aiAutoCompleteManager != null) {
-                String fullText = codeEditor.getText().toString();
-                int curLine = codeEditor.getCursor().getLeftLine();
-                int curCol = codeEditor.getCursor().getLeftColumn();
-
-                aiAutoCompleteManager.onTextChanged(fullText, curLine, curCol, suggestionText -> {
-                    // เมื่อ AI วิเคราะห์และตอบกลับมาเรียบร้อย ให้เด้งแผงขึ้นมาแสดงผลทันที
-                    runOnUiThread(() -> {
-                        lastReceivedSuggestion = suggestionText;
-                        if (tvAiSuggestionText != null) {
-                            tvAiSuggestionText.setText(suggestionText);
-                        }
-                        if (aiSuggestionBar != null) {
-                            aiSuggestionBar.setVisibility(View.VISIBLE);
-                        }
-                    });
-                });
+                showToast("✨ เติมโค้ดสำเร็จ!");
             }
         });
-
-        // โครงสร้างดึงข้อมูลโปรเจกต์เดิมของน้าทำงานต่อไปปกติ...
-        String projectName = getIntent().getStringExtra("projectName");
-        if (projectName != null) {
-            String rootPath = "/sdcard/MiniStudio/" + projectName;
-            currentProject = new ProjectModel(projectName, rootPath);
-            getSupportActionBar().setTitle(currentProject.getProjectName());
-            
-            setupTabLogic();
-            
-            // 🛠️ เรียกทำงานผ่านโครงสร้างผู้จัดการต้นไม้ตัวใหม่ที่แยกออกไป
-            projectTreeManager = new ProjectTreeManager(this, treeView);
-            projectTreeManager.initializeFileTree();
-            setEditorActiveState(false);
-        }
     }
 
+    // ===================================================================
+    // 🛠️ [ปรับปรุง]: ควบรวมสตรีมตรวจจับการพิมพ์ (Auto-Save + AI Auto-Complete)
+    // ===================================================================
+    codeEditor.subscribeEvent(ContentChangeEvent.class, (event, unsubscribe) -> {
+        tvSaveStatus.setText("Editing...");
+        tvSaveStatus.setTextColor(android.graphics.Color.parseColor("#FFB74D"));
+
+        // 1. ระบบออโต้เซฟเดิมของน้า
+        autoSaveHandler.removeCallbacks(saveRunnable);
+        saveRunnable = () -> {
+            saveFile();
+            tvSaveStatus.setText("Saved");
+            tvSaveStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
+        };
+        autoSaveHandler.postDelayed(saveRunnable, 1500);
+
+        // 2. 🔥 [ระบบใหม่]: สั่งให้ AI วิเคราะห์คำศัพท์ต่อท้ายแบบเบื้องหลัง
+        if (codeEditor.getCursor() != null && aiAutoCompleteManager != null) {
+            String fullText = codeEditor.getText().toString();
+            int curLine = codeEditor.getCursor().getLeftLine();
+            int curCol = codeEditor.getCursor().getLeftColumn();
+
+            aiAutoCompleteManager.onTextChanged(fullText, curLine, curCol, suggestionText -> {
+                // เมื่อ AI วิเคราะห์และตอบกลับมาเรียบร้อย ให้เด้งแผงขึ้นมาแสดงผลทันที
+                runOnUiThread(() -> {
+                    lastReceivedSuggestion = suggestionText;
+                    if (tvAiSuggestionText != null) {
+                        tvAiSuggestionText.setText(suggestionText);
+                    }
+                    if (aiSuggestionBar != null) {
+                        aiSuggestionBar.setVisibility(View.VISIBLE);
+                    }
+                });
+            });
+        }
+    });
+
+    // โครงสร้างดึงข้อมูลโปรเจกต์เดิมของน้าทำงานต่อไปปกติ...
+    String projectName = getIntent().getStringExtra("projectName");
+    if (projectName != null) {
+        String rootPath = "/sdcard/MiniStudio/" + projectName;
+        currentProject = new ProjectModel(projectName, rootPath);
+        getSupportActionBar().setTitle(currentProject.getProjectName());
+
+        setupTabLogic();
+
+        // 🛠️ เรียกทำงานผ่านโครงสร้างผู้จัดการต้นไม้ตัวใหม่ที่แยกออกไป
+        projectTreeManager = new ProjectTreeManager(this, treeView);
+        projectTreeManager.initializeFileTree();
+        setEditorActiveState(false);
+    }
+}
 
     // 🌟 ฟังก์ชันเปิดหน้าต่าง Dialog คอนโซลแบบเต็มหน้าจอ (เวอร์ชันแก้ไขให้เห็น Status Bar + ดักปิดเสียง AI)
 private void showFullPanelDialog(int initialTabPosition) {
@@ -999,6 +1010,22 @@ private void updateAiOutput(String markdownText) {
         }
         return super.onOptionsItemSelected(item);
     }
+    private void toggleEditorTheme() {
+    if (codeEditor == null) return;
+
+    isLightEditorTheme = !isLightEditorTheme;
+    if (isLightEditorTheme) {
+        codeEditor.setColorScheme(new com.dev.ministudio.editor.NexusLightColorScheme());
+        showToast("☀️ ธีมสว่าง");
+    } else {
+        codeEditor.setColorScheme(new com.dev.ministudio.editor.NexusColorScheme());
+        showToast("🌙 ธีมมืด");
+    }
+    getSharedPreferences("AppSettings", MODE_PRIVATE)
+            .edit()
+            .putBoolean("editor_light_theme", isLightEditorTheme)
+            .apply();
+}
 
 private void showFileSearchDialog() {
     if (currentProject == null) {

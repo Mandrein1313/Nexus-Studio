@@ -658,15 +658,30 @@ private String extractRepoName(String url) {
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_global_github_settings) {
-            showGitHubSettingsDialog();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+@Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    int id = item.getItemId();
+    if (id == R.id.action_global_github_settings) {
+        showGitHubSettingsDialog();
+        return true;
     }
+    if (id == R.id.action_toggle_theme) {
+        toggleEditorThemePref();
+        return true;
+    }
+    return super.onOptionsItemSelected(item);
+}
+
+private void toggleEditorThemePref() {
+    SharedPreferences prefs = getSharedPreferences("AppSettings", MODE_PRIVATE);
+    boolean isLight = prefs.getBoolean("editor_light_theme", false);
+    isLight = !isLight;
+    prefs.edit().putBoolean("editor_light_theme", isLight).apply();
+
+    Toast.makeText(this,
+            isLight ? "☀️ ธีมสว่าง (ใช้ตอนเปิดโปรเจกต์)" : "🌙 ธีมมืด (ใช้ตอนเปิดโปรเจกต์)",
+            Toast.LENGTH_SHORT).show();
+}
 
     private void showGitHubSettingsDialog() {
         SharedPreferences prefs = getSharedPreferences("GitHubPrefs", Context.MODE_PRIVATE);
