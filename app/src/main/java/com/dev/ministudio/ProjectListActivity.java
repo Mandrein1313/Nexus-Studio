@@ -94,6 +94,35 @@ protected void onCreate(Bundle savedInstanceState) {
             this, drawerLayout, toolbar, android.R.string.ok, android.R.string.cancel);
     drawerLayout.addDrawerListener(toggle);
     toggle.syncState();
+    com.google.android.material.navigation.NavigationView navView = findViewById(R.id.nav_view);
+if (navView != null) {
+    // ดันเมนูลงมาใต้ status bar
+    int statusBarHeight = 0;
+    int resId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+    if (resId > 0) {
+        statusBarHeight = getResources().getDimensionPixelSize(resId);
+    }
+    navView.setPadding(0, statusBarHeight, 0, 0);
+
+    navView.setNavigationItemSelectedListener(item -> {
+        int id = item.getItemId();
+        if (id == R.id.nav_github_settings) {
+            showGitHubSettingsDialog();
+        } else if (id == R.id.nav_ai_settings) {
+            startActivity(new Intent(this, AiSettingsActivity.class));
+        } else if (id == R.id.nav_toggle_theme) {
+            toggleEditorThemePref();
+        } else if (id == R.id.nav_about) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Nexus Studio")
+                    .setMessage("Mobile Android IDE\nเขียน แก้ บิลด์แอปได้จากมือถือ")
+                    .setPositiveButton("ตกลง", null)
+                    .show();
+        }
+        drawerLayout.closeDrawers();
+        return true;
+    });
+}
 
     // 1. ตั้งค่าปุ่ม Fab ผ่านเมธอดแยก (สะอาดและดูดีขึ้น)
     setupFabButtons();

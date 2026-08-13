@@ -70,15 +70,16 @@
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view"
-        android:layout_width="280dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:background="#1E1E1E"
-        android:fitsSystemWindows="true"
-        app:itemTextColor="#FFFFFF"
-        app:itemIconTint="#BB86FC">
+<com.google.android.material.navigation.NavigationView
+    android:id="@+id/nav_view"
+    android:layout_width="280dp"
+    android:layout_height="match_parent"
+    android:layout_gravity="start"
+    android:background="#1E1E1E"
+    android:fitsSystemWindows="true"
+    app:itemTextColor="#FFFFFF"
+    app:itemIconTint="#BB86FC"
+    app:menu="@menu/menu_drawer_project" />
     </com.google.android.material.navigation.NavigationView>
 
 </androidx.drawerlayout.widget.DrawerLayout>
