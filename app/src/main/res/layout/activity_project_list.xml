@@ -2,7 +2,6 @@
 <androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -40,35 +39,17 @@
 
         </LinearLayout>
 
-        <com.getbase.floatingactionbutton.FloatingActionsMenu
-            android:id="@+id/multiple_actions"
+        <!-- Material FAB แทนของเก่า -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_main"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:layout_margin="16dp"
-            fab:fab_addButtonColorNormal="#BB9AF7"
-            fab:fab_addButtonColorPressed="#9D7CD8"
-            fab:fab_expandDirection="up">
-
-            <com.getbase.floatingactionbutton.FloatingActionButton
-                android:id="@+id/action_create"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                fab:fab_title="สร้างโปรเจกต์ใหม่"
-                fab:fab_colorNormal="#24283B"
-                fab:fab_colorPressed="#1F2335"
-                fab:fab_size="mini" />
-
-            <com.getbase.floatingactionbutton.FloatingActionButton
-                android:id="@+id/action_github"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                fab:fab_title="นำเข้าจาก GitHub"
-                fab:fab_colorNormal="#24283B"
-                fab:fab_colorPressed="#1F2335"
-                fab:fab_size="mini" />
-
-        </com.getbase.floatingactionbutton.FloatingActionsMenu>
+            android:layout_margin="20dp"
+            android:src="@android:drawable/ic_input_add"
+            app:backgroundTint="#BB9AF7"
+            app:tint="#1A1B26"
+            app:elevation="6dp" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

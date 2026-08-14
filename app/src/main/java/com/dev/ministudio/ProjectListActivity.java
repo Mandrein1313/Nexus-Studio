@@ -29,8 +29,7 @@ import java.util.ArrayList;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import com.getbase.floatingactionbutton.FloatingActionButton;
-import com.getbase.floatingactionbutton.FloatingActionsMenu;
+
 import java.net.URL;
 import java.io.InputStream;
 import android.graphics.Color;
@@ -48,9 +47,6 @@ public class ProjectListActivity extends AppCompatActivity {
     private ArrayList<String> projects = new ArrayList<>();
     private ArrayAdapter<String> adapter;
     private DrawerLayout drawerLayout;
-    private FloatingActionsMenu fabMenu;
-    private FloatingActionButton fabCreate;
-    private FloatingActionButton fabGithub;
     private final android.content.BroadcastReceiver cloneReceiver = new android.content.BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -76,8 +72,8 @@ protected void onCreate(Bundle savedInstanceState) {
 
     // กันเนื้อหาไม่ให้ทับ status bar / navigation bar (Android 15+)
     androidx.core.view.WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
-    getWindow().setStatusBarColor(android.graphics.Color.parseColor("#1E1E1E"));
-    getWindow().setNavigationBarColor(android.graphics.Color.parseColor("#1E1E1E"));
+    getWindow().setStatusBarColor(android.graphics.Color.parseColor("#1A1B26"));
+    getWindow().setNavigationBarColor(android.graphics.Color.parseColor("#1A1B26"));
 
     setContentView(R.layout.activity_project_list);
 
@@ -85,53 +81,64 @@ protected void onCreate(Bundle savedInstanceState) {
     Toolbar toolbar = findViewById(R.id.toolbar);
     drawerLayout = findViewById(R.id.drawer_layout);
 
-    fabMenu = findViewById(R.id.multiple_actions);
-    fabCreate = findViewById(R.id.action_create);
-    fabGithub = findViewById(R.id.action_github);
+    // ===== FAB ใหม่ (Material) =====
+    com.google.android.material.floatingactionbutton.FloatingActionButton fabMain = findViewById(R.id.fab_main);
+    if (fabMain != null) {
+        fabMain.setOnClickListener(v -> {
+            new AlertDialog.Builder(this)
+                .setTitle("สร้าง / นำเข้าโปรเจกต์")
+                .setItems(new String[]{"🚀 สร้างโปรเจกต์ใหม่", "📥 นำเข้าจาก GitHub"}, (d, which) -> {
+                    if (which == 0) {
+                        showCreateProjectDialog();
+                    } else {
+                        importFromGitHub();
+                    }
+                })
+                .show();
+        });
+    }
 
     setSupportActionBar(toolbar);
     ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
             this, drawerLayout, toolbar, android.R.string.ok, android.R.string.cancel);
     drawerLayout.addDrawerListener(toggle);
     toggle.syncState();
+
     com.google.android.material.navigation.NavigationView navView = findViewById(R.id.nav_view);
-if (navView != null) {
-    // ดันเมนูลงมาใต้ status bar
-    int statusBarHeight = 0;
-    int resId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-    if (resId > 0) {
-        statusBarHeight = getResources().getDimensionPixelSize(resId);
-    }
-    navView.setPadding(0, statusBarHeight, 0, 0);
-
-    navView.setNavigationItemSelectedListener(item -> {
-        int id = item.getItemId();
-        if (id == R.id.nav_github_settings) {
-            showGitHubSettingsDialog();
-        } else if (id == R.id.nav_ai_settings) {
-            startActivity(new Intent(this, AiSettingsActivity.class));
-        } else if (id == R.id.nav_toggle_theme) {
-            toggleEditorThemePref();
-        } else if (id == R.id.nav_about) {
-            new AlertDialog.Builder(this)
-                    .setTitle("Nexus Studio")
-                    .setMessage("Mobile Android IDE\nเขียน แก้ บิลด์แอปได้จากมือถือ")
-                    .setPositiveButton("ตกลง", null)
-                    .show();
+    if (navView != null) {
+        // ดันเมนูลงมาใต้ status bar
+        int statusBarHeight = 0;
+        int resId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resId > 0) {
+            statusBarHeight = getResources().getDimensionPixelSize(resId);
         }
-        drawerLayout.closeDrawers();
-        return true;
-    });
-}
+        navView.setPadding(0, statusBarHeight, 0, 0);
 
-    // 1. ตั้งค่าปุ่ม Fab ผ่านเมธอดแยก (สะอาดและดูดีขึ้น)
-    setupFabButtons();
+        navView.setNavigationItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_github_settings) {
+                showGitHubSettingsDialog();
+            } else if (id == R.id.nav_ai_settings) {
+                startActivity(new Intent(this, AiSettingsActivity.class));
+            } else if (id == R.id.nav_toggle_theme) {
+                toggleEditorThemePref();
+            } else if (id == R.id.nav_about) {
+                new AlertDialog.Builder(this)
+                        .setTitle("Nexus Studio")
+                        .setMessage("Mobile Android IDE\nเขียน แก้ บิลด์แอปได้จากมือถือ")
+                        .setPositiveButton("ตกลง", null)
+                        .show();
+            }
+            drawerLayout.closeDrawers();
+            return true;
+        });
+    }
 
-    // 2. โหลดข้อมูลต่างๆ
+    // โหลดข้อมูลต่างๆ
     checkPermissions();
     refreshProjectList();
 
-    // 3. ตั้งค่า Adapter
+    // ตั้งค่า Adapter
     adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, projects) {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
@@ -175,13 +182,13 @@ if (navView != null) {
         return true;
     });
 
-    // 4. ระบบตรวจสอบ GitHub
+    // ระบบตรวจสอบ GitHub
     SharedPreferences prefs = getSharedPreferences("GitHubPrefs", Context.MODE_PRIVATE);
     if (!prefs.getBoolean("is_github_setup", false)) {
         new android.os.Handler().postDelayed(this::showGitHubSettingsDialog, 600);
     }
 
-    // เพิ่มตัวรับแจ้งเตือนเมื่อ Service ทำงานเสร็จ
+    // ตัวรับแจ้งเตือนเมื่อ Service ทำงานเสร็จ
     IntentFilter filter = new IntentFilter(GitHubCloneService.ACTION_CLONE_COMPLETE);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         registerReceiver(cloneReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
@@ -189,18 +196,6 @@ if (navView != null) {
         registerReceiver(cloneReceiver, filter);
     }
 }
-
-    private void setupFabButtons() {
-        fabCreate.setOnClickListener(v -> {
-            showCreateProjectDialog(); // เรียกหน้าต่างสร้างโปรเจกต์
-            fabMenu.collapse();
-        });
-
-        fabGithub.setOnClickListener(v -> {
-            importFromGitHub(); // เรียกฟังก์ชันนำเข้า (น้าไปเขียนต่อด้านล่างครับ)
-            fabMenu.collapse();
-        });
-    }
 
 private void importFromGitHub() {
     final EditText etUrl = new EditText(this);
