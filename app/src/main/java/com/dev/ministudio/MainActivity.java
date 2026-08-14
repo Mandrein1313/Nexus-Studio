@@ -148,45 +148,58 @@ protected void onCreate(Bundle savedInstanceState) {
     initViews();
     setupLogic();
 }
-    private void initViews() {
-        etFind = findViewById(R.id.etFind);
-        etReplace = findViewById(R.id.etReplace);
-        searchBar = findViewById(R.id.searchBar);
-        codeEditor = findViewById(R.id.codeEditor); 
-        tvFilePath = findViewById(R.id.tvFilePath); 
-        tvSaveStatus = findViewById(R.id.tvSaveStatus);
-        emptyStateView = findViewById(R.id.emptyStateView);
-        
-        treeView = findViewById(R.id.treeView); 
-        tabRecyclerView = findViewById(R.id.tabRecyclerView);
-        tabRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+private void initViews() {
+    etFind = findViewById(R.id.etFind);
+    etReplace = findViewById(R.id.etReplace);
+    searchBar = findViewById(R.id.searchBar);
+    codeEditor = findViewById(R.id.codeEditor);
+    tvFilePath = findViewById(R.id.tvFilePath);
+    tvSaveStatus = findViewById(R.id.tvSaveStatus);
+    emptyStateView = findViewById(R.id.emptyStateView);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+    treeView = findViewById(R.id.treeView);
+    tabRecyclerView = findViewById(R.id.tabRecyclerView);
+    if (tabRecyclerView != null) {
+        tabRecyclerView.setLayoutManager(
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+    }
 
-        drawerLayout = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, android.R.string.ok, android.R.string.cancel);
+    Toolbar toolbar = findViewById(R.id.toolbar);
+    setSupportActionBar(toolbar);
+
+    drawerLayout = findViewById(R.id.drawer_layout);
+    if (drawerLayout != null && toolbar != null) {
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawerLayout, toolbar, android.R.string.ok, android.R.string.cancel);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
-
-        findViewById(R.id.btnNext).setOnClickListener(v -> findAndHighlight());
-        findViewById(R.id.btnReplace).setOnClickListener(v -> replaceText());
-        
-        setupShortcutBar();
-
-        rvErrorPanel = findViewById(R.id.rvErrorPanel);
-        if (rvErrorPanel != null) {
-            rvErrorPanel.setLayoutManager(new LinearLayoutManager(this));
-        }
-
-        previewContainer = findViewById(R.id.previewContainer);
     }
+
+    View btnNext = findViewById(R.id.btnNext);
+    if (btnNext != null) btnNext.setOnClickListener(v -> findAndHighlight());
+    View btnReplace = findViewById(R.id.btnReplace);
+    if (btnReplace != null) btnReplace.setOnClickListener(v -> replaceText());
+
+    setupShortcutBar();
+
+    rvErrorPanel = findViewById(R.id.rvErrorPanel);
+    if (rvErrorPanel != null) {
+        rvErrorPanel.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    previewContainer = findViewById(R.id.previewContainer);
+}
 
 private void setupLogic() {
     aiLayoutAnalyzer = new com.dev.ministudio.AiLayoutAnalyzer(this);
     dialogManager = new ProjectDialogManager(this, parentNode -> {
         triggerTreeRefresh(parentNode);
     });
+
+    if (codeEditor == null) {
+        showToast("ไม่พบตัวแก้ไขโค้ด");
+        return;
+    }
 
     codeEditor.setEditorLanguage(new JavaLanguage());
 
@@ -208,26 +221,20 @@ private void setupLogic() {
     codeEditor.setHighlightCurrentBlock(true);
 
     // ===================================================================
-    // ✨ [เพิ่มใหม่]: ค้นหา View แผงคำแนะนำ AI จาก XML และผูกตัวจัดการ
+    // ✨ แผงคำแนะนำ AI
     // ===================================================================
     aiSuggestionBar = findViewById(R.id.aiSuggestionBar);
     tvAiSuggestionText = findViewById(R.id.tvAiSuggestionText);
     Button btnAcceptAi = findViewById(R.id.btnAcceptAiSuggestion);
 
-    // เรียกตื่นตัวจัดการเดาคำศัพท์อัจฉริยะ
     aiAutoCompleteManager = new AiAutoCompleteManager(this, codeEditor, aiLayoutAnalyzer);
 
-    // ปุ่มกดเพื่อสวมโค้ดแนะนำลงหน้าจอแก้ไขตัวจริง
     if (btnAcceptAi != null) {
         btnAcceptAi.setOnClickListener(v -> {
             if (codeEditor != null && !lastReceivedSuggestion.isEmpty()) {
                 int line = codeEditor.getCursor().getLeftLine();
                 int column = codeEditor.getCursor().getLeftColumn();
-
-                // วางโค้ดแนะนำของ AI พุ่งตรงเข้าจุดกระพริบเคอร์เซอร์ทันที
                 codeEditor.getText().insert(line, column, lastReceivedSuggestion);
-
-                // วางเสร็จล้างแผงประจุข้อมูล และซ่อนตัวลงไปอย่างนุ่มนวล
                 lastReceivedSuggestion = "";
                 if (aiSuggestionBar != null) {
                     aiSuggestionBar.setVisibility(View.GONE);
@@ -238,29 +245,30 @@ private void setupLogic() {
     }
 
     // ===================================================================
-    // 🛠️ [ปรับปรุง]: ควบรวมสตรีมตรวจจับการพิมพ์ (Auto-Save + AI Auto-Complete)
+    // Auto-Save + AI Auto-Complete
     // ===================================================================
     codeEditor.subscribeEvent(ContentChangeEvent.class, (event, unsubscribe) -> {
-        tvSaveStatus.setText("Editing...");
-        tvSaveStatus.setTextColor(android.graphics.Color.parseColor("#FFB74D"));
+        if (tvSaveStatus != null) {
+            tvSaveStatus.setText("Editing...");
+            tvSaveStatus.setTextColor(android.graphics.Color.parseColor("#FF9E64"));
+        }
 
-        // 1. ระบบออโต้เซฟเดิมของน้า
         autoSaveHandler.removeCallbacks(saveRunnable);
         saveRunnable = () -> {
             saveFile();
-            tvSaveStatus.setText("Saved");
-            tvSaveStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
+            if (tvSaveStatus != null) {
+                tvSaveStatus.setText("Saved");
+                tvSaveStatus.setTextColor(android.graphics.Color.parseColor("#9ECE6A"));
+            }
         };
         autoSaveHandler.postDelayed(saveRunnable, 1500);
 
-        // 2. 🔥 [ระบบใหม่]: สั่งให้ AI วิเคราะห์คำศัพท์ต่อท้ายแบบเบื้องหลัง
         if (codeEditor.getCursor() != null && aiAutoCompleteManager != null) {
             String fullText = codeEditor.getText().toString();
             int curLine = codeEditor.getCursor().getLeftLine();
             int curCol = codeEditor.getCursor().getLeftColumn();
 
             aiAutoCompleteManager.onTextChanged(fullText, curLine, curCol, suggestionText -> {
-                // เมื่อ AI วิเคราะห์และตอบกลับมาเรียบร้อย ให้เด้งแผงขึ้นมาแสดงผลทันที
                 runOnUiThread(() -> {
                     lastReceivedSuggestion = suggestionText;
                     if (tvAiSuggestionText != null) {
@@ -274,18 +282,22 @@ private void setupLogic() {
         }
     });
 
-    // โครงสร้างดึงข้อมูลโปรเจกต์เดิมของน้าทำงานต่อไปปกติ...
+    // โหลดโปรเจกต์
     String projectName = getIntent().getStringExtra("projectName");
     if (projectName != null) {
         String rootPath = "/sdcard/MiniStudio/" + projectName;
         currentProject = new ProjectModel(projectName, rootPath);
-        getSupportActionBar().setTitle(currentProject.getProjectName());
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(currentProject.getProjectName());
+        }
 
         setupTabLogic();
 
-        // 🛠️ เรียกทำงานผ่านโครงสร้างผู้จัดการต้นไม้ตัวใหม่ที่แยกออกไป
-        projectTreeManager = new ProjectTreeManager(this, treeView);
-        projectTreeManager.initializeFileTree();
+        if (treeView != null) {
+            projectTreeManager = new ProjectTreeManager(this, treeView);
+            projectTreeManager.initializeFileTree();
+        }
         setEditorActiveState(false);
     }
 }
@@ -861,9 +873,16 @@ private void setupShortcutBar() {
     shortcutBar.addView(createButton("🪄 ปรับปรุง", params, v -> handleAiAction(true), "#9ECE6A", "#1C2A20"));
 }
 
-private TextView createButton(String text, LinearLayout.LayoutParams params,
+private TextView createButton(String text, LinearLayout.LayoutParams baseParams,
                               View.OnClickListener listener, String textColor, String bgColor) {
     float density = getResources().getDisplayMetrics().density;
+
+    // สำคัญ: ต้อง new ใหม่ทุกปุ่ม ห้ามใช้ params ตัวเดียวซ้ำ
+    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT, (int) (36 * density)
+    );
+    params.setMargins((int) (3 * density), (int) (2 * density), (int) (3 * density), (int) (2 * density));
+
     TextView btn = new TextView(this);
     btn.setText(text);
     btn.setTextSize(14);
