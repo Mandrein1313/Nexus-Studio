@@ -6,7 +6,7 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212"
+    android:background="#1A1B26"
     android:fitsSystemWindows="true">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -24,9 +24,9 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="#1E1E1E"
+                android:background="#1A1B26"
                 app:title="Projects"
-                app:titleTextColor="#BB86FC"
+                app:titleTextColor="#BB9AF7"
                 app:contentInsetStartWithNavigation="0dp" />
 
             <ListView
@@ -46,8 +46,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
-            fab:fab_addButtonColorNormal="#BB86FC"
-            fab:fab_addButtonColorPressed="#9965f4"
+            fab:fab_addButtonColorNormal="#BB9AF7"
+            fab:fab_addButtonColorPressed="#7AA2F7"
             fab:fab_expandDirection="up">
 
             <com.getbase.floatingactionbutton.FloatingActionButton
@@ -55,7 +55,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 fab:fab_title="สร้างโปรเจกต์ใหม่"
-                fab:fab_colorNormal="#FFFFFF"
+                fab:fab_colorNormal="#C0CAF5"
                 fab:fab_size="mini" />
 
             <com.getbase.floatingactionbutton.FloatingActionButton
@@ -63,7 +63,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 fab:fab_title="นำเข้าจาก GitHub"
-                fab:fab_colorNormal="#FFFFFF"
+                fab:fab_colorNormal="#C0CAF5"
                 fab:fab_size="mini" />
 
         </com.getbase.floatingactionbutton.FloatingActionsMenu>
@@ -75,10 +75,10 @@
         android:layout_width="280dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="#1E1E1E"
+        android:background="#1F2335"
         android:fitsSystemWindows="true"
-        app:itemTextColor="#FFFFFF"
-        app:itemIconTint="#BB86FC"
+        app:itemTextColor="#C0CAF5"
+        app:itemIconTint="#BB9AF7"
         app:menu="@menu/menu_drawer_project" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

@@ -5,7 +5,7 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1E1E1E"
+    android:background="#1A1B26"
     android:fitsSystemWindows="true">
 
     <LinearLayout
@@ -18,15 +18,15 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="#1E1E1E"
-            app:titleTextColor="#FFFFFF"
+            android:background="#1A1B26"
+            app:titleTextColor="#C0CAF5"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Dark" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:background="#252526"
+            android:background="#1F2335"
             android:padding="6dp">
             <TextView
                 android:id="@+id/tvFilePath"
@@ -34,7 +34,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="No file open"
-                android:textColor="#8C8C8C"
+                android:textColor="#565F89"
                 android:textSize="12sp"
                 android:maxLines="1"
                 android:ellipsize="end" />
@@ -43,7 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Saved"
-                android:textColor="#4CAF50"
+                android:textColor="#9ECE6A"
                 android:textSize="12sp"
                 android:layout_marginStart="8dp" />
         </LinearLayout>
@@ -52,7 +52,7 @@
             android:id="@+id/tabRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:background="#252526"
+            android:background="#1F2335"
             android:scrollbars="none" />
 
         <LinearLayout
@@ -60,7 +60,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#2D2D2D"
+            android:background="#24283B"
             android:padding="8dp"
             android:visibility="gone">
             <LinearLayout
@@ -73,8 +73,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="ค้นหาคำ..."
-                    android:textColor="#FFFFFF"
-                    android:textColorHint="#707070"
+                    android:textColor="#C0CAF5"
+                    android:textColorHint="#565F89"
                     android:textSize="14sp" />
                 <Button
                     android:id="@+id/btnNext"
@@ -94,8 +94,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="แทนที่ด้วย..."
-                    android:textColor="#FFFFFF"
-                    android:textColorHint="#707070"
+                    android:textColor="#C0CAF5"
+                    android:textColorHint="#565F89"
                     android:textSize="14sp" />
                 <Button
                     android:id="@+id/btnReplace"
@@ -110,7 +110,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="#1E1E1E">
+            android:background="#1A1B26">
 
             <LinearLayout
                 android:id="@+id/emptyStateView"
@@ -129,7 +129,7 @@
                         android:layout_width="56dp"
                         android:layout_height="56dp"
                         android:background="@android:drawable/presence_online"
-                        android:backgroundTint="#CCCCCC" />
+                        android:backgroundTint="#565F89" />
                     <LinearLayout
                         android:layout_width="160dp"
                         android:layout_height="wrap_content"
@@ -138,16 +138,16 @@
                         <View
                             android:layout_width="70dp"
                             android:layout_height="12dp"
-                            android:background="#CCCCCC" />
+                            android:background="#3B4261" />
                         <View
                             android:layout_width="140dp"
                             android:layout_height="12dp"
-                            android:background="#CCCCCC"
+                            android:background="#3B4261"
                             android:layout_marginTop="10dp" />
                         <View
                             android:layout_width="45dp"
                             android:layout_height="12dp"
-                            android:background="#CCCCCC"
+                            android:background="#3B4261"
                             android:layout_marginTop="10dp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -162,7 +162,7 @@
                         android:layout_width="56dp"
                         android:layout_height="56dp"
                         android:background="@android:drawable/presence_online"
-                        android:backgroundTint="#CCCCCC" />
+                        android:backgroundTint="#565F89" />
                     <LinearLayout
                         android:layout_width="160dp"
                         android:layout_height="wrap_content"
@@ -171,16 +171,16 @@
                         <View
                             android:layout_width="125dp"
                             android:layout_height="12dp"
-                            android:background="#CCCCCC" />
+                            android:background="#3B4261" />
                         <View
                             android:layout_width="175dp"
                             android:layout_height="12dp"
-                            android:background="#CCCCCC"
+                            android:background="#3B4261"
                             android:layout_marginTop="10dp" />
                         <View
                             android:layout_width="40dp"
                             android:layout_height="12dp"
-                            android:background="#CCCCCC"
+                            android:background="#3B4261"
                             android:layout_marginTop="10dp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -189,7 +189,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Don't open files"
-                    android:textColor="#8C8C8C"
+                    android:textColor="#565F89"
                     android:textSize="18sp"
                     android:layout_marginTop="35dp" />
             </LinearLayout>
@@ -204,7 +204,7 @@
                 android:id="@+id/previewContainer"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#1E1E1E"
+                android:background="#1A1B26"
                 android:visibility="gone" />
         </FrameLayout>
 
@@ -212,7 +212,7 @@
             android:id="@+id/aiSuggestionBar"
             android:layout_width="match_parent"
             android:layout_height="38dp"
-            android:background="#2D203D"
+            android:background="#2A2040"
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:paddingStart="12dp"
@@ -222,7 +222,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="✨ AI แนะนำ: "
-                android:textColor="#BB86FC"
+                android:textColor="#BB9AF7"
                 android:textSize="11sp"
                 android:textStyle="bold" />
 
@@ -235,7 +235,7 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:text="..."
-                android:textColor="#A5A5A5"
+                android:textColor="#A9B1D6"
                 android:textSize="12sp"
                 android:fontFamily="monospace" />
 
@@ -243,9 +243,9 @@
                 android:id="@+id/btnAcceptAiSuggestion"
                 android:layout_width="wrap_content"
                 android:layout_height="28dp"
-                android:backgroundTint="#BB86FC"
+                android:backgroundTint="#BB9AF7"
                 android:text="แทรกโค้ด"
-                android:textColor="#121212"
+                android:textColor="#1A1B26"
                 android:textSize="10sp"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
@@ -255,7 +255,7 @@
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#202020"
+            android:background="#1F2335"
             android:scrollbars="none">
             <LinearLayout
                 android:id="@+id/shortcutBar"
@@ -272,14 +272,14 @@
             android:layout_width="match_parent"
             android:layout_height="220dp"
             android:orientation="vertical"
-            android:background="#1E1E1E"
+            android:background="#1A1B26"
             android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
                 android:orientation="horizontal"
-                android:background="#2D2D2D"
+                android:background="#24283B"
                 android:gravity="center_vertical"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp">
@@ -288,10 +288,10 @@
                     android:id="@+id/consoleFilterTabs"
                     android:layout_width="160dp"
                     android:layout_height="match_parent"
-                    android:background="#2D2D2D"
-                    app:tabTextColor="#8C8C8C"
-                    app:tabSelectedTextColor="#FFFFFF"
-                    app:tabIndicatorColor="#BB86FC"
+                    android:background="#24283B"
+                    app:tabTextColor="#565F89"
+                    app:tabSelectedTextColor="#C0CAF5"
+                    app:tabIndicatorColor="#BB9AF7"
                     app:tabIndicatorHeight="2dp"
                     app:tabMode="fixed" />
 
@@ -306,7 +306,7 @@
                     android:layout_height="32dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@android:drawable/arrow_down_float"
-                    app:tint="#FFFFFF" />
+                    app:tint="#C0CAF5" />
                 
                 <ImageButton
                     android:id="@+id/btnConsoleClear"
@@ -314,7 +314,7 @@
                     android:layout_height="32dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@android:drawable/ic_menu_close_clear_cancel"
-                    app:tint="#FFFFFF" />
+                    app:tint="#C0CAF5" />
                 
                 <ImageButton
                     android:id="@+id/btnToggleExpand"
@@ -322,14 +322,14 @@
                     android:layout_height="32dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@android:drawable/ic_menu_compass"
-                    app:tint="#FFB74D" />
+                    app:tint="#E0AF68" />
                 <ImageButton
                     android:id="@+id/btnCloseConsole"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@android:drawable/ic_menu_delete"
-                    app:tint="#FF5252" />
+                    app:tint="#F7768E" />
             </LinearLayout>
 
             <androidx.viewpager2.widget.ViewPager2
@@ -354,42 +354,44 @@
             android:id="@+id/rvErrorPanel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#2D1F1F"
+            android:background="#2A1F24"
             android:visibility="gone" />
 
     </LinearLayout>
-<com.google.android.material.navigation.NavigationView
-    android:id="@+id/nav_view"
-    android:layout_width="280dp"
-    android:layout_height="match_parent"
-    android:layout_gravity="start"
-    android:background="#252526"
-    android:fitsSystemWindows="true">
 
-    <LinearLayout
-        android:id="@+id/drawer_content"
-        android:layout_width="match_parent"
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="280dp"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="8dp"
-        android:clipToPadding="false">
+        android:layout_gravity="start"
+        android:background="#1F2335"
+        android:fitsSystemWindows="true">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="โครงสร้างโปรเจกต์"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:padding="8dp" />
-
-        <ListView
-            android:id="@+id/treeView"
+        <LinearLayout
+            android:id="@+id/drawer_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:divider="@null"
-            android:clipToPadding="false" />
-    </LinearLayout>
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:clipToPadding="false">
 
-</com.google.android.material.navigation.NavigationView>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="โครงสร้างโปรเจกต์"
+                android:textColor="#C0CAF5"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:padding="8dp" />
+
+            <ListView
+                android:id="@+id/treeView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@null"
+                android:clipToPadding="false" />
+        </LinearLayout>
+
+    </com.google.android.material.navigation.NavigationView>
+
 </androidx.drawerlayout.widget.DrawerLayout>

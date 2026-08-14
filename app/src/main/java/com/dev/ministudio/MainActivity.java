@@ -121,8 +121,8 @@ protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
     WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
-    getWindow().setStatusBarColor(android.graphics.Color.parseColor("#1E1E1E"));
-    getWindow().setNavigationBarColor(android.graphics.Color.parseColor("#1E1E1E"));
+    getWindow().setStatusBarColor(Color.parseColor("#1A1B26"));
+    getWindow().setNavigationBarColor(Color.parseColor("#1A1B26"));
 
     setContentView(R.layout.activity_main);
 
@@ -309,8 +309,8 @@ private void showFullPanelDialog(int initialTabPosition) {
         );
         // กันเนื้อหาไม่ให้ทับ status bar / navigation bar
         androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, true);
-        window.setStatusBarColor(android.graphics.Color.parseColor("#1E1E1E"));
-        window.setNavigationBarColor(android.graphics.Color.parseColor("#1E1E1E"));
+        window.setStatusBarColor(Color.parseColor("#1A1B26"));
+        window.setNavigationBarColor(Color.parseColor("#1A1B26"));
     }
 
     dialogTabLayout = fullPanelDialog.findViewById(R.id.tabLayout);
@@ -833,27 +833,36 @@ private void setupShortcutBar() {
     );
     params.setMargins((int) (3 * density), (int) (2 * density), (int) (3 * density), (int) (2 * density));
 
-    // 1. ปุ่ม Undo & Redo
-    shortcutBar.addView(createButton("↶", params, v -> { if (codeEditor != null) codeEditor.undo(); }, "#B0B3B8", "#2D2D2D"));
-    shortcutBar.addView(createButton("↷", params, v -> { if (codeEditor != null) codeEditor.redo(); }, "#B0B3B8", "#2D2D2D"));
+    // 1. Undo & Redo
+    shortcutBar.addView(createButton("↶", params, v -> {
+        if (codeEditor != null) codeEditor.undo();
+    }, "#A9B1D6", "#24283B"));
 
-    // 2. ปุ่มสัญลักษณ์ทั่วไป
-    String[] shortcuts = { "{", "}", "[", "]", "(", ")", "<", ">", ";"};
+    shortcutBar.addView(createButton("↷", params, v -> {
+        if (codeEditor != null) codeEditor.redo();
+    }, "#A9B1D6", "#24283B"));
+
+    // 2. สัญลักษณ์ทั่วไป  ← แก้สีตรงนี้
+    String[] shortcuts = {"{", "}", "[", "]", "(", ")", "<", ">", ";"};
     for (String symbol : shortcuts) {
         shortcutBar.addView(createButton(symbol, params, v -> {
             if (codeEditor != null && codeEditor.getCursor() != null) {
-                codeEditor.getText().insert(codeEditor.getCursor().getLeftLine(), codeEditor.getCursor().getLeftColumn(), symbol);
+                codeEditor.getText().insert(
+                        codeEditor.getCursor().getLeftLine(),
+                        codeEditor.getCursor().getLeftColumn(),
+                        symbol
+                );
             }
-        }, "#B0B3B8", "#2D2D2D"));
+        }, "#A9B1D6", "#24283B"));  // ← text สี / พื้นหลัง
     }
 
     // 3. ปุ่ม AI
-    shortcutBar.addView(createButton("🤖 ถาม AI", params, v -> handleAiAction(false), "#BB86FC", "#251F35"));
-    shortcutBar.addView(createButton("🪄 ปรับปรุง", params, v -> handleAiAction(true), "#81C784", "#1C2A20"));
+    shortcutBar.addView(createButton("🤖 ถาม AI", params, v -> handleAiAction(false), "#BB9AF7", "#2A2040"));
+    shortcutBar.addView(createButton("🪄 ปรับปรุง", params, v -> handleAiAction(true), "#9ECE6A", "#1C2A20"));
 }
 
-// ฟังก์ชัน Helper สร้างปุ่ม (ลดความซ้ำซ้อน)
-private TextView createButton(String text, LinearLayout.LayoutParams params, View.OnClickListener listener, String textColor, String bgColor) {
+private TextView createButton(String text, LinearLayout.LayoutParams params,
+                              View.OnClickListener listener, String textColor, String bgColor) {
     float density = getResources().getDisplayMetrics().density;
     TextView btn = new TextView(this);
     btn.setText(text);
@@ -1308,7 +1317,7 @@ if (searchBarRoot != null) {
                 android.content.ClipData clip = android.content.ClipData.newPlainText("MiniStudioCode", text);
                 if (clipboard != null) {
                     clipboard.setPrimaryClip(clip);
-                    showToast("📋 คัดลอกโค้ดลงคลิปบอร์ดแล้วครับน้า!");
+                    showToast("📋 คัดลอกโค้ดลงคลิปบอร์ดแล้ว!");
                 }
             });
         }
@@ -1327,7 +1336,7 @@ if (searchBarRoot != null) {
                     if (fullPanelDialog != null && fullPanelDialog.isShowing()) {
                         fullPanelDialog.dismiss();
                     }
-                    showToast("✨ นำโค้ดเข้าสู่หน้าแก้ไขเรียบร้อยแล้วครับน้า!");
+                    showToast("✨ นำโค้ดเข้าสู่หน้าแก้ไขเรียบร้อยแล้ว!");
                 }
             });
         }
