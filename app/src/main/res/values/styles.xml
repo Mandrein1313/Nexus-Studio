@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- สีหลักและสีเน้น (Primary / Secondary Colors) -->
+        <item name="colorPrimary">#BB9AF7</item>
+        <item name="colorPrimaryVariant">#7AA2F7</item>
+        <item name="colorSecondary">#7DCFFF</item>
+
+        <!-- พื้นหลัง และ Surface -->
+        <item name="android:windowBackground">#1A1B26</item>
+        <item name="colorSurface">#1F2335</item>
+
+        <!-- สีของ System Bars (StatusBar / NavigationBar) -->
+        <item name="android:statusBarColor">#1A1B26</item>
+        <item name="android:navigationBarColor">#1A1B26</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+
+        <!-- สีข้อความพื้นฐาน (Text Colors) -->
+        <item name="android:textColorPrimary">#C0CAF5</item>
+        <item name="android:textColorSecondary">#565F89</item>
+    </style>
+</resources>
