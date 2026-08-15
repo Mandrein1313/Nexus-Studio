@@ -121,8 +121,8 @@ protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
     WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
-    getWindow().setStatusBarColor(android.graphics.Color.parseColor("#1A1B26"));
-    getWindow().setNavigationBarColor(android.graphics.Color.parseColor("#1A1B26"));
+    getWindow().setStatusBarColor(android.graphics.Color.parseColor("#1E1E1E"));
+    getWindow().setNavigationBarColor(android.graphics.Color.parseColor("#1E1E1E"));
     setContentView(R.layout.activity_main);
 
     // ดัน drawer ลงมาใต้ status bar (ใช้ความสูงจริงจากระบบ)
