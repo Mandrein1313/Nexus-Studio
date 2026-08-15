@@ -1,4 +1,4 @@
-;package com.dev.ministudio;
+package com.dev.ministudio;
 
 import android.os.Bundle;
 import android.os.Handler;
