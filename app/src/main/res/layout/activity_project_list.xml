@@ -8,7 +8,7 @@
     android:background="#1A1B26"
     android:fitsSystemWindows="true">
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
@@ -39,19 +39,18 @@
 
         </LinearLayout>
 
-        <!-- Material FAB แทนของเก่า -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_main"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="20dp"
-            android:src="@android:drawable/ic_input_add"
+            app:srcCompat="@android:drawable/ic_input_add"
             app:backgroundTint="#BB9AF7"
             app:tint="#1A1B26"
             app:elevation="6dp" />
 
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </FrameLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
