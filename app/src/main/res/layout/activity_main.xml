@@ -22,11 +22,11 @@
     app:titleTextColor="#C0CAF5"
     app:popupTheme="@style/ThemeOverlay.AppCompat.Dark" />
 
-        <LinearLayout
+<LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:background="#252526"
+            android:background="#1F2335"
             android:padding="6dp">
             <TextView
                 android:id="@+id/tvFilePath"
@@ -34,7 +34,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="No file open"
-                android:textColor="#8C8C8C"
+                android:textColor="#565F89"
                 android:textSize="12sp"
                 android:maxLines="1"
                 android:ellipsize="end" />
@@ -43,16 +43,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Saved"
-                android:textColor="#4CAF50"
+                android:textColor="#9ECE6A"
                 android:textSize="12sp"
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
+ <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/tabRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:background="#252526"
+            android:background="#1F2335"
             android:scrollbars="none" />
 
         <LinearLayout
