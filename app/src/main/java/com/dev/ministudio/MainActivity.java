@@ -122,7 +122,6 @@ protected void onCreate(Bundle savedInstanceState) {
 
     WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
 
-    // เคลียร์ธงโปร่งใสที่ระบบอาจใส่มา
     getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
     getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
@@ -130,16 +129,15 @@ protected void onCreate(Bundle savedInstanceState) {
     getWindow().setStatusBarColor(barColor);
     getWindow().setNavigationBarColor(barColor);
 
-    // บังคับไอคอน status bar เป็นสีสว่าง (โทนมืด)
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
         View decor = getWindow().getDecorView();
         int flags = decor.getSystemUiVisibility();
-        flags &= \~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR; // ปิดโหมดไอคอนดำ
+        flags &= \~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
         decor.setSystemUiVisibility(flags);
     }
+
     setContentView(R.layout.activity_main);
 
-    // ดัน drawer ลงมาใต้ status bar (ใช้ความสูงจริงจากระบบ)
     View drawerContent = findViewById(R.id.drawer_content);
     if (drawerContent != null) {
         int statusBarHeight = 0;
