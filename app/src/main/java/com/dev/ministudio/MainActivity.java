@@ -1,4 +1,4 @@
-package com.dev.ministudio;
+;package com.dev.ministudio;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -121,8 +121,22 @@ protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
     WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
-    getWindow().setStatusBarColor(android.graphics.Color.parseColor("#1A1B26"));
-    getWindow().setNavigationBarColor(android.graphics.Color.parseColor("#1A1B26"));
+
+    // เคลียร์ธงโปร่งใสที่ระบบอาจใส่มา
+    getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+    getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
+    int barColor = android.graphics.Color.parseColor("#1A1B26");
+    getWindow().setStatusBarColor(barColor);
+    getWindow().setNavigationBarColor(barColor);
+
+    // บังคับไอคอน status bar เป็นสีสว่าง (โทนมืด)
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+        View decor = getWindow().getDecorView();
+        int flags = decor.getSystemUiVisibility();
+        flags &= \~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR; // ปิดโหมดไอคอนดำ
+        decor.setSystemUiVisibility(flags);
+    }
     setContentView(R.layout.activity_main);
 
     // ดัน drawer ลงมาใต้ status bar (ใช้ความสูงจริงจากระบบ)
