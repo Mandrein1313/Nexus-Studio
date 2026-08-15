@@ -130,11 +130,9 @@ protected void onCreate(Bundle savedInstanceState) {
     getWindow().setNavigationBarColor(barColor);
 
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-        View decor = getWindow().getDecorView();
-        int flags = decor.getSystemUiVisibility();
-        flags &= \~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-        decor.setSystemUiVisibility(flags);
-    }
+    View decor = getWindow().getDecorView();
+    decor.setSystemUiVisibility(0);
+}
 
     setContentView(R.layout.activity_main);
 
