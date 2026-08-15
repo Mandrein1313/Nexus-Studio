@@ -832,28 +832,43 @@ private void setupShortcutBar() {
     );
     params.setMargins((int) (3 * density), (int) (2 * density), (int) (3 * density), (int) (2 * density));
 
-    // 1. ปุ่ม Undo & Redo
-    shortcutBar.addView(createButton("↶", params, v -> { if (codeEditor != null) codeEditor.undo(); }, "#B0B3B8", "#2D2D2D"));
-    shortcutBar.addView(createButton("↷", params, v -> { if (codeEditor != null) codeEditor.redo(); }, "#B0B3B8", "#2D2D2D"));
+    // 1. Undo & Redo
+    shortcutBar.addView(createButton("↶", params, v -> {
+        if (codeEditor != null) codeEditor.undo();
+    }, "#A9B1D6", "#24283B"));
 
-    // 2. ปุ่มสัญลักษณ์ทั่วไป
-    String[] shortcuts = { "{", "}", "[", "]", "(", ")", "<", ">", ";"};
+    shortcutBar.addView(createButton("↷", params, v -> {
+        if (codeEditor != null) codeEditor.redo();
+    }, "#A9B1D6", "#24283B"));
+
+    // 2. สัญลักษณ์
+    String[] shortcuts = {"{", "}", "[", "]", "(", ")", "<", ">", ";"};
     for (String symbol : shortcuts) {
         shortcutBar.addView(createButton(symbol, params, v -> {
             if (codeEditor != null && codeEditor.getCursor() != null) {
-                codeEditor.getText().insert(codeEditor.getCursor().getLeftLine(), codeEditor.getCursor().getLeftColumn(), symbol);
+                codeEditor.getText().insert(
+                        codeEditor.getCursor().getLeftLine(),
+                        codeEditor.getCursor().getLeftColumn(),
+                        symbol
+                );
             }
-        }, "#B0B3B8", "#2D2D2D"));
+        }, "#A9B1D6", "#24283B"));
     }
 
     // 3. ปุ่ม AI
-    shortcutBar.addView(createButton("🤖 ถาม AI", params, v -> handleAiAction(false), "#BB86FC", "#251F35"));
-    shortcutBar.addView(createButton("🪄 ปรับปรุง", params, v -> handleAiAction(true), "#81C784", "#1C2A20"));
+    shortcutBar.addView(createButton("🤖 ถาม AI", params, v -> handleAiAction(false), "#BB9AF7", "#2A2040"));
+    shortcutBar.addView(createButton("🪄 ปรับปรุง", params, v -> handleAiAction(true), "#9ECE6A", "#1C2A20"));
 }
 
 // ฟังก์ชัน Helper สร้างปุ่ม (ลดความซ้ำซ้อน)
-private TextView createButton(String text, LinearLayout.LayoutParams params, View.OnClickListener listener, String textColor, String bgColor) {
+private TextView createButton(String text, LinearLayout.LayoutParams ignored,
+                              View.OnClickListener listener, String textColor, String bgColor) {
     float density = getResources().getDisplayMetrics().density;
+    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT, (int) (36 * density));
+    params.setMargins((int) (3 * density), (int) (2 * density),
+            (int) (3 * density), (int) (2 * density));
+
     TextView btn = new TextView(this);
     btn.setText(text);
     btn.setTextSize(14);

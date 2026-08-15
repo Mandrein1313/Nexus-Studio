@@ -14,13 +14,13 @@
         android:orientation="vertical"
         android:fitsSystemWindows="true">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="#1E1E1E"
-            app:titleTextColor="#FFFFFF"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Dark" />
+<androidx.appcompat.widget.Toolbar
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:background="#1A1B26"
+    app:titleTextColor="#C0CAF5"
+    app:popupTheme="@style/ThemeOverlay.AppCompat.Dark" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -252,11 +252,11 @@
                 style="@style/Widget.MaterialComponents.Button.UnelevatedButton" />
         </LinearLayout>
 
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#202020"
-            android:scrollbars="none">
+<HorizontalScrollView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#1F2335"
+    android:scrollbars="none">
             <LinearLayout
                 android:id="@+id/shortcutBar"
                 android:layout_width="wrap_content"
