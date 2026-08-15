@@ -76,8 +76,8 @@ protected void onCreate(Bundle savedInstanceState) {
 
     // กันเนื้อหาไม่ให้ทับ status bar / navigation bar (Android 15+)
     androidx.core.view.WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
-    getWindow().setStatusBarColor(android.graphics.Color.parseColor("#1E1E1E"));
-    getWindow().setNavigationBarColor(android.graphics.Color.parseColor("#1E1E1E"));
+   getWindow().setStatusBarColor(android.graphics.Color.parseColor("#1A1B26"));
+   getWindow().setNavigationBarColor(android.graphics.Color.parseColor("#1A1B26"));;
     setContentView(R.layout.activity_project_list);
 
     ListView listView = findViewById(R.id.projectListView);
