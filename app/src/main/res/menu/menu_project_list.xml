@@ -8,5 +8,9 @@
         android:icon="@drawable/settings_account_box"
         app:showAsAction="always" />
 
-
+    <item
+        android:id="@+id/action_toggle_theme"
+        android:title="สลับธีมสว่าง/มืด"
+        android:icon="@android:drawable/ic_menu_view"
+        app:showAsAction="never" />
 </menu>
