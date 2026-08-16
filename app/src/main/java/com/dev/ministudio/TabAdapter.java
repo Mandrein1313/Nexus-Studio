@@ -34,37 +34,38 @@ public class TabAdapter extends RecyclerView.Adapter<TabAdapter.TabViewHolder> {
         return new TabViewHolder(view);
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull TabViewHolder holder, int position) {
-        File file = projectModel.getOpenedFiles().get(position);
-        holder.tvTabName.setText(file.getName());
+ @Override
+public void onBindViewHolder(@NonNull TabViewHolder holder, int position) {
+    File file = projectModel.getOpenedFiles().get(position);
+    holder.tvTabName.setText(file.getName());
 
-        // ตรวจสอบสถานะว่าใช่ไฟล์ที่กำลังเปิดอ่านอยู่หรือไม่
-        if (file.equals(projectModel.getCurrentOpenFile())) {
-            // ดึง XML drawable ขีดเส้นใต้สีม่วงที่เราสร้างไว้มาใช้
-            holder.itemView.setBackgroundResource(R.drawable.tab_active_bg);
-            holder.tvTabName.setTextColor(Color.parseColor("#BB86FC")); // ชื่อไฟล์สีม่วงเด่นชัด
-            holder.btnCloseTab.setColorFilter(Color.parseColor("#BB86FC")); // ปุ่ม X สีม่วงเข้าคู่กัน
-        } else {
-            // แท็บปกติที่ไม่ได้เลือกใช้สีมืดเรียบๆ
-            holder.itemView.setBackgroundColor(Color.parseColor("#1D1D1D")); 
-            holder.tvTabName.setTextColor(Color.parseColor("#888888")); // สีตัวอักษรจางลง
-            holder.btnCloseTab.setColorFilter(Color.parseColor("#555555"));
-        }
+    boolean isActive = file.equals(projectModel.getCurrentOpenFile());
 
-        // กดที่ตัวแท็บเพื่อสลับหน้าจอไปอ่านไฟล์นั้นๆ
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) listener.onTabClick(file);
-        });
-
-        // 🟢 ระบบกดปุ่ม X เพื่อปิดแท็บแบบสมบูรณ์!
-        holder.btnCloseTab.setOnClickListener(v -> {
-            if (listener != null) {
-                // ส่งตำแหน่งและไฟล์กลับไปให้ MainActivity สั่งทำลายแท็บ
-                listener.onTabClose(file, holder.getAdapterPosition());
-            }
-        });
+    if (isActive) {
+        holder.itemView.setBackgroundResource(R.drawable.tab_active_bg);
+        holder.tvTabName.setTextColor(Color.parseColor("#C0CAF5"));
+        holder.tvTabName.setTypeface(null, android.graphics.Typeface.BOLD);
+        holder.btnCloseTab.setColorFilter(Color.parseColor("#A9B1D6"));
+    } else {
+        holder.itemView.setBackgroundColor(Color.parseColor("#1F2335"));
+        holder.tvTabName.setTextColor(Color.parseColor("#565F89"));
+        holder.tvTabName.setTypeface(null, android.graphics.Typeface.NORMAL);
+        holder.btnCloseTab.setColorFilter(Color.parseColor("#565F89"));
     }
+
+    holder.itemView.setOnClickListener(v -> {
+        if (listener != null) listener.onTabClick(file);
+    });
+
+    holder.btnCloseTab.setOnClickListener(v -> {
+        if (listener != null) {
+            int pos = holder.getAdapterPosition();
+            if (pos != RecyclerView.NO_POSITION) {
+                listener.onTabClose(file, pos);
+            }
+        }
+    });
+}
 
     @Override
     public int getItemCount() {

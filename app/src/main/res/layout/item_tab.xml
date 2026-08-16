@@ -3,30 +3,31 @@
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:background="#2D2D2D"
-    android:paddingTop="2dp"
-    android:paddingBottom="2dp"
-    android:paddingStart="10dp"
-    android:paddingEnd="8dp"
     android:gravity="center_vertical"
-    android:layout_marginEnd="2dp">
+    android:paddingStart="14dp"
+    android:paddingEnd="10dp"
+    android:layout_marginEnd="1dp"
+    android:minWidth="96dp">
 
     <TextView
         android:id="@+id/tvTabName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#FFFFFF"
-        android:textSize="11sp"
         android:text="MainActivity.java"
-        android:typeface="monospace" />
+        android:textColor="#A9B1D6"
+        android:textSize="12sp"
+        android:maxLines="1"
+        android:ellipsize="middle"
+        android:maxWidth="140dp" />
 
     <ImageButton
         android:id="@+id/btnCloseTab"
-        android:layout_width="12dp"
-        android:layout_height="12dp"
-        android:layout_marginStart="6dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="8dp"
+        android:padding="3dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@android:drawable/ic_menu_close_clear_cancel"
         android:scaleType="fitCenter"
-        android:tint="#777777" />
+        android:contentDescription="ปิดแท็บ" />
 </LinearLayout>
