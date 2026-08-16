@@ -48,12 +48,12 @@
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
- <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/tabRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="#1F2335"
-            android:scrollbars="none" />
+<androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/tabRecyclerView"
+    android:layout_width="match_parent"
+    android:layout_height="32dp"
+    android:background="#1F2335"
+    android:scrollbars="none" />
 
         <LinearLayout
             android:id="@+id/searchBar"
