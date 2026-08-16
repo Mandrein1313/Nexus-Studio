@@ -1234,13 +1234,47 @@ if (searchBarRoot != null) {
         if (projectTreeManager != null) projectTreeManager.refreshFileTree(); 
     }
 
-    private void setupTabLogic() {
-        tabAdapter = new TabAdapter(currentProject, new TabAdapter.OnTabInterface() {
-            @Override public void onTabClick(File file) { openFile(file); }
-            @Override public void onTabClose(File file, int position) {}
-        });
-        tabRecyclerView.setAdapter(tabAdapter);
-    }
+ private void setupTabLogic() {
+    tabAdapter = new TabAdapter(currentProject, new TabAdapter.OnTabInterface() {
+        @Override
+        public void onTabClick(File file) {
+            openFile(file);
+        }
+
+        @Override
+        public void onTabClose(File file, int position) {
+            if (currentProject == null || file == null) return;
+
+            // 1. เอาออกจากรายการแท็บ
+            currentProject.removeFileFromTabs(file);
+
+            // 2. ถ้าปิดไฟล์ที่กำลังเปิดอยู่ ต้องสลับไปไฟล์อื่น หรือว่าง
+            File current = currentProject.getCurrentOpenFile();
+            if (current != null && current.equals(file)) {
+                java.util.List<File> opened = currentProject.getOpenedFiles();
+                if (opened != null && !opened.isEmpty()) {
+                    // เปิดแท็บข้างเคียง
+                    int newIndex = Math.min(position, opened.size() - 1);
+                    if (newIndex < 0) newIndex = 0;
+                    openFile(opened.get(newIndex));
+                } else {
+                    // ไม่เหลือแท็บแล้ว
+                    currentProject.setCurrentOpenFile(null);
+                    if (codeEditor != null) codeEditor.setText("");
+                    setEditorActiveState(false);
+                    if (tvFilePath != null) tvFilePath.setText("No file open");
+                    if (tvSaveStatus != null) tvSaveStatus.setText("");
+                }
+            }
+
+            // 3. รีเฟรชแถบแท็บ
+            if (tabAdapter != null) {
+                tabAdapter.notifyDataSetChanged();
+            }
+        }
+    });
+    tabRecyclerView.setAdapter(tabAdapter);
+}
 
     public void updateFilePathStatus(File file) {
     if (tvFilePath != null && file != null) {
