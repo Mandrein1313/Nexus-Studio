@@ -117,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
    private boolean isLightEditorTheme = false;
    private boolean isShortcutExpanded = true;
    
+   
 @Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -159,53 +160,66 @@ protected void onCreate(Bundle savedInstanceState) {
     setupLogic();
 }
     private void initViews() {
-        etFind = findViewById(R.id.etFind);
-        etReplace = findViewById(R.id.etReplace);
-        searchBar = findViewById(R.id.searchBar);
-        codeEditor = findViewById(R.id.codeEditor); 
-        tvFilePath = findViewById(R.id.tvFilePath); 
-        tvSaveStatus = findViewById(R.id.tvSaveStatus);
-        emptyStateView = findViewById(R.id.emptyStateView);
-        
-        treeView = findViewById(R.id.treeView); 
-        tabRecyclerView = findViewById(R.id.tabRecyclerView);
-        tabRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+    etFind = findViewById(R.id.etFind);
+    etReplace = findViewById(R.id.etReplace);
+    searchBar = findViewById(R.id.searchBar);
+    codeEditor = findViewById(R.id.codeEditor); 
+    tvFilePath = findViewById(R.id.tvFilePath); 
+    tvSaveStatus = findViewById(R.id.tvSaveStatus);
+    emptyStateView = findViewById(R.id.emptyStateView);
+    
+    treeView = findViewById(R.id.treeView); 
+    tabRecyclerView = findViewById(R.id.tabRecyclerView);
+    tabRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+    Toolbar toolbar = findViewById(R.id.toolbar);
+    setSupportActionBar(toolbar);
 
-        drawerLayout = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, android.R.string.ok, android.R.string.cancel);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
+    drawerLayout = findViewById(R.id.drawer_layout);
+    ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, android.R.string.ok, android.R.string.cancel);
+    drawerLayout.addDrawerListener(toggle);
+    toggle.syncState();
 
-        findViewById(R.id.btnNext).setOnClickListener(v -> findAndHighlight());
-        findViewById(R.id.btnReplace).setOnClickListener(v -> replaceText());
-        
-        setupShortcutBar();
-        TextView btnToggleShortcut = findViewById(R.id.btnToggleShortcut);
-View shortcutRow = findViewById(R.id.shortcutRow);
-if (btnToggleShortcut != null && shortcutRow != null) {
-    btnToggleShortcut.setOnClickListener(v -> {
-        isShortcutExpanded = !isShortcutExpanded;
-        if (isShortcutExpanded) {
-            shortcutRow.setVisibility(View.VISIBLE);
-            btnToggleShortcut.setText("⌃"); // กดแล้วจะย่อ
-        } else {
-            shortcutRow.setVisibility(View.GONE);
-            btnToggleShortcut.setText("⌄"); // กดแล้วจะขยาย
-        }
-    });
-}
+    findViewById(R.id.btnNext).setOnClickListener(v -> findAndHighlight());
+    findViewById(R.id.btnReplace).setOnClickListener(v -> replaceText());
+    
+    setupShortcutBar();
 
-        rvErrorPanel = findViewById(R.id.rvErrorPanel);
-        if (rvErrorPanel != null) {
-            rvErrorPanel.setLayoutManager(new LinearLayoutManager(this));
-        }
+    TextView btnToggleShortcut = findViewById(R.id.btnToggleShortcut);
+    View shortcutRow = findViewById(R.id.shortcutRow);
+    if (btnToggleShortcut != null && shortcutRow != null) {
+        btnToggleShortcut.setOnClickListener(v -> {
+            if (isShortcutExpanded) {
+                // กำลังขยายอยู่ → ย่อ + เด้งเมนู
+                isShortcutExpanded = false;
+                shortcutRow.setVisibility(View.GONE);
+                btnToggleShortcut.setText("⌄");
+                showCollapsedShortcutMenu(btnToggleShortcut);
+            } else {
+                // กำลังย่ออยู่ → ขยายกลับ
+                isShortcutExpanded = true;
+                shortcutRow.setVisibility(View.VISIBLE);
+                btnToggleShortcut.setText("⌃");
+            }
+        });
 
-        previewContainer = findViewById(R.id.previewContainer);
+        // กดค้างตอนย่อ ก็เปิดเมนูได้อีกครั้ง
+        btnToggleShortcut.setOnLongClickListener(v -> {
+            if (!isShortcutExpanded) {
+                showCollapsedShortcutMenu(btnToggleShortcut);
+                return true;
+            }
+            return false;
+        });
     }
 
+    rvErrorPanel = findViewById(R.id.rvErrorPanel);
+    if (rvErrorPanel != null) {
+        rvErrorPanel.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    previewContainer = findViewById(R.id.previewContainer);
+}
 private void setupLogic() {
     aiLayoutAnalyzer = new com.dev.ministudio.AiLayoutAnalyzer(this);
     dialogManager = new ProjectDialogManager(this, parentNode -> {
@@ -889,6 +903,72 @@ private void setupShortcutBar() {
                 v -> handleAiAction(false), "#BB9AF7", "#2A2040"));
         aiShortcutBar.addView(createButton("🪄 ปรับปรุง", params,
                 v -> handleAiAction(true), "#9ECE6A", "#1C2A20"));
+    }
+}
+private void showCollapsedShortcutMenu(View anchor) {
+    android.widget.PopupMenu popup = new android.widget.PopupMenu(this, anchor);
+
+    // กลุ่ม Undo / Redo
+    popup.getMenu().add(0, 1, 0, "↶ Undo");
+    popup.getMenu().add(0, 2, 1, "↷ Redo");
+
+    // กลุ่มสัญลักษณ์
+    popup.getMenu().add(1, 10, 10, "{ }");
+    popup.getMenu().add(1, 11, 11, "[ ]");
+    popup.getMenu().add(1, 12, 12, "( )");
+    popup.getMenu().add(1, 13, 13, "< >");
+    popup.getMenu().add(1, 14, 14, ";");
+
+    // กลุ่ม AI
+    popup.getMenu().add(2, 20, 20, "🤖 ถาม AI");
+    popup.getMenu().add(2, 21, 21, "🪄 ปรับปรุง");
+
+    popup.setOnMenuItemClickListener(item -> {
+        int id = item.getItemId();
+        if (codeEditor == null) return false;
+
+        switch (id) {
+            case 1:
+                codeEditor.undo();
+                break;
+            case 2:
+                codeEditor.redo();
+                break;
+            case 10:
+                insertAtCursor("{");
+                break;
+            case 11:
+                insertAtCursor("[");
+                break;
+            case 12:
+                insertAtCursor("(");
+                break;
+            case 13:
+                insertAtCursor("<");
+                break;
+            case 14:
+                insertAtCursor(";");
+                break;
+            case 20:
+                handleAiAction(false);
+                break;
+            case 21:
+                handleAiAction(true);
+                break;
+        }
+        return true;
+    });
+
+    popup.show();
+}
+
+private void insertAtCursor(String text) {
+    if (codeEditor != null && codeEditor.getCursor() != null) {
+        codeEditor.getText().insert(
+                codeEditor.getCursor().getLeftLine(),
+                codeEditor.getCursor().getLeftColumn(),
+                text
+        );
     }
 }
 private TextView createButton(String text, LinearLayout.LayoutParams ignored,
