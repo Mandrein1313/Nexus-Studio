@@ -195,14 +195,14 @@
                 style="@style/Widget.MaterialComponents.Button.UnelevatedButton" />
         </LinearLayout>
 
-        <!-- แถบล่างทั้งชุด -->
+        <!-- แถบล่างทั้งชุด (รวมปุ่มทางลัดและแถบปุ่มหลัก) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="#1F2335">
 
-            <!-- แถวสัญลักษณ์ (ย่อ/ขยายได้) -->
+            <!-- แถวเครื่องมือเพิ่ม (ย่อ/ขยายได้) -->
             <LinearLayout
                 android:id="@+id/shortcutRow"
                 android:layout_width="match_parent"
@@ -237,24 +237,84 @@
                     android:paddingEnd="6dp" />
             </LinearLayout>
 
-            <!-- แถวปุ่มย่อ/ขยาย -->
+            <!-- แถวปุ่มหลัก (แสดงตลอด) -->
             <LinearLayout
+                android:id="@+id/mainShortcutRow"
                 android:layout_width="match_parent"
-                android:layout_height="28dp"
+                android:layout_height="48dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp">
+                android:paddingStart="6dp"
+                android:paddingEnd="8dp"
+                android:background="#1A1B26">
 
+                <!-- ปุ่ม Toggle -->
                 <TextView
                     android:id="@+id/btnToggleShortcut"
-                    android:layout_width="36dp"
-                    android:layout_height="28dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:gravity="center"
                     android:text="⌃"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textColor="#A9B1D6"
                     android:background="?attr/selectableItemBackgroundBorderless" />
+
+                <!-- ปุ่ม TAB -->
+                <TextView
+                    android:id="@+id/btnTab"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:minWidth="52dp"
+                    android:gravity="center"
+                    android:text="TAB"
+                    android:textSize="13sp"
+                    android:textColor="#C0CAF5"
+                    android:background="@drawable/bg_dialog_input"
+                    android:layout_marginStart="4dp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
+
+                <!-- ปุ่ม { -->
+                <TextView
+                    android:id="@+id/btnOpenBrace"
+                    android:layout_width="40dp"
+                    android:layout_height="36dp"
+                    android:gravity="center"
+                    android:text="{"
+                    android:textSize="16sp"
+                    android:textColor="#C0CAF5"
+                    android:background="@drawable/bg_dialog_input"
+                    android:layout_marginStart="6dp" />
+
+                <!-- ปุ่ม } -->
+                <TextView
+                    android:id="@+id/btnCloseBrace"
+                    android:layout_width="40dp"
+                    android:layout_height="36dp"
+                    android:gravity="center"
+                    android:text="}"
+                    android:textSize="16sp"
+                    android:textColor="#C0CAF5"
+                    android:background="@drawable/bg_dialog_input"
+                    android:layout_marginStart="4dp" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <!-- ปุ่ม AI หลัก -->
+                <TextView
+                    android:id="@+id/btnMainAi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:gravity="center"
+                    android:text="🤖 AI"
+                    android:textSize="13sp"
+                    android:textColor="#BB9AF7"
+                    android:background="@drawable/bg_dialog_input"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp" />
             </LinearLayout>
         </LinearLayout>
 

@@ -188,22 +188,57 @@ protected void onCreate(Bundle savedInstanceState) {
     TextView btnToggleShortcut = findViewById(R.id.btnToggleShortcut);
     View shortcutRow = findViewById(R.id.shortcutRow);
     if (btnToggleShortcut != null && shortcutRow != null) {
+
         btnToggleShortcut.setOnClickListener(v -> {
             if (isShortcutExpanded) {
-                // กำลังขยายอยู่ → ย่อ + เด้งเมนู
+                // ===== ย่อ =====
                 isShortcutExpanded = false;
-                shortcutRow.setVisibility(View.GONE);
+
+                shortcutRow.animate()
+                        .alpha(0f)
+                        .translationY(-30f)
+                        .setDuration(180)
+                        .setInterpolator(new android.view.animation.AccelerateInterpolator())
+                        .withEndAction(() -> {
+                            shortcutRow.setVisibility(View.GONE);
+                            shortcutRow.setAlpha(1f);
+                            shortcutRow.setTranslationY(0f);
+                        })
+                        .start();
+
+                btnToggleShortcut.animate()
+                        .rotation(180f)
+                        .setDuration(200)
+                        .start();
                 btnToggleShortcut.setText("⌄");
+
+                // เด้งเมนูหลังย่อ
                 showCollapsedShortcutMenu(btnToggleShortcut);
+
             } else {
-                // กำลังย่ออยู่ → ขยายกลับ
+                // ===== ขยาย =====
                 isShortcutExpanded = true;
+
                 shortcutRow.setVisibility(View.VISIBLE);
+                shortcutRow.setAlpha(0f);
+                shortcutRow.setTranslationY(-30f);
+
+                shortcutRow.animate()
+                        .alpha(1f)
+                        .translationY(0f)
+                        .setDuration(220)
+                        .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                        .start();
+
+                btnToggleShortcut.animate()
+                        .rotation(0f)
+                        .setDuration(200)
+                        .start();
                 btnToggleShortcut.setText("⌃");
             }
         });
 
-        // กดค้างตอนย่อ ก็เปิดเมนูได้อีกครั้ง
+        // กดค้างตอนย่อ → เปิดเมนูอีกครั้ง
         btnToggleShortcut.setOnLongClickListener(v -> {
             if (!isShortcutExpanded) {
                 showCollapsedShortcutMenu(btnToggleShortcut);
