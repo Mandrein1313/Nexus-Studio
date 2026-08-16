@@ -115,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
    private String lastReceivedSuggestion = "";
    private String pendingProjectName = "";
    private boolean isLightEditorTheme = false;
+   private boolean isShortcutExpanded = true;
    
 @Override
 protected void onCreate(Bundle savedInstanceState) {
@@ -182,6 +183,20 @@ protected void onCreate(Bundle savedInstanceState) {
         findViewById(R.id.btnReplace).setOnClickListener(v -> replaceText());
         
         setupShortcutBar();
+        TextView btnToggleShortcut = findViewById(R.id.btnToggleShortcut);
+View shortcutRow = findViewById(R.id.shortcutRow);
+if (btnToggleShortcut != null && shortcutRow != null) {
+    btnToggleShortcut.setOnClickListener(v -> {
+        isShortcutExpanded = !isShortcutExpanded;
+        if (isShortcutExpanded) {
+            shortcutRow.setVisibility(View.VISIBLE);
+            btnToggleShortcut.setText("⌃"); // กดแล้วจะย่อ
+        } else {
+            shortcutRow.setVisibility(View.GONE);
+            btnToggleShortcut.setText("⌄"); // กดแล้วจะขยาย
+        }
+    });
+}
 
         rvErrorPanel = findViewById(R.id.rvErrorPanel);
         if (rvErrorPanel != null) {
