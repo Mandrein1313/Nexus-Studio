@@ -117,6 +117,12 @@ public class MainActivity extends AppCompatActivity {
    private boolean isLightEditorTheme = false;
    private boolean isShortcutExpanded = false;
    
+  private final android.os.Handler hexHighlightHandler =
+        new android.os.Handler(android.os.Looper.getMainLooper());
+private Runnable hexHighlightRunnable;
+private int nextHexColorId = 200;
+private final java.util.HashMap<String, Integer> hexColorIdMap = new java.util.HashMap<>();
+   
    
 @Override
 protected void onCreate(Bundle savedInstanceState) {
@@ -340,7 +346,7 @@ private void setupLogic() {
         });
     }
 
-    // Auto-Save + AI Auto-Complete
+    // Auto-Save + AI Auto-Complete + ไฮไลต์รหัสสี
     codeEditor.subscribeEvent(ContentChangeEvent.class, (event, unsubscribe) -> {
         if (tvSaveStatus != null) {
             tvSaveStatus.setText("Editing...");
@@ -374,9 +380,12 @@ private void setupLogic() {
                 });
             });
         }
+
+        // ไฮไลต์ #RRGGBB ทั้งไฟล์เป็นสีจริง
+        scheduleHexColorHighlight();
     });
 
-    // แสดงสีจริงเมื่อ cursor อยู่บนรหัส #RRGGBB
+    // แสดงสีที่แถบสถานะเมื่อ cursor อยู่บนรหัสสี
     codeEditor.subscribeEvent(
             io.github.rosemoe.sora.event.SelectionChangeEvent.class,
             (event, unsubscribe) -> showColorPreviewIfNeeded()
@@ -400,6 +409,74 @@ private void setupLogic() {
 }
 
 // ---------- วางเมธอดสองตัวนี้ใน MainActivity (นอก setupLogic) ----------
+private void scheduleHexColorHighlight() {
+    if (hexHighlightRunnable != null) {
+        hexHighlightHandler.removeCallbacks(hexHighlightRunnable);
+    }
+    hexHighlightRunnable = this::applyHexColorHighlight;
+    hexHighlightHandler.postDelayed(hexHighlightRunnable, 350);
+}
+
+private void applyHexColorHighlight() {
+    if (codeEditor == null) return;
+
+    try {
+        io.github.rosemoe.sora.text.Content content = codeEditor.getText();
+        int lineCount = content.getLineCount();
+        io.github.rosemoe.sora.widget.schemes.EditorColorScheme scheme =
+                codeEditor.getColorScheme();
+
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(
+                "#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\\b"
+        );
+
+        io.github.rosemoe.sora.lang.styling.MappedSpans.Builder builder =
+                new io.github.rosemoe.sora.lang.styling.MappedSpans.Builder(lineCount);
+
+        for (int line = 0; line < lineCount; line++) {
+            String lineText = content.getLineString(line);
+            builder.addIfNeeded(line, 0,
+                    io.github.rosemoe.sora.widget.schemes.EditorColorScheme.TEXT_NORMAL);
+
+            java.util.regex.Matcher matcher = pattern.matcher(lineText);
+            while (matcher.find()) {
+                String hex = matcher.group();
+                int color = parseHexColor(hex);
+                if (color == 0) continue;
+
+                int colorId = getOrRegisterHexColorId(scheme, hex, color);
+                builder.addIfNeeded(line, matcher.start(),
+                        io.github.rosemoe.sora.lang.styling.TextStyle.makeStyle(colorId));
+                builder.addIfNeeded(line, matcher.end(),
+                        io.github.rosemoe.sora.widget.schemes.EditorColorScheme.TEXT_NORMAL);
+            }
+        }
+
+        io.github.rosemoe.sora.lang.styling.Styles styles =
+                new io.github.rosemoe.sora.lang.styling.Styles(builder.build());
+        codeEditor.setStyles(styles);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+
+private int getOrRegisterHexColorId(
+        io.github.rosemoe.sora.widget.schemes.EditorColorScheme scheme,
+        String hex,
+        int color
+) {
+    String key = hex.toLowerCase();
+    Integer existing = hexColorIdMap.get(key);
+    if (existing != null) {
+        scheme.setColor(existing, color);
+        return existing;
+    }
+    int id = nextHexColorId++;
+    if (nextHexColorId > 2000) nextHexColorId = 200;
+    hexColorIdMap.put(key, id);
+    scheme.setColor(id, color);
+    return id;
+}
 
 private void showColorPreviewIfNeeded() {
     if (codeEditor == null || codeEditor.getCursor() == null || tvSaveStatus == null) {
@@ -433,18 +510,52 @@ private void showColorPreviewIfNeeded() {
     if (foundHex != null) {
         int color = parseHexColor(foundHex);
         if (color != 0) {
-            tvSaveStatus.setText("● " + foundHex);
-            tvSaveStatus.setTextColor(color);
+            double luminance = (0.299 * android.graphics.Color.red(color)
+                    + 0.587 * android.graphics.Color.green(color)
+                    + 0.114 * android.graphics.Color.blue(color)) / 255.0;
+            int textColor = luminance > 0.55
+                    ? android.graphics.Color.BLACK
+                    : android.graphics.Color.WHITE;
+
+            tvSaveStatus.setText("  " + foundHex + "  ");
+            tvSaveStatus.setTextColor(textColor);
+
+            android.graphics.drawable.GradientDrawable bg =
+                    new android.graphics.drawable.GradientDrawable();
+            bg.setColor(color);
+            bg.setCornerRadius(8f);
+            bg.setStroke(2, android.graphics.Color.parseColor("#A9B1D6"));
+            tvSaveStatus.setBackground(bg);
+            tvSaveStatus.setPadding(12, 4, 12, 4);
             return;
         }
     }
 
-    // ออกจากรหัสสี → คืน Saved ถ้ากำลังโชว์ preview อยู่
     CharSequence cur = tvSaveStatus.getText();
-    if (cur != null && cur.toString().startsWith("●")) {
+    if (cur != null && (cur.toString().contains("#") || tvSaveStatus.getBackground() != null)) {
         tvSaveStatus.setText("Saved");
         tvSaveStatus.setTextColor(android.graphics.Color.parseColor("#9ECE6A"));
+        tvSaveStatus.setBackground(null);
+        tvSaveStatus.setPadding(0, 0, 0, 0);
     }
+}
+
+private int parseHexColor(String hex) {
+    try {
+        String h = hex.startsWith("#") ? hex.substring(1) : hex;
+        if (h.length() == 3) {
+            h = "" + h.charAt(0) + h.charAt(0)
+                    + h.charAt(1) + h.charAt(1)
+                    + h.charAt(2) + h.charAt(2);
+            return android.graphics.Color.parseColor("#" + h);
+        } else if (h.length() == 6) {
+            return android.graphics.Color.parseColor("#" + h);
+        } else if (h.length() == 8) {
+            return (int) Long.parseLong(h, 16);
+        }
+    } catch (Exception ignored) {
+    }
+    return 0;
 }
 
 private int parseHexColor(String hex) {
@@ -963,18 +1074,17 @@ public void openFile(File file) {
         projectTreeManager.openFile(file);
     }
 
-    // 2. บังคับอัปเดต UI ทันทีโดยไม่ต้องรอ Callback ที่อาจช้า
+    // 2. อัปเดต path
     updateFilePathStatus(file);
-    
-    // 3. สั่งให้ Editor พร้อมทำงานและ Visible ทันที
+
+    // 3. เปิด editor + ไฮไลต์สี
     runOnUiThread(() -> {
         if (codeEditor != null) {
-            // ดึงไฟล์มาโชว์ใน editor (ถ้าคลาส projectTreeManager ไม่ได้ทำไว้)
-            // ตัวอย่างเช่น: codeEditor.setText(FileUtils.read(file));
-            
             if (codeEditor.getVisibility() != View.VISIBLE) {
                 setEditorActiveState(true);
             }
+            // หลัง setText เสร็จแล้ว (ใน manager หรือตรงนี้)
+            scheduleHexColorHighlight();
         }
     });
 }
