@@ -1044,18 +1044,56 @@ private void showFullColorPickerDialog() {
     infoRow.addView(colorDot);
 
     final TextView tvHex = new TextView(this);
-    tvHex.setText("#00FF00");
+    tvHex.setText("#FF00FF00");
     tvHex.setTextColor(Color.parseColor("#A9B1D6"));
     tvHex.setTextSize(16);
     tvHex.setPadding((int)(12*density), 0, 0, 0);
     infoRow.addView(tvHex);
     root.addView(infoRow);
 
+    // ===== ตัวแปรสีปัจจุบัน =====
+    final int[] currentColor = {Color.GREEN};
+    final int[] currentAlpha = {255};
+
+    // ฟังก์ชันอัปเดตสี + hex
+    final Runnable updateColor = () -> {
+        int colorWithAlpha = (currentAlpha[0] << 24) | (currentColor[0] & 0x00FFFFFF);
+        String hex = String.format("#%08X", colorWithAlpha);
+        tvHex.setText(hex);
+        colorDot.setBackground(createCircleBgWithAlpha(colorWithAlpha));
+    };
+
     // ตอนเลือกสีจากวงล้อ
     colorWheel.setOnColorChangeListener(color -> {
-        String hex = String.format("#%06X", (0xFFFFFF & color));
-        tvHex.setText(hex);
-        colorDot.setBackground(createCircleBg(hex));
+        currentColor[0] = color;
+        updateColor.run();
+    });
+
+    // ===== แถบความโปร่งใส (Alpha) =====
+    TextView tvAlphaLabel = new TextView(this);
+    tvAlphaLabel.setText("ความโปร่งใส");
+    tvAlphaLabel.setTextColor(Color.parseColor("#565F89"));
+    tvAlphaLabel.setTextSize(12);
+    tvAlphaLabel.setPadding(0, (int)(12*density), 0, (int)(4*density));
+    root.addView(tvAlphaLabel);
+
+    android.widget.SeekBar alphaSeek = new android.widget.SeekBar(this);
+    alphaSeek.setMax(255);
+    alphaSeek.setProgress(255);
+    LinearLayout.LayoutParams seekParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT);
+    alphaSeek.setLayoutParams(seekParams);
+    root.addView(alphaSeek);
+
+    alphaSeek.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser) {
+            currentAlpha[0] = progress;
+            updateColor.run();
+        }
+        @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
+        @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
     });
 
     // ปุ่ม Cancel / Apply
@@ -1107,6 +1145,15 @@ private void showFullColorPickerDialog() {
         );
     }
     dialog.show();
+}
+
+// Helper สำหรับสีที่มี alpha
+private android.graphics.drawable.GradientDrawable createCircleBgWithAlpha(int color) {
+    android.graphics.drawable.GradientDrawable gd =
+            new android.graphics.drawable.GradientDrawable();
+    gd.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+    gd.setColor(color);
+    return gd;
 }
 
 private android.graphics.drawable.GradientDrawable createRoundedBg(String color, int radiusDp) {
