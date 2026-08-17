@@ -212,9 +212,6 @@ protected void onCreate(Bundle savedInstanceState) {
                         .start();
                 btnToggleShortcut.setText("⌄");
 
-                // เด้งเมนูหลังย่อ
-                showCollapsedShortcutMenu(btnToggleShortcut);
-
             } else {
                 // ===== ขยาย =====
                 isShortcutExpanded = true;
@@ -236,15 +233,6 @@ protected void onCreate(Bundle savedInstanceState) {
                         .start();
                 btnToggleShortcut.setText("⌃");
             }
-        });
-
-        // กดค้างตอนย่อ → เปิดเมนูอีกครั้ง
-        btnToggleShortcut.setOnLongClickListener(v -> {
-            if (!isShortcutExpanded) {
-                showCollapsedShortcutMenu(btnToggleShortcut);
-                return true;
-            }
-            return false;
         });
     }
 
@@ -940,72 +928,7 @@ private void setupShortcutBar() {
                 v -> handleAiAction(true), "#9ECE6A", "#1C2A20"));
     }
 }
-private void showCollapsedShortcutMenu(View anchor) {
-    android.widget.PopupMenu popup = new android.widget.PopupMenu(this, anchor);
 
-    // กลุ่ม Undo / Redo
-    popup.getMenu().add(0, 1, 0, "↶ Undo");
-    popup.getMenu().add(0, 2, 1, "↷ Redo");
-
-    // กลุ่มสัญลักษณ์
-    popup.getMenu().add(1, 10, 10, "{ }");
-    popup.getMenu().add(1, 11, 11, "[ ]");
-    popup.getMenu().add(1, 12, 12, "( )");
-    popup.getMenu().add(1, 13, 13, "< >");
-    popup.getMenu().add(1, 14, 14, ";");
-
-    // กลุ่ม AI
-    popup.getMenu().add(2, 20, 20, "🤖 ถาม AI");
-    popup.getMenu().add(2, 21, 21, "🪄 ปรับปรุง");
-
-    popup.setOnMenuItemClickListener(item -> {
-        int id = item.getItemId();
-        if (codeEditor == null) return false;
-
-        switch (id) {
-            case 1:
-                codeEditor.undo();
-                break;
-            case 2:
-                codeEditor.redo();
-                break;
-            case 10:
-                insertAtCursor("{");
-                break;
-            case 11:
-                insertAtCursor("[");
-                break;
-            case 12:
-                insertAtCursor("(");
-                break;
-            case 13:
-                insertAtCursor("<");
-                break;
-            case 14:
-                insertAtCursor(";");
-                break;
-            case 20:
-                handleAiAction(false);
-                break;
-            case 21:
-                handleAiAction(true);
-                break;
-        }
-        return true;
-    });
-
-    popup.show();
-}
-
-private void insertAtCursor(String text) {
-    if (codeEditor != null && codeEditor.getCursor() != null) {
-        codeEditor.getText().insert(
-                codeEditor.getCursor().getLeftLine(),
-                codeEditor.getCursor().getLeftColumn(),
-                text
-        );
-    }
-}
 private TextView createButton(String text, LinearLayout.LayoutParams ignored,
                               View.OnClickListener listener, String textColor, String bgColor) {
     float density = getResources().getDisplayMetrics().density;
