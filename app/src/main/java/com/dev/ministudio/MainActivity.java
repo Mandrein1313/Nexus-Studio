@@ -297,9 +297,11 @@ private void setupLogic() {
         triggerTreeRefresh(parentNode);
     });
 
+    if (codeEditor == null) return;
+
     codeEditor.setEditorLanguage(new JavaLanguage());
 
-    // โหลดธีมจากหน้า Projects (AppSettings)
+    // โหลดธีมจากหน้า Projects
     SharedPreferences appPrefs = getSharedPreferences("AppSettings", MODE_PRIVATE);
     boolean isLight = appPrefs.getBoolean("editor_light_theme", false);
     if (isLight) {
@@ -316,27 +318,19 @@ private void setupLogic() {
     codeEditor.setUndoEnabled(true);
     codeEditor.setHighlightCurrentBlock(true);
 
-    // ===================================================================
-    // ✨ [เพิ่มใหม่]: ค้นหา View แผงคำแนะนำ AI จาก XML และผูกตัวจัดการ
-    // ===================================================================
+    // แผง AI suggestion
     aiSuggestionBar = findViewById(R.id.aiSuggestionBar);
     tvAiSuggestionText = findViewById(R.id.tvAiSuggestionText);
     Button btnAcceptAi = findViewById(R.id.btnAcceptAiSuggestion);
 
-    // เรียกตื่นตัวจัดการเดาคำศัพท์อัจฉริยะ
     aiAutoCompleteManager = new AiAutoCompleteManager(this, codeEditor, aiLayoutAnalyzer);
 
-    // ปุ่มกดเพื่อสวมโค้ดแนะนำลงหน้าจอแก้ไขตัวจริง
     if (btnAcceptAi != null) {
         btnAcceptAi.setOnClickListener(v -> {
             if (codeEditor != null && !lastReceivedSuggestion.isEmpty()) {
                 int line = codeEditor.getCursor().getLeftLine();
                 int column = codeEditor.getCursor().getLeftColumn();
-
-                // วางโค้ดแนะนำของ AI พุ่งตรงเข้าจุดกระพริบเคอร์เซอร์ทันที
                 codeEditor.getText().insert(line, column, lastReceivedSuggestion);
-
-                // วางเสร็จล้างแผงประจุข้อมูล และซ่อนตัวลงไปอย่างนุ่มนวล
                 lastReceivedSuggestion = "";
                 if (aiSuggestionBar != null) {
                     aiSuggestionBar.setVisibility(View.GONE);
@@ -346,30 +340,29 @@ private void setupLogic() {
         });
     }
 
-    // ===================================================================
-    // 🛠️ [ปรับปรุง]: ควบรวมสตรีมตรวจจับการพิมพ์ (Auto-Save + AI Auto-Complete)
-    // ===================================================================
+    // Auto-Save + AI Auto-Complete
     codeEditor.subscribeEvent(ContentChangeEvent.class, (event, unsubscribe) -> {
-        tvSaveStatus.setText("Editing...");
-        tvSaveStatus.setTextColor(android.graphics.Color.parseColor("#FFB74D"));
+        if (tvSaveStatus != null) {
+            tvSaveStatus.setText("Editing...");
+            tvSaveStatus.setTextColor(android.graphics.Color.parseColor("#FF9E64"));
+        }
 
-        // 1. ระบบออโต้เซฟเดิมของน้า
         autoSaveHandler.removeCallbacks(saveRunnable);
         saveRunnable = () -> {
             saveFile();
-            tvSaveStatus.setText("Saved");
-            tvSaveStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
+            if (tvSaveStatus != null) {
+                tvSaveStatus.setText("Saved");
+                tvSaveStatus.setTextColor(android.graphics.Color.parseColor("#9ECE6A"));
+            }
         };
         autoSaveHandler.postDelayed(saveRunnable, 1500);
 
-        // 2. 🔥 [ระบบใหม่]: สั่งให้ AI วิเคราะห์คำศัพท์ต่อท้ายแบบเบื้องหลัง
         if (codeEditor.getCursor() != null && aiAutoCompleteManager != null) {
             String fullText = codeEditor.getText().toString();
             int curLine = codeEditor.getCursor().getLeftLine();
             int curCol = codeEditor.getCursor().getLeftColumn();
 
             aiAutoCompleteManager.onTextChanged(fullText, curLine, curCol, suggestionText -> {
-                // เมื่อ AI วิเคราะห์และตอบกลับมาเรียบร้อย ให้เด้งแผงขึ้นมาแสดงผลทันที
                 runOnUiThread(() -> {
                     lastReceivedSuggestion = suggestionText;
                     if (tvAiSuggestionText != null) {
@@ -383,20 +376,93 @@ private void setupLogic() {
         }
     });
 
-    // โครงสร้างดึงข้อมูลโปรเจกต์เดิมของน้าทำงานต่อไปปกติ...
+    // แสดงสีจริงเมื่อ cursor อยู่บนรหัส #RRGGBB
+    codeEditor.subscribeEvent(
+            io.github.rosemoe.sora.event.SelectionChangeEvent.class,
+            (event, unsubscribe) -> showColorPreviewIfNeeded()
+    );
+
+    // โหลดโปรเจกต์
     String projectName = getIntent().getStringExtra("projectName");
     if (projectName != null) {
         String rootPath = "/sdcard/MiniStudio/" + projectName;
         currentProject = new ProjectModel(projectName, rootPath);
-        getSupportActionBar().setTitle(currentProject.getProjectName());
-
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(currentProject.getProjectName());
+        }
         setupTabLogic();
-
-        // 🛠️ เรียกทำงานผ่านโครงสร้างผู้จัดการต้นไม้ตัวใหม่ที่แยกออกไป
-        projectTreeManager = new ProjectTreeManager(this, treeView);
-        projectTreeManager.initializeFileTree();
+        if (treeView != null) {
+            projectTreeManager = new ProjectTreeManager(this, treeView);
+            projectTreeManager.initializeFileTree();
+        }
         setEditorActiveState(false);
     }
+}
+
+// ---------- วางเมธอดสองตัวนี้ใน MainActivity (นอก setupLogic) ----------
+
+private void showColorPreviewIfNeeded() {
+    if (codeEditor == null || codeEditor.getCursor() == null || tvSaveStatus == null) {
+        return;
+    }
+
+    int line = codeEditor.getCursor().getLeftLine();
+    int col = codeEditor.getCursor().getLeftColumn();
+
+    String lineText;
+    try {
+        lineText = codeEditor.getText().getLineString(line);
+    } catch (Exception e) {
+        return;
+    }
+    if (lineText == null || lineText.isEmpty()) return;
+
+    java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(
+            "#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\\b"
+    );
+    java.util.regex.Matcher matcher = pattern.matcher(lineText);
+
+    String foundHex = null;
+    while (matcher.find()) {
+        if (col >= matcher.start() && col <= matcher.end()) {
+            foundHex = matcher.group();
+            break;
+        }
+    }
+
+    if (foundHex != null) {
+        int color = parseHexColor(foundHex);
+        if (color != 0) {
+            tvSaveStatus.setText("● " + foundHex);
+            tvSaveStatus.setTextColor(color);
+            return;
+        }
+    }
+
+    // ออกจากรหัสสี → คืน Saved ถ้ากำลังโชว์ preview อยู่
+    CharSequence cur = tvSaveStatus.getText();
+    if (cur != null && cur.toString().startsWith("●")) {
+        tvSaveStatus.setText("Saved");
+        tvSaveStatus.setTextColor(android.graphics.Color.parseColor("#9ECE6A"));
+    }
+}
+
+private int parseHexColor(String hex) {
+    try {
+        String h = hex.startsWith("#") ? hex.substring(1) : hex;
+        if (h.length() == 3) {
+            h = "" + h.charAt(0) + h.charAt(0)
+                    + h.charAt(1) + h.charAt(1)
+                    + h.charAt(2) + h.charAt(2);
+            return android.graphics.Color.parseColor("#" + h);
+        } else if (h.length() == 6) {
+            return android.graphics.Color.parseColor("#" + h);
+        } else if (h.length() == 8) {
+            return (int) Long.parseLong(h, 16);
+        }
+    } catch (Exception ignored) {
+    }
+    return 0;
 }
 
     // 🌟 ฟังก์ชันเปิดหน้าต่าง Dialog คอนโซลแบบเต็มหน้าจอ (เวอร์ชันแก้ไขให้เห็น Status Bar + ดักปิดเสียง AI)
