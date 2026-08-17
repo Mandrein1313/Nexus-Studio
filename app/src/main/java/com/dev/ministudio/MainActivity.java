@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
    private String lastReceivedSuggestion = "";
    private String pendingProjectName = "";
    private boolean isLightEditorTheme = false;
-   private boolean isShortcutExpanded = true;
+   private boolean isShortcutExpanded = false;
    
    
 @Override
@@ -195,6 +195,16 @@ protected void onCreate(Bundle savedInstanceState) {
     TextView btnUndo = findViewById(R.id.btnUndo);
     TextView btnRedo = findViewById(R.id.btnRedo);
 
+    // ===== ตั้งค่าเริ่มต้น: ซ่อนแถบสัญลักษณ์ =====
+    isShortcutExpanded = false;
+    if (shortcutRow != null) {
+        shortcutRow.setVisibility(View.GONE);
+    }
+    if (btnToggleShortcut != null) {
+        btnToggleShortcut.setText("⌄");
+        btnToggleShortcut.setRotation(180f);
+    }
+
     if (btnUndo != null) {
         btnUndo.setOnClickListener(v -> {
             if (codeEditor != null) codeEditor.undo();
@@ -246,6 +256,7 @@ protected void onCreate(Bundle savedInstanceState) {
     if (btnToggleShortcut != null && shortcutRow != null) {
         btnToggleShortcut.setOnClickListener(v -> {
             if (isShortcutExpanded) {
+                // ย่อ
                 isShortcutExpanded = false;
                 shortcutRow.animate()
                         .alpha(0f)
@@ -261,6 +272,7 @@ protected void onCreate(Bundle savedInstanceState) {
                 btnToggleShortcut.animate().rotation(180f).setDuration(200).start();
                 btnToggleShortcut.setText("⌄");
             } else {
+                // ขยาย
                 isShortcutExpanded = true;
                 shortcutRow.setVisibility(View.VISIBLE);
                 shortcutRow.setAlpha(0f);
@@ -943,7 +955,17 @@ private void setupShortcutBar() {
             (int) (3 * density), (int) (2 * density));
 
     // เหลือแค่สัญลักษณ์ (ไม่มี Undo/Redo และ AI แล้ว)
-    String[] shortcuts = {"{", "}", "[", "]", "(", ")", "<", ">", ";"};
+    String[] shortcuts = {
+    // วงเล็บ
+    "{", "}", "[", "]", "(", ")", "<", ">",
+    // ตัวดำเนินการ
+    "=", "+", "-", "*", "/", "%",
+    // เครื่องหมายคำพูด
+    "\"", "'", "`",
+    // อื่น ๆ
+    ".", ",", ":", ";", "!", "?",
+    "&", "|", "_", "#", "@", "$"
+};
     for (String symbol : shortcuts) {
         shortcutBar.addView(createButton(symbol, params, v -> {
             if (codeEditor != null && codeEditor.getCursor() != null) {
