@@ -1002,6 +1002,7 @@ private void showFullColorPickerDialog() {
     dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
 
     float density = getResources().getDisplayMetrics().density;
+    int wheelSize = (int) (240 * density);
 
     LinearLayout root = new LinearLayout(this);
     root.setOrientation(LinearLayout.VERTICAL);
@@ -1017,60 +1018,45 @@ private void showFullColorPickerDialog() {
     title.setTypeface(null, Typeface.BOLD);
     root.addView(title);
 
-    // วงกลมสีที่เลือก
-    final View colorPreview = new View(this);
-    LinearLayout.LayoutParams previewParams = new LinearLayout.LayoutParams(
-            (int)(72*density), (int)(72*density));
-    previewParams.gravity = Gravity.CENTER_HORIZONTAL;
-    previewParams.topMargin = (int)(20*density);
-    previewParams.bottomMargin = (int)(8*density);
-    colorPreview.setLayoutParams(previewParams);
-    colorPreview.setBackground(createCircleBg("#00FF00"));
-    root.addView(colorPreview);
+    // ===== วงล้อสี =====
+    final ColorWheelView colorWheel = new ColorWheelView(this);
+    LinearLayout.LayoutParams wheelParams = new LinearLayout.LayoutParams(wheelSize, wheelSize);
+    wheelParams.gravity = Gravity.CENTER_HORIZONTAL;
+    wheelParams.topMargin = (int)(16*density);
+    colorWheel.setLayoutParams(wheelParams);
+    root.addView(colorWheel);
 
-    // Hex
+    // แสดงสี + Hex
+    LinearLayout infoRow = new LinearLayout(this);
+    infoRow.setOrientation(LinearLayout.HORIZONTAL);
+    infoRow.setGravity(Gravity.CENTER);
+    LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT);
+    infoParams.topMargin = (int)(16*density);
+    infoRow.setLayoutParams(infoParams);
+
+    final View colorDot = new View(this);
+    LinearLayout.LayoutParams dotParams = new LinearLayout.LayoutParams(
+            (int)(36*density), (int)(36*density));
+    colorDot.setLayoutParams(dotParams);
+    colorDot.setBackground(createCircleBg("#00FF00"));
+    infoRow.addView(colorDot);
+
     final TextView tvHex = new TextView(this);
     tvHex.setText("#00FF00");
     tvHex.setTextColor(Color.parseColor("#A9B1D6"));
     tvHex.setTextSize(16);
-    tvHex.setGravity(Gravity.CENTER);
-    root.addView(tvHex);
+    tvHex.setPadding((int)(12*density), 0, 0, 0);
+    infoRow.addView(tvHex);
+    root.addView(infoRow);
 
-    // ตารางสี
-    String[] presetColors = {
-            "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#00FFFF",
-            "#0000FF", "#8B00FF", "#FF00FF", "#FFFFFF", "#CCCCCC",
-            "#888888", "#444444", "#000000", "#F7768E", "#E0AF68",
-            "#9ECE6A", "#7AA2F7", "#BB9AF7", "#7DCFFF", "#C0CAF5"
-    };
-
-    android.widget.GridLayout grid = new android.widget.GridLayout(this);
-    grid.setColumnCount(5);
-    LinearLayout.LayoutParams gridParams = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT);
-    gridParams.topMargin = (int)(16*density);
-    grid.setLayoutParams(gridParams);
-
-    int cellSize = (int)(48 * density);
-    int margin = (int)(4 * density);
-
-    for (String hex : presetColors) {
-        View cell = new View(this);
-        android.widget.GridLayout.LayoutParams cellParams =
-                new android.widget.GridLayout.LayoutParams();
-        cellParams.width = cellSize;
-        cellParams.height = cellSize;
-        cellParams.setMargins(margin, margin, margin, margin);
-        cell.setLayoutParams(cellParams);
-        cell.setBackground(createCircleBg(hex));
-        cell.setOnClickListener(v -> {
-            colorPreview.setBackground(createCircleBg(hex));
-            tvHex.setText(hex.toUpperCase());
-        });
-        grid.addView(cell);
-    }
-    root.addView(grid);
+    // ตอนเลือกสีจากวงล้อ
+    colorWheel.setOnColorChangeListener(color -> {
+        String hex = String.format("#%06X", (0xFFFFFF & color));
+        tvHex.setText(hex);
+        colorDot.setBackground(createCircleBg(hex));
+    });
 
     // ปุ่ม Cancel / Apply
     LinearLayout btnRow = new LinearLayout(this);
