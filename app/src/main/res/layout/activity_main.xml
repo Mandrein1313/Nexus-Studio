@@ -248,7 +248,7 @@
                 android:paddingEnd="8dp"
                 android:background="#1A1B26">
 
-                <!-- ปุ่ม Toggle -->
+                <!-- Toggle -->
                 <TextView
                     android:id="@+id/btnToggleShortcut"
                     android:layout_width="40dp"
@@ -259,7 +259,31 @@
                     android:textColor="#A9B1D6"
                     android:background="?attr/selectableItemBackgroundBorderless" />
 
-                <!-- ปุ่ม TAB -->
+                <!-- Undo -->
+                <TextView
+                    android:id="@+id/btnUndo"
+                    android:layout_width="40dp"
+                    android:layout_height="36dp"
+                    android:gravity="center"
+                    android:text="↶"
+                    android:textSize="16sp"
+                    android:textColor="#C0CAF5"
+                    android:background="@drawable/bg_dialog_input"
+                    android:layout_marginStart="4dp" />
+
+                <!-- Redo -->
+                <TextView
+                    android:id="@+id/btnRedo"
+                    android:layout_width="40dp"
+                    android:layout_height="36dp"
+                    android:gravity="center"
+                    android:text="↷"
+                    android:textSize="16sp"
+                    android:textColor="#C0CAF5"
+                    android:background="@drawable/bg_dialog_input"
+                    android:layout_marginStart="4dp" />
+
+                <!-- TAB -->
                 <TextView
                     android:id="@+id/btnTab"
                     android:layout_width="wrap_content"
@@ -274,7 +298,7 @@
                     android:paddingStart="12dp"
                     android:paddingEnd="12dp" />
 
-                <!-- ปุ่ม { -->
+                <!-- { -->
                 <TextView
                     android:id="@+id/btnOpenBrace"
                     android:layout_width="40dp"
@@ -286,7 +310,7 @@
                     android:background="@drawable/bg_dialog_input"
                     android:layout_marginStart="6dp" />
 
-                <!-- ปุ่ม } -->
+                <!-- } -->
                 <TextView
                     android:id="@+id/btnCloseBrace"
                     android:layout_width="40dp"
@@ -303,7 +327,7 @@
                     android:layout_height="1dp"
                     android:layout_weight="1" />
 
-                <!-- ปุ่ม AI หลัก -->
+                <!-- AI -->
                 <TextView
                     android:id="@+id/btnMainAi"
                     android:layout_width="wrap_content"

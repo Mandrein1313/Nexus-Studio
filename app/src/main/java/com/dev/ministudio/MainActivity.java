@@ -159,7 +159,7 @@ protected void onCreate(Bundle savedInstanceState) {
     initViews();
     setupLogic();
 }
-    private void initViews() {
+ private void initViews() {
     etFind = findViewById(R.id.etFind);
     etReplace = findViewById(R.id.etReplace);
     searchBar = findViewById(R.id.searchBar);
@@ -185,15 +185,68 @@ protected void onCreate(Bundle savedInstanceState) {
     
     setupShortcutBar();
 
+    // ===== ปุ่มด้านล่าง =====
     TextView btnToggleShortcut = findViewById(R.id.btnToggleShortcut);
     View shortcutRow = findViewById(R.id.shortcutRow);
-    if (btnToggleShortcut != null && shortcutRow != null) {
+    TextView btnTab = findViewById(R.id.btnTab);
+    TextView btnOpenBrace = findViewById(R.id.btnOpenBrace);
+    TextView btnCloseBrace = findViewById(R.id.btnCloseBrace);
+    TextView btnMainAi = findViewById(R.id.btnMainAi);
+    TextView btnUndo = findViewById(R.id.btnUndo);
+    TextView btnRedo = findViewById(R.id.btnRedo);
 
+    if (btnUndo != null) {
+        btnUndo.setOnClickListener(v -> {
+            if (codeEditor != null) codeEditor.undo();
+        });
+    }
+    if (btnRedo != null) {
+        btnRedo.setOnClickListener(v -> {
+            if (codeEditor != null) codeEditor.redo();
+        });
+    }
+    if (btnTab != null) {
+        btnTab.setOnClickListener(v -> {
+            if (codeEditor != null && codeEditor.getCursor() != null) {
+                codeEditor.getText().insert(
+                        codeEditor.getCursor().getLeftLine(),
+                        codeEditor.getCursor().getLeftColumn(),
+                        "    "
+                );
+            }
+        });
+    }
+    if (btnOpenBrace != null) {
+        btnOpenBrace.setOnClickListener(v -> {
+            if (codeEditor != null && codeEditor.getCursor() != null) {
+                codeEditor.getText().insert(
+                        codeEditor.getCursor().getLeftLine(),
+                        codeEditor.getCursor().getLeftColumn(),
+                        "{"
+                );
+            }
+        });
+    }
+    if (btnCloseBrace != null) {
+        btnCloseBrace.setOnClickListener(v -> {
+            if (codeEditor != null && codeEditor.getCursor() != null) {
+                codeEditor.getText().insert(
+                        codeEditor.getCursor().getLeftLine(),
+                        codeEditor.getCursor().getLeftColumn(),
+                        "}"
+                );
+            }
+        });
+    }
+    if (btnMainAi != null) {
+        btnMainAi.setOnClickListener(v -> handleAiAction(false));
+    }
+
+    // ===== Toggle ย่อ/ขยาย =====
+    if (btnToggleShortcut != null && shortcutRow != null) {
         btnToggleShortcut.setOnClickListener(v -> {
             if (isShortcutExpanded) {
-                // ===== ย่อ =====
                 isShortcutExpanded = false;
-
                 shortcutRow.animate()
                         .alpha(0f)
                         .translationY(-30f)
@@ -205,32 +258,20 @@ protected void onCreate(Bundle savedInstanceState) {
                             shortcutRow.setTranslationY(0f);
                         })
                         .start();
-
-                btnToggleShortcut.animate()
-                        .rotation(180f)
-                        .setDuration(200)
-                        .start();
+                btnToggleShortcut.animate().rotation(180f).setDuration(200).start();
                 btnToggleShortcut.setText("⌄");
-
             } else {
-                // ===== ขยาย =====
                 isShortcutExpanded = true;
-
                 shortcutRow.setVisibility(View.VISIBLE);
                 shortcutRow.setAlpha(0f);
                 shortcutRow.setTranslationY(-30f);
-
                 shortcutRow.animate()
                         .alpha(1f)
                         .translationY(0f)
                         .setDuration(220)
                         .setInterpolator(new android.view.animation.DecelerateInterpolator())
                         .start();
-
-                btnToggleShortcut.animate()
-                        .rotation(0f)
-                        .setDuration(200)
-                        .start();
+                btnToggleShortcut.animate().rotation(0f).setDuration(200).start();
                 btnToggleShortcut.setText("⌃");
             }
         });
@@ -889,7 +930,10 @@ private void setupShortcutBar() {
     if (shortcutBar == null) return;
 
     shortcutBar.removeAllViews();
-    if (aiShortcutBar != null) aiShortcutBar.removeAllViews();
+    if (aiShortcutBar != null) {
+        aiShortcutBar.removeAllViews();
+        aiShortcutBar.setVisibility(View.GONE); // ซ่อน AI ด้านบน
+    }
 
     float density = getResources().getDisplayMetrics().density;
     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -898,15 +942,7 @@ private void setupShortcutBar() {
     params.setMargins((int) (3 * density), (int) (2 * density),
             (int) (3 * density), (int) (2 * density));
 
-    // 1. Undo / Redo → เลื่อนได้
-    shortcutBar.addView(createButton("↶", params, v -> {
-        if (codeEditor != null) codeEditor.undo();
-    }, "#A9B1D6", "#24283B"));
-    shortcutBar.addView(createButton("↷", params, v -> {
-        if (codeEditor != null) codeEditor.redo();
-    }, "#A9B1D6", "#24283B"));
-
-    // 2. สัญลักษณ์ → เลื่อนได้
+    // เหลือแค่สัญลักษณ์ (ไม่มี Undo/Redo และ AI แล้ว)
     String[] shortcuts = {"{", "}", "[", "]", "(", ")", "<", ">", ";"};
     for (String symbol : shortcuts) {
         shortcutBar.addView(createButton(symbol, params, v -> {
@@ -918,14 +954,6 @@ private void setupShortcutBar() {
                 );
             }
         }, "#A9B1D6", "#24283B"));
-    }
-
-    // 3. ปุ่ม AI → ค้างขวา ไม่เลื่อนตาม
-    if (aiShortcutBar != null) {
-        aiShortcutBar.addView(createButton("🤖 ถาม AI", params,
-                v -> handleAiAction(false), "#BB9AF7", "#2A2040"));
-        aiShortcutBar.addView(createButton("🪄 ปรับปรุง", params,
-                v -> handleAiAction(true), "#9ECE6A", "#1C2A20"));
     }
 }
 
