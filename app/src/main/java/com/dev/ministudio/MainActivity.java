@@ -382,7 +382,7 @@ private void setupLogic() {
         }
 
         // ไฮไลต์ #RRGGBB ทั้งไฟล์เป็นสีจริง
-        scheduleHexColorHighlight();
+ //       scheduleHexColorHighlight();
     });
 
     // แสดงสีที่แถบสถานะเมื่อ cursor อยู่บนรหัสสี
@@ -1065,7 +1065,7 @@ public void openFile(File file) {
                 setEditorActiveState(true);
             }
             // หลัง setText เสร็จแล้ว (ใน manager หรือตรงนี้)
-            scheduleHexColorHighlight();
+//            scheduleHexColorHighlight();
         }
     });
 }
