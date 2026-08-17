@@ -557,25 +557,6 @@ private int parseHexColor(String hex) {
     }
     return 0;
 }
-
-private int parseHexColor(String hex) {
-    try {
-        String h = hex.startsWith("#") ? hex.substring(1) : hex;
-        if (h.length() == 3) {
-            h = "" + h.charAt(0) + h.charAt(0)
-                    + h.charAt(1) + h.charAt(1)
-                    + h.charAt(2) + h.charAt(2);
-            return android.graphics.Color.parseColor("#" + h);
-        } else if (h.length() == 6) {
-            return android.graphics.Color.parseColor("#" + h);
-        } else if (h.length() == 8) {
-            return (int) Long.parseLong(h, 16);
-        }
-    } catch (Exception ignored) {
-    }
-    return 0;
-}
-
     // 🌟 ฟังก์ชันเปิดหน้าต่าง Dialog คอนโซลแบบเต็มหน้าจอ (เวอร์ชันแก้ไขให้เห็น Status Bar + ดักปิดเสียง AI)
 private void showFullPanelDialog(int initialTabPosition) {
     if (fullPanelDialog != null && fullPanelDialog.isShowing()) {
