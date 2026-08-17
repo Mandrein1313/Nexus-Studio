@@ -1139,23 +1139,6 @@ private android.graphics.drawable.GradientDrawable createCircleBg(String color) 
     return gd;
 }
 
-// ===== Helper =====
-private android.graphics.drawable.GradientDrawable createRoundedBg(String color, int radiusDp) {
-    android.graphics.drawable.GradientDrawable gd =
-            new android.graphics.drawable.GradientDrawable();
-    gd.setColor(Color.parseColor(color));
-    gd.setCornerRadius(radiusDp * getResources().getDisplayMetrics().density);
-    return gd;
-}
-
-private android.graphics.drawable.GradientDrawable createCircleBg(String color) {
-    android.graphics.drawable.GradientDrawable gd =
-            new android.graphics.drawable.GradientDrawable();
-    gd.setShape(android.graphics.drawable.GradientDrawable.OVAL);
-    gd.setColor(Color.parseColor(color));
-    return gd;
-}
-
 // จัดการ Logic ของ AI
 private void handleAiAction(boolean isOptimize) {
     if (codeEditor == null || currentProject == null) return;
