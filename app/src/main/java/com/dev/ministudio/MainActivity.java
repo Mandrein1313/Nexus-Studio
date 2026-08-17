@@ -997,7 +997,7 @@ private TextView createButton(String text, LinearLayout.LayoutParams ignored,
     btn.setOnClickListener(listener);
     return btn;
 }
-pprivate void showFullColorPickerDialog() {
+private void showFullColorPickerDialog() {
     android.app.Dialog dialog = new android.app.Dialog(this);
     dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
 
