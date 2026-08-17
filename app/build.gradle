@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace 'com.dev.ministudio'
-    compileSdk 36          // ← เปลี่ยนจาก 35 เป็น 36
+    compileSdk 36
 
     defaultConfig {
         applicationId 'com.dev.ministudio'
         minSdk 24
-        targetSdk 35       // เก็บ 35 ได้ ไม่บังคับต้องขึ้นพร้อม compileSdk
+        targetSdk 35
         versionCode 2
         versionName '1.1.0'
     }
@@ -68,7 +68,7 @@ dependencies {
     implementation 'net.lingala.zip4j:zip4j:2.11.5'
     implementation 'org.json:json:20240303'
 
-    // Sora Editor 0.24.6 (group เปลี่ยนจาก Rosemoe.sora-editor → rosemoe)
+    // Sora Editor 0.24.6
     def soraVersion = '0.24.6'
     implementation "io.github.rosemoe:editor:$soraVersion"
     implementation "io.github.rosemoe:language-java:$soraVersion"
@@ -97,12 +97,11 @@ dependencies {
     // Kotlin stdlib
     implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.0.21'
 
+    // Color Picker
+    implementation 'com.github.skydoves:colorpicker-view:2.3.0'
+
     // Testing
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
-    dependencies {
-    // ... ของเดิม
-    implementation 'com.github.skydoves:colorpicker-view:2.3.0'
-
 }
