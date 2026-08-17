@@ -1003,7 +1003,6 @@ private void showFullColorPickerDialog() {
 
     float density = getResources().getDisplayMetrics().density;
 
-    // ===== Root =====
     LinearLayout root = new LinearLayout(this);
     root.setOrientation(LinearLayout.VERTICAL);
     root.setPadding((int)(24*density), (int)(24*density),
@@ -1015,67 +1014,65 @@ private void showFullColorPickerDialog() {
     title.setText("Insert Color");
     title.setTextColor(Color.parseColor("#C0CAF5"));
     title.setTextSize(18);
-    title.setTypeface(null, android.graphics.Typeface.BOLD);
+    title.setTypeface(null, Typeface.BOLD);
     root.addView(title);
 
-    // ===== ColorPickerView (วงล้อ) =====
-    com.skydoves.colorpickerview.ColorPickerView colorPickerView =
-            new com.skydoves.colorpickerview.ColorPickerView.Builder(this)
-                    .setColorListener(new com.skydoves.colorpickerview.listeners.ColorEnvelopeListener() {
-                        @Override
-                        public void onColorSelected(com.skydoves.colorpickerview.ColorEnvelope envelope, boolean fromUser) {
-                            // อัปเดตตอนเลือกสี
-                        }
-                    })
-                    .setPreferenceName("NexusColorPicker")
-                    .build();
-
-    LinearLayout.LayoutParams pickerParams = new LinearLayout.LayoutParams(
-            (int)(260*density), (int)(260*density));
-    pickerParams.gravity = Gravity.CENTER_HORIZONTAL;
-    pickerParams.topMargin = (int)(16*density);
-    colorPickerView.setLayoutParams(pickerParams);
-    root.addView(colorPickerView);
-
-    // ===== แสดงสี + Hex =====
-    LinearLayout infoRow = new LinearLayout(this);
-    infoRow.setOrientation(LinearLayout.HORIZONTAL);
-    infoRow.setGravity(Gravity.CENTER_VERTICAL);
-    LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT);
-    infoParams.topMargin = (int)(16*density);
-    infoRow.setLayoutParams(infoParams);
-
     // วงกลมสีที่เลือก
-    final View colorDot = new View(this);
-    LinearLayout.LayoutParams dotParams = new LinearLayout.LayoutParams(
-            (int)(36*density), (int)(36*density));
-    colorDot.setLayoutParams(dotParams);
-    colorDot.setBackground(createCircleBg("#00FF00"));
-    infoRow.addView(colorDot);
+    final View colorPreview = new View(this);
+    LinearLayout.LayoutParams previewParams = new LinearLayout.LayoutParams(
+            (int)(72*density), (int)(72*density));
+    previewParams.gravity = Gravity.CENTER_HORIZONTAL;
+    previewParams.topMargin = (int)(20*density);
+    previewParams.bottomMargin = (int)(8*density);
+    colorPreview.setLayoutParams(previewParams);
+    colorPreview.setBackground(createCircleBg("#00FF00"));
+    root.addView(colorPreview);
 
-    // ข้อความ Hex
+    // Hex
     final TextView tvHex = new TextView(this);
     tvHex.setText("#00FF00");
     tvHex.setTextColor(Color.parseColor("#A9B1D6"));
     tvHex.setTextSize(16);
-    tvHex.setPadding((int)(12*density), 0, 0, 0);
-    infoRow.addView(tvHex);
+    tvHex.setGravity(Gravity.CENTER);
+    root.addView(tvHex);
 
-    root.addView(infoRow);
+    // ตารางสี
+    String[] presetColors = {
+            "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#00FFFF",
+            "#0000FF", "#8B00FF", "#FF00FF", "#FFFFFF", "#CCCCCC",
+            "#888888", "#444444", "#000000", "#F7768E", "#E0AF68",
+            "#9ECE6A", "#7AA2F7", "#BB9AF7", "#7DCFFF", "#C0CAF5"
+    };
 
-    // ผูก listener ให้วงล้ออัปเดตสี + hex
-    colorPickerView.setColorListener(new com.skydoves.colorpickerview.listeners.ColorEnvelopeListener() {
-        @Override
-        public void onColorSelected(com.skydoves.colorpickerview.ColorEnvelope envelope, boolean fromUser) {
-            String hex = "#" + envelope.getHexCode();
-            tvHex.setText(hex);
-            colorDot.setBackground(createCircleBg(hex));
-        }
-    });
+    android.widget.GridLayout grid = new android.widget.GridLayout(this);
+    grid.setColumnCount(5);
+    LinearLayout.LayoutParams gridParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT);
+    gridParams.topMargin = (int)(16*density);
+    grid.setLayoutParams(gridParams);
 
-    // ===== ปุ่ม Cancel / Apply =====
+    int cellSize = (int)(48 * density);
+    int margin = (int)(4 * density);
+
+    for (String hex : presetColors) {
+        View cell = new View(this);
+        android.widget.GridLayout.LayoutParams cellParams =
+                new android.widget.GridLayout.LayoutParams();
+        cellParams.width = cellSize;
+        cellParams.height = cellSize;
+        cellParams.setMargins(margin, margin, margin, margin);
+        cell.setLayoutParams(cellParams);
+        cell.setBackground(createCircleBg(hex));
+        cell.setOnClickListener(v -> {
+            colorPreview.setBackground(createCircleBg(hex));
+            tvHex.setText(hex.toUpperCase());
+        });
+        grid.addView(cell);
+    }
+    root.addView(grid);
+
+    // ปุ่ม Cancel / Apply
     LinearLayout btnRow = new LinearLayout(this);
     btnRow.setOrientation(LinearLayout.HORIZONTAL);
     btnRow.setGravity(Gravity.END);
@@ -1098,7 +1095,7 @@ private void showFullColorPickerDialog() {
     btnApply.setText("Apply");
     btnApply.setTextColor(Color.parseColor("#7AA2F7"));
     btnApply.setTextSize(15);
-    btnApply.setTypeface(null, android.graphics.Typeface.BOLD);
+    btnApply.setTypeface(null, Typeface.BOLD);
     btnApply.setPadding((int)(20*density), (int)(12*density),
             (int)(20*density), (int)(12*density));
     btnApply.setOnClickListener(v -> {
@@ -1113,7 +1110,6 @@ private void showFullColorPickerDialog() {
         dialog.dismiss();
     });
     btnRow.addView(btnApply);
-
     root.addView(btnRow);
 
     dialog.setContentView(root);
@@ -1125,6 +1121,22 @@ private void showFullColorPickerDialog() {
         );
     }
     dialog.show();
+}
+
+private android.graphics.drawable.GradientDrawable createRoundedBg(String color, int radiusDp) {
+    android.graphics.drawable.GradientDrawable gd =
+            new android.graphics.drawable.GradientDrawable();
+    gd.setColor(Color.parseColor(color));
+    gd.setCornerRadius(radiusDp * getResources().getDisplayMetrics().density);
+    return gd;
+}
+
+private android.graphics.drawable.GradientDrawable createCircleBg(String color) {
+    android.graphics.drawable.GradientDrawable gd =
+            new android.graphics.drawable.GradientDrawable();
+    gd.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+    gd.setColor(Color.parseColor(color));
+    return gd;
 }
 
 // ===== Helper =====

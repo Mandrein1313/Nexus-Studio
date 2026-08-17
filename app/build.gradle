@@ -97,9 +97,6 @@ dependencies {
     // Kotlin stdlib
     implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.0.21'
 
-    // Color Picker
-    implementation 'com.github.skydoves:colorpicker-view:2.3.0'
-
     // Testing
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
