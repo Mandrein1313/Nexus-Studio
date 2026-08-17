@@ -283,20 +283,20 @@
                     android:background="@drawable/bg_dialog_input"
                     android:layout_marginStart="4dp" />
 
-                <!-- TAB -->
-                <TextView
-                    android:id="@+id/btnTab"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:minWidth="52dp"
-                    android:gravity="center"
-                    android:text="TAB"
-                    android:textSize="13sp"
-                    android:textColor="#C0CAF5"
-                    android:background="@drawable/bg_dialog_input"
-                    android:layout_marginStart="4dp"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp" />
+<!-- แทนที่ปุ่ม TAB ด้วยปุ่ม Color -->
+<TextView
+    android:id="@+id/btnColorPicker"
+    android:layout_width="wrap_content"
+    android:layout_height="36dp"
+    android:minWidth="52dp"
+    android:gravity="center"
+    android:text="🎨"
+    android:textSize="16sp"
+    android:textColor="#C0CAF5"
+    android:background="@drawable/bg_dialog_input"
+    android:layout_marginStart="4dp"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp" />
 
                 <!-- { -->
                 <TextView

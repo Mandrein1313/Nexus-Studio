@@ -188,7 +188,7 @@ protected void onCreate(Bundle savedInstanceState) {
     // ===== ปุ่มด้านล่าง =====
     TextView btnToggleShortcut = findViewById(R.id.btnToggleShortcut);
     View shortcutRow = findViewById(R.id.shortcutRow);
-    TextView btnTab = findViewById(R.id.btnTab);
+    TextView btnColorPicker = findViewById(R.id.btnColorPicker);  // แทน TAB
     TextView btnOpenBrace = findViewById(R.id.btnOpenBrace);
     TextView btnCloseBrace = findViewById(R.id.btnCloseBrace);
     TextView btnMainAi = findViewById(R.id.btnMainAi);
@@ -215,17 +215,12 @@ protected void onCreate(Bundle savedInstanceState) {
             if (codeEditor != null) codeEditor.redo();
         });
     }
-    if (btnTab != null) {
-        btnTab.setOnClickListener(v -> {
-            if (codeEditor != null && codeEditor.getCursor() != null) {
-                codeEditor.getText().insert(
-                        codeEditor.getCursor().getLeftLine(),
-                        codeEditor.getCursor().getLeftColumn(),
-                        "    "
-                );
-            }
-        });
+
+    // ปุ่ม Color Picker (แทน TAB)
+    if (btnColorPicker != null) {
+        btnColorPicker.setOnClickListener(v -> showFullColorPickerDialog());
     }
+
     if (btnOpenBrace != null) {
         btnOpenBrace.setOnClickListener(v -> {
             if (codeEditor != null && codeEditor.getCursor() != null) {
@@ -1001,6 +996,152 @@ private TextView createButton(String text, LinearLayout.LayoutParams ignored,
     btn.setBackground(shape);
     btn.setOnClickListener(listener);
     return btn;
+}
+private void showFullColorPickerDialog() {
+    android.app.Dialog dialog = new android.app.Dialog(this);
+    dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+
+    float density = getResources().getDisplayMetrics().density;
+
+    // ===== Root =====
+    LinearLayout root = new LinearLayout(this);
+    root.setOrientation(LinearLayout.VERTICAL);
+    root.setPadding((int)(24*density), (int)(24*density),
+            (int)(24*density), (int)(16*density));
+    root.setBackground(createRoundedBg("#1F2335", 20));
+
+    // Title
+    TextView title = new TextView(this);
+    title.setText("Insert Color");
+    title.setTextColor(Color.parseColor("#C0CAF5"));
+    title.setTextSize(18);
+    title.setTypeface(null, android.graphics.Typeface.BOLD);
+    root.addView(title);
+
+    // ===== ColorPickerView (วงล้อ) =====
+    com.skydoves.colorpickerview.ColorPickerView colorPickerView =
+            new com.skydoves.colorpickerview.ColorPickerView.Builder(this)
+                    .setColorListener(new com.skydoves.colorpickerview.listeners.ColorEnvelopeListener() {
+                        @Override
+                        public void onColorSelected(com.skydoves.colorpickerview.ColorEnvelope envelope, boolean fromUser) {
+                            // อัปเดตตอนเลือกสี
+                        }
+                    })
+                    .setPreferenceName("NexusColorPicker")
+                    .build();
+
+    LinearLayout.LayoutParams pickerParams = new LinearLayout.LayoutParams(
+            (int)(260*density), (int)(260*density));
+    pickerParams.gravity = Gravity.CENTER_HORIZONTAL;
+    pickerParams.topMargin = (int)(16*density);
+    colorPickerView.setLayoutParams(pickerParams);
+    root.addView(colorPickerView);
+
+    // ===== แสดงสี + Hex =====
+    LinearLayout infoRow = new LinearLayout(this);
+    infoRow.setOrientation(LinearLayout.HORIZONTAL);
+    infoRow.setGravity(Gravity.CENTER_VERTICAL);
+    LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT);
+    infoParams.topMargin = (int)(16*density);
+    infoRow.setLayoutParams(infoParams);
+
+    // วงกลมสีที่เลือก
+    final View colorDot = new View(this);
+    LinearLayout.LayoutParams dotParams = new LinearLayout.LayoutParams(
+            (int)(36*density), (int)(36*density));
+    colorDot.setLayoutParams(dotParams);
+    colorDot.setBackground(createCircleBg("#00FF00"));
+    infoRow.addView(colorDot);
+
+    // ข้อความ Hex
+    final TextView tvHex = new TextView(this);
+    tvHex.setText("#00FF00");
+    tvHex.setTextColor(Color.parseColor("#A9B1D6"));
+    tvHex.setTextSize(16);
+    tvHex.setPadding((int)(12*density), 0, 0, 0);
+    infoRow.addView(tvHex);
+
+    root.addView(infoRow);
+
+    // ผูก listener ให้วงล้ออัปเดตสี + hex
+    colorPickerView.setColorListener(new com.skydoves.colorpickerview.listeners.ColorEnvelopeListener() {
+        @Override
+        public void onColorSelected(com.skydoves.colorpickerview.ColorEnvelope envelope, boolean fromUser) {
+            String hex = "#" + envelope.getHexCode();
+            tvHex.setText(hex);
+            colorDot.setBackground(createCircleBg(hex));
+        }
+    });
+
+    // ===== ปุ่ม Cancel / Apply =====
+    LinearLayout btnRow = new LinearLayout(this);
+    btnRow.setOrientation(LinearLayout.HORIZONTAL);
+    btnRow.setGravity(Gravity.END);
+    LinearLayout.LayoutParams btnRowParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT);
+    btnRowParams.topMargin = (int)(20*density);
+    btnRow.setLayoutParams(btnRowParams);
+
+    TextView btnCancel = new TextView(this);
+    btnCancel.setText("Cancel");
+    btnCancel.setTextColor(Color.parseColor("#7AA2F7"));
+    btnCancel.setTextSize(15);
+    btnCancel.setPadding((int)(20*density), (int)(12*density),
+            (int)(20*density), (int)(12*density));
+    btnCancel.setOnClickListener(v -> dialog.dismiss());
+    btnRow.addView(btnCancel);
+
+    TextView btnApply = new TextView(this);
+    btnApply.setText("Apply");
+    btnApply.setTextColor(Color.parseColor("#7AA2F7"));
+    btnApply.setTextSize(15);
+    btnApply.setTypeface(null, android.graphics.Typeface.BOLD);
+    btnApply.setPadding((int)(20*density), (int)(12*density),
+            (int)(20*density), (int)(12*density));
+    btnApply.setOnClickListener(v -> {
+        String hex = tvHex.getText().toString();
+        if (codeEditor != null && codeEditor.getCursor() != null) {
+            codeEditor.getText().insert(
+                    codeEditor.getCursor().getLeftLine(),
+                    codeEditor.getCursor().getLeftColumn(),
+                    hex
+            );
+        }
+        dialog.dismiss();
+    });
+    btnRow.addView(btnApply);
+
+    root.addView(btnRow);
+
+    dialog.setContentView(root);
+    if (dialog.getWindow() != null) {
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.getWindow().setLayout(
+                (int)(320 * density),
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+    }
+    dialog.show();
+}
+
+// ===== Helper =====
+private android.graphics.drawable.GradientDrawable createRoundedBg(String color, int radiusDp) {
+    android.graphics.drawable.GradientDrawable gd =
+            new android.graphics.drawable.GradientDrawable();
+    gd.setColor(Color.parseColor(color));
+    gd.setCornerRadius(radiusDp * getResources().getDisplayMetrics().density);
+    return gd;
+}
+
+private android.graphics.drawable.GradientDrawable createCircleBg(String color) {
+    android.graphics.drawable.GradientDrawable gd =
+            new android.graphics.drawable.GradientDrawable();
+    gd.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+    gd.setColor(Color.parseColor(color));
+    return gd;
 }
 
 // จัดการ Logic ของ AI
