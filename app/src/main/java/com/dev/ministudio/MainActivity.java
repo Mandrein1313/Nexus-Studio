@@ -997,12 +997,12 @@ private TextView createButton(String text, LinearLayout.LayoutParams ignored,
     btn.setOnClickListener(listener);
     return btn;
 }
-private void showFullColorPickerDialog() {
+pprivate void showFullColorPickerDialog() {
     android.app.Dialog dialog = new android.app.Dialog(this);
     dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
 
     float density = getResources().getDisplayMetrics().density;
-    int wheelSize = (int) (240 * density);
+    int wheelSize = (int) (220 * density);
 
     LinearLayout root = new LinearLayout(this);
     root.setOrientation(LinearLayout.VERTICAL);
@@ -1022,7 +1022,7 @@ private void showFullColorPickerDialog() {
     final ColorWheelView colorWheel = new ColorWheelView(this);
     LinearLayout.LayoutParams wheelParams = new LinearLayout.LayoutParams(wheelSize, wheelSize);
     wheelParams.gravity = Gravity.CENTER_HORIZONTAL;
-    wheelParams.topMargin = (int)(16*density);
+    wheelParams.topMargin = (int)(12*density);
     colorWheel.setLayoutParams(wheelParams);
     root.addView(colorWheel);
 
@@ -1033,7 +1033,7 @@ private void showFullColorPickerDialog() {
     LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT);
-    infoParams.topMargin = (int)(16*density);
+    infoParams.topMargin = (int)(12*density);
     infoRow.setLayoutParams(infoParams);
 
     final View colorDot = new View(this);
@@ -1046,50 +1046,88 @@ private void showFullColorPickerDialog() {
     final TextView tvHex = new TextView(this);
     tvHex.setText("#FF00FF00");
     tvHex.setTextColor(Color.parseColor("#A9B1D6"));
-    tvHex.setTextSize(16);
+    tvHex.setTextSize(15);
     tvHex.setPadding((int)(12*density), 0, 0, 0);
     infoRow.addView(tvHex);
     root.addView(infoRow);
 
-    // ===== ตัวแปรสีปัจจุบัน =====
-    final int[] currentColor = {Color.GREEN};
-    final int[] currentAlpha = {255};
+    // ===== ตัวแปรสี =====
+    final float[] currentHue = {120f};      // เขียว
+    final float[] currentValue = {1f};      // ความสว่าง 0\~1
+    final int[] currentAlpha = {255};       // 0\~255
 
-    // ฟังก์ชันอัปเดตสี + hex
     final Runnable updateColor = () -> {
-        int colorWithAlpha = (currentAlpha[0] << 24) | (currentColor[0] & 0x00FFFFFF);
+        // HSV → Color (Value ต่ำ = ดำ)
+        int rgb = Color.HSVToColor(new float[]{currentHue[0], 1f, currentValue[0]});
+        int colorWithAlpha = (currentAlpha[0] << 24) | (rgb & 0x00FFFFFF);
         String hex = String.format("#%08X", colorWithAlpha);
         tvHex.setText(hex);
         colorDot.setBackground(createCircleBgWithAlpha(colorWithAlpha));
     };
 
-    // ตอนเลือกสีจากวงล้อ
+    // เลือกสีจากวงล้อ (ได้แค่ Hue)
     colorWheel.setOnColorChangeListener(color -> {
-        currentColor[0] = color;
+        float[] hsv = new float[3];
+        Color.colorToHSV(color, hsv);
+        currentHue[0] = hsv[0];
         updateColor.run();
     });
 
-    // ===== แถบความโปร่งใส (Alpha) =====
+    // ===== แถบความสว่าง (Brightness) → ใช้หาสีดำ =====
+    TextView tvBrightLabel = new TextView(this);
+    tvBrightLabel.setText("ความสว่าง");
+    tvBrightLabel.setTextColor(Color.parseColor("#565F89"));
+    tvBrightLabel.setTextSize(12);
+    tvBrightLabel.setPadding(0, (int)(10*density), 0, (int)(2*density));
+    root.addView(tvBrightLabel);
+
+    final TextView tvBrightPercent = new TextView(this);
+    tvBrightPercent.setText("100%");
+    tvBrightPercent.setTextColor(Color.parseColor("#A9B1D6"));
+    tvBrightPercent.setTextSize(12);
+    root.addView(tvBrightPercent);
+
+    android.widget.SeekBar brightSeek = new android.widget.SeekBar(this);
+    brightSeek.setMax(100);
+    brightSeek.setProgress(100);
+    root.addView(brightSeek);
+
+    brightSeek.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser) {
+            currentValue[0] = progress / 100f;
+            tvBrightPercent.setText(progress + "%");
+            updateColor.run();
+        }
+        @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
+        @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
+    });
+
+    // ===== แถบความโปร่งใส (Alpha) เป็น % =====
     TextView tvAlphaLabel = new TextView(this);
     tvAlphaLabel.setText("ความโปร่งใส");
     tvAlphaLabel.setTextColor(Color.parseColor("#565F89"));
     tvAlphaLabel.setTextSize(12);
-    tvAlphaLabel.setPadding(0, (int)(12*density), 0, (int)(4*density));
+    tvAlphaLabel.setPadding(0, (int)(10*density), 0, (int)(2*density));
     root.addView(tvAlphaLabel);
 
+    final TextView tvAlphaPercent = new TextView(this);
+    tvAlphaPercent.setText("100%");
+    tvAlphaPercent.setTextColor(Color.parseColor("#A9B1D6"));
+    tvAlphaPercent.setTextSize(12);
+    root.addView(tvAlphaPercent);
+
     android.widget.SeekBar alphaSeek = new android.widget.SeekBar(this);
-    alphaSeek.setMax(255);
-    alphaSeek.setProgress(255);
-    LinearLayout.LayoutParams seekParams = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT);
-    alphaSeek.setLayoutParams(seekParams);
+    alphaSeek.setMax(100);
+    alphaSeek.setProgress(100); // 100% = ทึบ
     root.addView(alphaSeek);
 
     alphaSeek.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser) {
-            currentAlpha[0] = progress;
+            // 100% = ทึบ (alpha 255), 0% = โปร่งใส (alpha 0)
+            currentAlpha[0] = (int) (progress / 100f * 255);
+            tvAlphaPercent.setText(progress + "%");
             updateColor.run();
         }
         @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
@@ -1103,7 +1141,7 @@ private void showFullColorPickerDialog() {
     LinearLayout.LayoutParams btnRowParams = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT);
-    btnRowParams.topMargin = (int)(20*density);
+    btnRowParams.topMargin = (int)(16*density);
     btnRow.setLayoutParams(btnRowParams);
 
     TextView btnCancel = new TextView(this);
