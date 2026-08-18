@@ -382,36 +382,56 @@ private void setupLogic() {
             (event, unsubscribe) -> showColorPreviewIfNeeded()
     );
 
-    // แตะรหัสสีใน editor → เปิด Edit Color
+    // แตะรหัสสี → เปิด Edit Color (จับตำแหน่งแม่นกว่า)
     codeEditor.subscribeEvent(io.github.rosemoe.sora.event.ClickEvent.class, (event, unsubscribe) -> {
-        if (codeEditor == null || codeEditor.getCursor() == null) return;
+        if (codeEditor == null) return;
 
-        int line = codeEditor.getCursor().getLeftLine();
-        int col = codeEditor.getCursor().getLeftColumn();
+        // รอให้ cursor ขยับตามนิ้วก่อน แล้วค่อยอ่านตำแหน่ง
+        codeEditor.post(() -> {
+            if (codeEditor.getCursor() == null) return;
 
-        String lineText;
-        try {
-            lineText = codeEditor.getText().getLineString(line);
-        } catch (Exception e) {
-            return;
-        }
-        if (lineText == null || lineText.isEmpty()) return;
+            int line = codeEditor.getCursor().getLeftLine();
+            int col = codeEditor.getCursor().getLeftColumn();
 
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(
-                "#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\\b"
-        );
-        java.util.regex.Matcher matcher = pattern.matcher(lineText);
-
-        while (matcher.find()) {
-            if (col >= matcher.start() && col <= matcher.end()) {
-                showFullColorPickerDialog(
-                        matcher.group(),
-                        line, matcher.start(),
-                        line, matcher.end()
-                );
-                break;
+            String lineText;
+            try {
+                lineText = codeEditor.getText().getLineString(line);
+            } catch (Exception e) {
+                return;
             }
-        }
+            if (lineText == null || lineText.isEmpty()) return;
+
+            // ลำดับ 8 → 6 → 3 กันจับ #RGB สั้นเกินจาก #RRGGBB
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(
+                    "#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})"
+            );
+            java.util.regex.Matcher matcher = pattern.matcher(lineText);
+
+            String bestHex = null;
+            int bestStart = -1;
+            int bestEnd = -1;
+            int bestDist = Integer.MAX_VALUE;
+
+            while (matcher.find()) {
+                int start = matcher.start();
+                int end = matcher.end();
+                // อยู่ในช่วง หรือชิดขอบ ±1
+                if (col >= start - 1 && col <= end) {
+                    int mid = (start + end) / 2;
+                    int dist = Math.abs(col - mid);
+                    if (dist < bestDist) {
+                        bestDist = dist;
+                        bestHex = matcher.group();
+                        bestStart = start;
+                        bestEnd = end;
+                    }
+                }
+            }
+
+            if (bestHex != null) {
+                showFullColorPickerDialog(bestHex, line, bestStart, line, bestEnd);
+            }
+        });
     });
 
     // โหลดโปรเจกต์
@@ -430,9 +450,6 @@ private void setupLogic() {
         setEditorActiveState(false);
     }
 }
-
-// ---------- วางเมธอดสองตัวนี้ใน MainActivity (นอก setupLogic) ----------
-
 private void showColorPreviewIfNeeded() {
     if (codeEditor == null || codeEditor.getCursor() == null || tvSaveStatus == null) {
         return;
