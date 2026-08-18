@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
    private String pendingProjectName = "";
    private boolean isLightEditorTheme = false;
    private boolean isShortcutExpanded = false;
-   
+   private com.dev.ministudio.editor.HexColorHighlighter hexColorHighlighter;
    
 @Override
 protected void onCreate(Bundle savedInstanceState) {
@@ -318,6 +318,9 @@ private void setupLogic() {
     codeEditor.setUndoEnabled(true);
     codeEditor.setHighlightCurrentBlock(true);
 
+    // ไฮไลต์รหัสสี (ใช้กับ .xml / .css)
+    hexColorHighlighter = new com.dev.ministudio.editor.HexColorHighlighter(codeEditor);
+
     // แผง AI suggestion
     aiSuggestionBar = findViewById(R.id.aiSuggestionBar);
     tvAiSuggestionText = findViewById(R.id.tvAiSuggestionText);
@@ -340,7 +343,7 @@ private void setupLogic() {
         });
     }
 
-    // Auto-Save + AI Auto-Complete
+    // Auto-Save + AI Auto-Complete + ไฮไลต์สีใน XML
     codeEditor.subscribeEvent(ContentChangeEvent.class, (event, unsubscribe) -> {
         if (tvSaveStatus != null) {
             tvSaveStatus.setText("Editing...");
@@ -374,6 +377,11 @@ private void setupLogic() {
                 });
             });
         }
+
+        // ไฮไลต์ #RRGGBB เฉพาะไฟล์ xml/css
+        if (hexColorHighlighter != null && currentProject != null) {
+            hexColorHighlighter.schedule(currentProject.getCurrentOpenFile());
+        }
     });
 
     // แสดงสีที่แถบสถานะเมื่อ cursor อยู่บนรหัสสี
@@ -382,11 +390,10 @@ private void setupLogic() {
             (event, unsubscribe) -> showColorPreviewIfNeeded()
     );
 
-    // แตะรหัสสี → เปิด Edit Color (จับตำแหน่งแม่นกว่า)
+    // แตะรหัสสี → เปิด Edit Color
     codeEditor.subscribeEvent(io.github.rosemoe.sora.event.ClickEvent.class, (event, unsubscribe) -> {
         if (codeEditor == null) return;
 
-        // รอให้ cursor ขยับตามนิ้วก่อน แล้วค่อยอ่านตำแหน่ง
         codeEditor.post(() -> {
             if (codeEditor.getCursor() == null) return;
 
@@ -401,7 +408,6 @@ private void setupLogic() {
             }
             if (lineText == null || lineText.isEmpty()) return;
 
-            // ลำดับ 8 → 6 → 3 กันจับ #RGB สั้นเกินจาก #RRGGBB
             java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(
                     "#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})"
             );
@@ -415,7 +421,6 @@ private void setupLogic() {
             while (matcher.find()) {
                 int start = matcher.start();
                 int end = matcher.end();
-                // อยู่ในช่วง หรือชิดขอบ ±1
                 if (col >= start - 1 && col <= end) {
                     int mid = (start + end) / 2;
                     int dist = Math.abs(col - mid);
@@ -1012,17 +1017,23 @@ public void openFile(File file) {
         projectTreeManager.openFile(file);
     }
 
-    // 2. บังคับอัปเดต UI ทันทีโดยไม่ต้องรอ Callback ที่อาจช้า
+    // 2. อัปเดต path
     updateFilePathStatus(file);
-    
-    // 3. สั่งให้ Editor พร้อมทำงานและ Visible ทันที
+
+    // 3. เปิด editor + ไฮไลต์สี (ถ้าเป็น xml/css)
     runOnUiThread(() -> {
         if (codeEditor != null) {
-            // ดึงไฟล์มาโชว์ใน editor (ถ้าคลาส projectTreeManager ไม่ได้ทำไว้)
-            // ตัวอย่างเช่น: codeEditor.setText(FileUtils.read(file));
-            
             if (codeEditor.getVisibility() != View.VISIBLE) {
                 setEditorActiveState(true);
+            }
+
+            if (hexColorHighlighter != null) {
+                if (com.dev.ministudio.editor.HexColorHighlighter.isColorFile(file)) {
+                    // รอให้ setText เสร็จก่อนนิดหน่อย
+                    codeEditor.postDelayed(() -> hexColorHighlighter.schedule(file), 200);
+                } else {
+                    codeEditor.setEditorLanguage(new JavaLanguage());
+                }
             }
         }
     });
@@ -1872,13 +1883,21 @@ if (searchBarRoot != null) {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        if (aiLayoutAnalyzer != null) {
-            aiLayoutAnalyzer.shutdown(); 
-        }
-        super.onDestroy();
+@Override
+protected void onDestroy() {
+    // ปิด AI Analyzer
+    if (aiLayoutAnalyzer != null) {
+        aiLayoutAnalyzer.shutdown(); 
     }
+    
+    // ปิด HexColorHighlighter เพื่อคืน Memory และหยุด Background Thread
+    if (hexColorHighlighter != null) {
+        hexColorHighlighter.destroy();
+    }
+    
+    super.onDestroy();
+}
+
 // ฟังก์ชันกดปุ๊บ วาร์ปปั๊บ ไปยังตำแหน่งที่โค้ด Error (ฉบับปรับปรุงแก้อาการสัญลักษณ์หาย)
 public void jumpToErrorLocation(String fileName, int lineNumber) {
     runOnUiThread(() -> {
@@ -1886,19 +1905,17 @@ public void jumpToErrorLocation(String fileName, int lineNumber) {
         View consolePanel = findViewById(R.id.consolePanel);
         if (consolePanel != null) consolePanel.setVisibility(View.GONE);
 
-        // 2. ลอจิกการสั่งเปิดไฟล์ .java ที่พังขึ้นกระดาน (อิงตามระบบเปิดไฟล์หลักของน้า)
+        // 2. ลอจิกการสั่งเปิดไฟล์ .java ที่พังขึ้นกระดาน
         if (projectTreeManager != null && currentProject != null) {
-            // เดินสายหาตำแหน่งไฟล์จริงในโปรเจกต์แล้วบังคับให้ระบบ Tab โหลดขึ้นมาทำงาน
             java.io.File fileToOpen = projectTreeManager.findFileInProject(currentProject.getRootPath(), fileName);
             if (fileToOpen != null && fileToOpen.exists()) {
-                openFile(fileToOpen); // ใช้ฟังก์ชันเปิดไฟล์หลักของน้า
+                openFile(fileToOpen);
             }
         }
 
-        // 3. ปรับโค้ดคำสั่งวาร์ปเคอร์เซอร์ให้ตรงกับ Sora Editor API ของเครื่องน้าครับ
+        // 3. คำสั่งวาร์ปเคอร์เซอร์ (Sora Editor API)
         if (codeEditor != null) {
             int targetLine = Math.max(0, lineNumber - 1);
-            // สั่งขยับตำแหน่งและเลื่อนหน้าจอฉบับตรงรุ่น
             codeEditor.getCursor().setLeft(targetLine, 0);
             codeEditor.getCursor().setRight(targetLine, 0);
             codeEditor.ensurePositionVisible(targetLine, 0);
