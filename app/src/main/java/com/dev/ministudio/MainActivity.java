@@ -123,13 +123,51 @@ public class MainActivity extends AppCompatActivity {
    // เพิ่มตัวแปรนี้ในส่วนขอบเขตของคลาส MainActivity
     private LogcatReader logcatReader;
     private View consolePanel;
-private ScrollView consoleScrollView;
+    private ScrollView consoleScrollView;
 // tvConsole มีอยู่แล้วก็ใช้ตัวเดิมได้
-    
+    /** ใช้ string ตามภาษาที่ตั้งไว้ */
+private String t(int resId) {
+    return getString(resId);
+}
+
+/** ใช้ตอนต้องการ EN/TH คู่กันใน console เทคนิค (optional) */
+private String tr(String en, String th) {
+    String lang = getSharedPreferences("AppSettings", MODE_PRIVATE)
+            .getString("app_lang", "");
+    if (lang.isEmpty()) {
+        // ตามภาษาเครื่อง
+        return java.util.Locale.getDefault().getLanguage().startsWith("th") ? th : en;
+    }
+    return "th".equals(lang) ? th : en;
+}
+
+private void applySavedLanguage() {
+    String lang = getSharedPreferences("AppSettings", MODE_PRIVATE)
+            .getString("app_lang", "");
+    if (lang.isEmpty()) return; // ใช้ตามเครื่อง
+
+    java.util.Locale locale = new java.util.Locale(lang);
+    java.util.Locale.setDefault(locale);
+    android.content.res.Configuration config = new android.content.res.Configuration();
+    config.setLocale(locale);
+    getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+}
+
+/** สลับภาษา แล้ว recreate */
+public void setAppLanguage(String lang) {
+    // lang = "en" หรือ "th"
+    getSharedPreferences("AppSettings", MODE_PRIVATE)
+            .edit()
+            .putString("app_lang", lang)
+            .apply();
+    applySavedLanguage();
+    recreate();
+}
 
    
-@Override
+       @Override
 protected void onCreate(Bundle savedInstanceState) {
+    applySavedLanguage(); // ← ต้องมาก่อน setContentView
     super.onCreate(savedInstanceState);
 
     // ===== สี status bar / nav bar ให้ตรง Toolbar =====
@@ -141,7 +179,6 @@ protected void onCreate(Bundle savedInstanceState) {
     getWindow().setStatusBarColor(barColor);
     getWindow().setNavigationBarColor(barColor);
 
-    // ไอคอน status bar สีขาว (เหมาะพื้นมืด)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         getWindow().getDecorView().setSystemUiVisibility(0);
     }
@@ -154,7 +191,6 @@ protected void onCreate(Bundle savedInstanceState) {
     initViews();
     setupLogic();
 
-    // ===== ยืนยันตอนกดกลับ =====
     getOnBackPressedDispatcher().addCallback(this,
             new androidx.activity.OnBackPressedCallback(true) {
                 @Override
@@ -168,7 +204,6 @@ protected void onCreate(Bundle savedInstanceState) {
                         editorSearchManager.hide();
                         return;
                     }
-                    // เช็คว่าถ้า consolePanel แสดงอยู่ ให้ปิดแทน dialog
                     if (consolePanel != null && consolePanel.getVisibility() == View.VISIBLE) {
                         hideConsolePanel();
                         return;
@@ -1344,10 +1379,10 @@ private void toggleXmlPreview() {
     final int C_PURPLE = Color.parseColor("#BB9AF7");
     final int C_BLUE   = Color.parseColor("#7AA2F7");
     final int C_CYAN   = Color.parseColor("#7DCFFF");
-    final int C_GREEN  = Color.parseColor("#FF00CE3A");
+    final int C_GREEN  = Color.parseColor("#9ECE6A");
     final int C_MINT   = Color.parseColor("#73DACA");
-    final int C_ORANGE = Color.parseColor("#FF00BCE0");
-    final int C_RED    = Color.parseColor("#FFF70084");
+    final int C_ORANGE = Color.parseColor("#E0AF68");
+    final int C_RED    = Color.parseColor("#F7768E");
     final int C_MUTED  = Color.parseColor("#565F89");
     final int C_TEXT   = Color.parseColor("#A9B1D6");
 
@@ -1362,10 +1397,11 @@ private void toggleXmlPreview() {
         if (tvConsole != null) tvConsole.setText("");
 
         // Header มีสี
-        appendLog("Nexus Studio", Color.parseColor("#BB9AF7"));
-        appendLog("  ·  Gradle 8.2  ·  ", Color.parseColor("#565F89"));
-        appendLog(projectName + "\n", Color.parseColor("#7AA2F7"));
-        appendLog("Ready. Press Run to assembleDebug.\n\n", Color.parseColor("#A9B1D6"));
+        appendLog("Nexus Studio", C_PURPLE);
+        appendLog("  ·  Gradle 8.2  ·  ", C_MUTED);
+        appendLog(projectName + "\n", C_BLUE);
+        appendLog("Ready. Press Run to assembleDebug.\n\n", C_TEXT);
+
         BuildTaskManager buildTask = new BuildTaskManager(
                 MainActivity.this,
                 currentProject.getRootPath(),
@@ -1391,7 +1427,7 @@ private void toggleXmlPreview() {
                             return;
                         }
 
-                        // เลือกสี: keyword ก่อน แล้วค่อยใช้สีจาก BuildTaskManager
+                        // เลือกสีตามประเภทข้อความ
                         int finalColor = color;
 
                         if (lowerText.contains("build successful")) {
@@ -1475,7 +1511,6 @@ private void toggleXmlPreview() {
                             });
                         } else {
                             showToast("Build failed");
-                            // ไม่พิมพ์ BUILD FAILED ซ้ำ
 
                             final ParsedError err = analyzer.getLastError();
                             if (err != null) {

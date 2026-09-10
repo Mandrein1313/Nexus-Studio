@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Nexus Studio</string>
+
+    <!-- หน้า Projects -->
+    <string name="projects_title">โปรเจกต์</string>
+    <string name="projects_subtitle">MOBILE ANDROID IDE</string>
+    <string name="projects_description">เลือก Template สร้างโปรเจกต์ Gradle แล้วแก้โค้ด Java/Kotlin และ XML ได้จากมือถือ</string>
+    <string name="btn_new_project">+  โปรเจกต์ใหม่</string>
+    <string name="no_projects_yet">ยังไม่มีโปรเจกต์</string>
+    <string name="no_projects_hint">เริ่มจาก No Activity, Empty, Basic, Drawer, Bottom navigation หรือ Tabbed</string>
+    <string name="btn_choose_template">เลือกเทมเพลต</string>
+
+    <!-- เมนูด้านข้าง -->
+    <string name="nav_github_settings">ตั้งค่า GitHub</string>
+    <string name="nav_ai_settings">ตั้งค่า AI</string>
+    <string name="nav_import_github">นำเข้าจาก GitHub</string>
+    <string name="nav_toggle_theme">สลับธีมสว่าง/มืด</string>
+    <string name="nav_language">ภาษา / Language</string>
+    <string name="nav_general">ทั่วไป</string>
+    <string name="nav_about">เกี่ยวกับ Nexus Studio</string>
+
+    <!-- เมนู Toolbar -->
+    <string name="action_github_settings">ตั้งค่า GitHub</string>
+    <string name="action_toggle_theme">สลับธีมสว่าง/มืด</string>
+
+    <!-- Dialog ภาษา -->
+    <string name="settings_language">ภาษา</string>
+    <string name="lang_english">English</string>
+    <string name="lang_thai">ไทย</string>
+
+    <!-- เกี่ยวกับ -->
+    <string name="about_title">Nexus Studio</string>
+    <string name="about_message">Mobile Android IDE\nเขียน แก้ บิลด์แอปได้จากมือถือ</string>
+    <string name="btn_ok">ตกลง</string>
+    <string name="btn_cancel">ยกเลิก</string>
+    <string name="btn_delete">ลบ</string>
+    <string name="btn_save">บันทึก</string>
+    <string name="btn_download">ดาวน์โหลด</string>
+
+    <!-- ลบโปรเจกต์ -->
+    <string name="delete_project_title">ลบโปรเจกต์</string>
+    <string name="delete_project_message">ลบ \"%1$s\" หรือไม่?</string>
+    <string name="delete_project_done">ลบแล้ว</string>
+
+    <!-- สลับธีม -->
+    <string name="theme_light_enabled">☀️ ธีมสว่าง (ใช้ตอนเปิดโปรเจกต์)</string>
+    <string name="theme_dark_enabled">🌙 ธีมมืด (ใช้ตอนเปิดโปรเจกต์)</string>
+
+    <!-- นำเข้าจาก GitHub -->
+    <string name="import_github_title">นำเข้าโปรเจกต์จาก GitHub</string>
+    <string name="import_github_message">ระบบจะดึงเฉพาะ Commit ล่าสุด (Shallow Clone) เพื่อความรวดเร็ว</string>
+    <string name="import_github_hint">https://github.com/user/repository.git</string>
+    <string name="import_github_empty_url">กรุณาใส่ลิงก์ก่อนครับ</string>
+    <string name="import_github_started">เริ่มการ Clone หลังบ้านเรียบร้อยแล้ว</string>
+
+    <!-- ตั้งค่า GitHub -->
+    <string name="github_settings_title">ตั้งค่าบัญชี GitHub Sync</string>
+    <string name="github_settings_desc">ข้อมูลนี้จะถูกบันทึกเพื่อใช้ส่งซอร์สโค้ดโปรเจกต์ขึ้นไปบิวด์บนคลาวด์อัตโนมัติ</string>
+    <string name="github_username">GitHub Username</string>
+    <string name="github_username_hint">ระบุชื่อผู้ใช้ GitHub</string>
+    <string name="github_email">GitHub Email</string>
+    <string name="github_email_hint">ระบุอีเมลที่ผูกกับ GitHub</string>
+    <string name="github_token">Personal Access Token (Classic)</string>
+    <string name="github_token_hint">วางโทเค็นสิทธิ์เข้าถึง (ghp_…)</string>
+    <string name="github_settings_empty">กรุณากรอก Username และ Token</string>
+    <string name="github_settings_saved">บันทึกการตั้งค่าสำเร็จ</string>
+
+    <!-- Console / Build -->
+    <string name="btn_run">รัน</string>
+    <string name="btn_stop">หยุด</string>
+    <string name="btn_clear">ล้าง</string>
+    <string name="build_please_open_project">กรุณาเปิดโปรเจกต์ก่อนทำการรัน</string>
+    <string name="build_github_not_set">ยังไม่ได้ตั้งค่าบัญชี GitHub กรุณาตั้งค่าที่หน้าแรกก่อน</string>
+    <string name="build_started">กำลังเริ่มระบบ Cloud Build…</string>
+    <string name="build_success">บิวด์สำเร็จ</string>
+    <string name="build_failed">บิวด์ล้มเหลว</string>
+    <string name="console_ready">พร้อมแล้ว กด Run เพื่อ assembleDebug</string>
+
+    <!-- Preview -->
+    <string name="preview_xml_only">Preview รองรับเฉพาะไฟล์ .xml (layout)</string>
+    <string name="preview_mode">Layout Preview</string>
+    <string name="preview_phone">โทรศัพท์</string>
+    <string name="preview_tablet">แท็บเล็ต</string>
+</resources>

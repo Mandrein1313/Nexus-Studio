@@ -2,31 +2,39 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:checkableBehavior="none">
-        
+
         <item
             android:id="@+id/nav_github_settings"
             android:icon="@android:drawable/ic_menu_manage"
-            android:title="GitHub Settings" />
+            android:title="@string/nav_github_settings" />
+
         <item
             android:id="@+id/nav_ai_settings"
             android:icon="@android:drawable/ic_menu_edit"
-            android:title="AI Settings" />
+            android:title="@string/nav_ai_settings" />
+
         <item
             android:id="@+id/nav_import_github"
             android:icon="@android:drawable/ic_menu_upload"
-            android:title="นำเข้าจาก GitHub" />
+            android:title="@string/nav_import_github" />
+
         <item
             android:id="@+id/nav_toggle_theme"
             android:icon="@android:drawable/ic_menu_view"
-            android:title="สลับธีมสว่าง/มืด" />
+            android:title="@string/nav_toggle_theme" />
+
+        <item
+            android:id="@+id/nav_language"
+            android:icon="@android:drawable/ic_menu_sort_alphabetically"
+            android:title="@string/nav_language" />
     </group>
 
-    <item android:title="ทั่วไป">
+    <item android:title="@string/nav_general">
         <menu>
             <item
                 android:id="@+id/nav_about"
                 android:icon="@android:drawable/ic_menu_info_details"
-                android:title="เกี่ยวกับ Nexus Studio" />
+                android:title="@string/nav_about" />
         </menu>
     </item>
 </menu>

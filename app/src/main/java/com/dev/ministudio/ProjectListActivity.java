@@ -64,6 +64,9 @@ public class ProjectListActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // นำค่าภาษาที่บันทึกไว้มาใช้งานก่อนแสดงผล UI
+        applySavedLanguage();
+
         super.onCreate(savedInstanceState);
 
         // ตั้งค่าขอบหน้าจอสำหรับ Android 15+
@@ -145,6 +148,8 @@ public class ProjectListActivity extends AppCompatActivity {
                     startActivity(new Intent(this, AiSettingsActivity.class));
                 } else if (id == R.id.nav_toggle_theme) {
                     toggleEditorThemePref();
+                } else if (id == R.id.nav_language) {
+                    showLanguageDialog();
                 } else if (id == R.id.nav_about) {
                     new AlertDialog.Builder(this)
                             .setTitle("Nexus Studio")
@@ -171,6 +176,38 @@ public class ProjectListActivity extends AppCompatActivity {
         } else {
             registerReceiver(cloneReceiver, filter);
         }
+    }
+
+    private void showLanguageDialog() {
+        String[] options = {"English", "ไทย"};
+        new AlertDialog.Builder(this)
+                .setTitle("Language / ภาษา")
+                .setItems(options, (d, which) -> {
+                    String lang = (which == 0) ? "en" : "th";
+                    setAppLanguage(lang);
+                })
+                .show();
+    }
+
+    private void applySavedLanguage() {
+        String lang = getSharedPreferences("AppSettings", MODE_PRIVATE)
+                .getString("app_lang", "");
+        if (lang.isEmpty()) return;
+
+        java.util.Locale locale = new java.util.Locale(lang);
+        java.util.Locale.setDefault(locale);
+        android.content.res.Configuration config = new android.content.res.Configuration();
+        config.setLocale(locale);
+        getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+    }
+
+    public void setAppLanguage(String lang) {
+        getSharedPreferences("AppSettings", MODE_PRIVATE)
+                .edit()
+                .putString("app_lang", lang)
+                .apply();
+        applySavedLanguage();
+        recreate();
     }
 
     private void setupFabButtons() {

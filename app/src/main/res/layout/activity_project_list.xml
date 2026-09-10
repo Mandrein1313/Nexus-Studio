@@ -22,7 +22,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="#1A1B26"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:title="Projects"
+            app:title="@string/projects_title"
             app:titleTextColor="#C0CAF5"
             app:navigationIcon="@drawable/ic_menu_24"
             app:contentInsetStartWithNavigation="0dp" />
@@ -48,7 +48,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="MOBILE ANDROID IDE"
+                    android:text="@string/projects_subtitle"
                     android:textColor="#565F89"
                     android:textSize="11sp"
                     android:letterSpacing="0.12" />
@@ -56,7 +56,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Nexus Studio"
+                    android:text="@string/app_name"
                     android:textColor="#C0CAF5"
                     android:textSize="26sp"
                     android:textStyle="bold"
@@ -65,7 +65,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="เลือก Template สร้างโปรเจกต์ Gradle แล้วแก้โค้ด Java/Kotlin และ XML ได้จากมือถือ"
+                    android:text="@string/projects_description"
                     android:textColor="#565F89"
                     android:textSize="13sp"
                     android:lineSpacingExtra="2dp"
@@ -76,7 +76,7 @@
                     android:id="@+id/btnNewProject"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="+  New project"
+                    android:text="@string/btn_new_project"
                     android:textColor="#FFFFFF"
                     android:textSize="15sp"
                     android:textStyle="bold"
@@ -109,7 +109,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="No projects yet"
+                        android:text="@string/no_projects_yet"
                         android:textColor="#C0CAF5"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -117,7 +117,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="เริ่มจาก No Activity, Empty, Basic, Drawer, Bottom navigation หรือ Tabbed"
+                        android:text="@string/no_projects_hint"
                         android:textColor="#565F89"
                         android:textSize="13sp"
                         android:gravity="center"
@@ -128,7 +128,7 @@
                         android:id="@+id/btnChooseTemplate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Choose a template"
+                        android:text="@string/btn_choose_template"
                         android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"

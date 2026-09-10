@@ -1,4 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Nexus Studio</string>
-</resources>
 
+    <!-- Project list screen -->
+    <string name="projects_title">Projects</string>
+    <string name="projects_subtitle">MOBILE ANDROID IDE</string>
+    <string name="projects_description">Choose a template to create a Gradle project, then edit Java/Kotlin and XML from your phone</string>
+    <string name="btn_new_project">+  New project</string>
+    <string name="no_projects_yet">No projects yet</string>
+    <string name="no_projects_hint">Start with No Activity, Empty, Basic, Drawer, Bottom navigation, or Tabbed</string>
+    <string name="btn_choose_template">Choose a template</string>
+
+    <!-- Drawer menu -->
+    <string name="nav_github_settings">GitHub Settings</string>
+    <string name="nav_ai_settings">AI Settings</string>
+    <string name="nav_import_github">Import from GitHub</string>
+    <string name="nav_toggle_theme">Toggle light/dark theme</string>
+    <string name="nav_language">Language</string>
+    <string name="nav_general">General</string>
+    <string name="nav_about">About Nexus Studio</string>
+
+    <!-- Toolbar menu -->
+    <string name="action_github_settings">GitHub Settings</string>
+    <string name="action_toggle_theme">Toggle light/dark theme</string>
+
+    <!-- Language dialog -->
+    <string name="settings_language">Language</string>
+    <string name="lang_english">English</string>
+    <string name="lang_thai">ไทย</string>
+
+    <!-- About -->
+    <string name="about_title">Nexus Studio</string>
+    <string name="about_message">Mobile Android IDE\nWrite, edit, and build apps from your phone</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_delete">Delete</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_download">Download</string>
+
+    <!-- Delete project -->
+    <string name="delete_project_title">Delete project</string>
+    <string name="delete_project_message">Delete \"%1$s\"?</string>
+    <string name="delete_project_done">Deleted</string>
+
+    <!-- Theme toggle -->
+    <string name="theme_light_enabled">Light theme (applies when opening a project)</string>
+    <string name="theme_dark_enabled">Dark theme (applies when opening a project)</string>
+
+    <!-- Import from GitHub -->
+    <string name="import_github_title">Import project from GitHub</string>
+    <string name="import_github_message">Only the latest commit will be fetched (shallow clone) for speed</string>
+    <string name="import_github_hint">https://github.com/user/repository.git</string>
+    <string name="import_github_empty_url">Please enter a URL first</string>
+    <string name="import_github_started">Clone started in the background</string>
+
+    <!-- GitHub Settings dialog -->
+    <string name="github_settings_title">GitHub Sync Settings</string>
+    <string name="github_settings_desc">This data is saved to upload project sources for cloud builds automatically</string>
+    <string name="github_username">GitHub Username</string>
+    <string name="github_username_hint">Enter your GitHub username</string>
+    <string name="github_email">GitHub Email</string>
+    <string name="github_email_hint">Email linked to your GitHub account</string>
+    <string name="github_token">Personal Access Token (Classic)</string>
+    <string name="github_token_hint">Paste access token (ghp_…)</string>
+    <string name="github_settings_empty">Please enter Username and Token</string>
+    <string name="github_settings_saved">Settings saved</string>
+
+    <!-- Console / Build (UI strings) -->
+    <string name="btn_run">Run</string>
+    <string name="btn_stop">Stop</string>
+    <string name="btn_clear">Clear</string>
+    <string name="build_please_open_project">Please open a project first</string>
+    <string name="build_github_not_set">GitHub account not set. Configure it in settings first.</string>
+    <string name="build_started">Cloud build started…</string>
+    <string name="build_success">Build successful</string>
+    <string name="build_failed">Build failed</string>
+    <string name="console_ready">Ready. Press Run to assembleDebug.</string>
+
+    <!-- Preview -->
+    <string name="preview_xml_only">Preview supports .xml (layout) files only</string>
+    <string name="preview_mode">Layout Preview</string>
+    <string name="preview_phone">Phone</string>
+    <string name="preview_tablet">Tablet</string>
+</resources>

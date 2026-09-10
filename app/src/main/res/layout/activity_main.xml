@@ -1,3 +1,4 @@
+นี่คือไฟล์ activity_main.xml ฉบับปรับแก้เรียบร้อยแล้วครับ โดยอัปเดตการใช้ String Resources (@string/...) ทั้งปุ่ม Console และข้อความอื่นๆ ภายในไฟล์ให้รองรับการสลับภาษาตามที่คุณต้องการครบถ้วนครับ:
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -34,7 +35,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="No file open"
+                android:text="@string/no_file_open"
                 android:textColor="#565F89"
                 android:textSize="12sp"
                 android:maxLines="1"
@@ -44,7 +45,7 @@
                 android:id="@+id/tvSaveStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Saved"
+                android:text="@string/saved"
                 android:textColor="#9ECE6A"
                 android:textSize="12sp"
                 android:layout_marginStart="8dp" />
@@ -81,7 +82,7 @@
                     android:layout_width="0dp"
                     android:layout_height="40dp"
                     android:layout_weight="1"
-                    android:hint="ค้นหา..."
+                    android:hint="@string/search_hint"
                     android:textColor="#C0CAF5"
                     android:textColorHint="#565F89"
                     android:textSize="14sp"
@@ -140,7 +141,7 @@
                     android:layout_width="0dp"
                     android:layout_height="40dp"
                     android:layout_weight="1"
-                    android:hint="แทนที่ด้วย..."
+                    android:hint="@string/replace_hint"
                     android:textColor="#C0CAF5"
                     android:textColorHint="#565F89"
                     android:textSize="14sp"
@@ -156,7 +157,7 @@
                     android:gravity="center"
                     android:paddingStart="12dp"
                     android:paddingEnd="12dp"
-                    android:text="แทนที่"
+                    android:text="@string/btn_replace"
                     android:textColor="#7AA2F7"
                     android:textSize="13sp" />
 
@@ -167,7 +168,7 @@
                     android:gravity="center"
                     android:paddingStart="12dp"
                     android:paddingEnd="12dp"
-                    android:text="ทั้งหมด"
+                    android:text="@string/btn_replace_all"
                     android:textColor="#BB9AF7"
                     android:textSize="13sp" />
             </LinearLayout>
@@ -183,7 +184,7 @@
                     android:id="@+id/cbCaseSensitive"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ตัวพิมพ์เล็ก-ใหญ่"
+                    android:text="@string/case_sensitive"
                     android:textColor="#A9B1D6"
                     android:textSize="12sp"
                     android:buttonTint="#7AA2F7" />
@@ -207,7 +208,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="เปิดไฟล์จากเมนูซ้าย"
+                    android:text="@string/open_file_from_drawer"
                     android:textColor="#565F89"
                     android:textSize="15sp" />
             </FrameLayout>
@@ -410,7 +411,7 @@
                     android:gravity="center"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
-                    android:text="▶  Run"
+                    android:text="@string/btn_run"
                     android:textColor="#FFFFFF"
                     android:textSize="13sp"
                     android:textStyle="bold"
@@ -424,7 +425,7 @@
                     android:gravity="center"
                     android:paddingStart="14dp"
                     android:paddingEnd="14dp"
-                    android:text="■  Stop"
+                    android:text="@string/btn_stop"
                     android:textColor="#C0CAF5"
                     android:textSize="13sp"
                     android:background="@drawable/bg_btn_console_secondary" />
@@ -437,7 +438,7 @@
                     android:gravity="center"
                     android:paddingStart="14dp"
                     android:paddingEnd="14dp"
-                    android:text="🗑  Clear"
+                    android:text="@string/btn_clear"
                     android:textColor="#C0CAF5"
                     android:textSize="13sp"
                     android:background="@drawable/bg_btn_console_secondary" />
@@ -521,7 +522,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="โครงสร้างโปรเจกต์"
+                android:text="@string/project_structure"
                 android:textColor="#C0CAF5"
                 android:textSize="14sp"
                 android:textStyle="bold"
@@ -537,3 +538,4 @@
     </com.google.android.material.navigation.NavigationView>
 
 </androidx.drawerlayout.widget.DrawerLayout>
+
