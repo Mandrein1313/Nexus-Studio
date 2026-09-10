@@ -1346,7 +1346,7 @@ private void toggleXmlPreview() {
     final int C_CYAN   = Color.parseColor("#7DCFFF");
     final int C_GREEN  = Color.parseColor("#9ECE6A");
     final int C_MINT   = Color.parseColor("#73DACA");
-    final int C_ORANGE = Color.parseColor("#E0AF68");
+    final int C_ORANGE = Color.parseColor("#FF00BCE0");
     final int C_RED    = Color.parseColor("#F7768E");
     final int C_MUTED  = Color.parseColor("#565F89");
     final int C_TEXT   = Color.parseColor("#A9B1D6");
