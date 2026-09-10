@@ -66,16 +66,27 @@
     <string name="github_settings_empty">Please enter Username and Token</string>
     <string name="github_settings_saved">Settings saved</string>
 
-    <!-- Console / Build (UI strings) -->
-    <string name="btn_run">Run</string>
-    <string name="btn_stop">Stop</string>
-    <string name="btn_clear">Clear</string>
+    <!-- Console / Build -->
+    <string name="btn_run">▶  Run</string>
+    <string name="btn_stop">■  Stop</string>
+    <string name="btn_clear">🗑  Clear</string>
     <string name="build_please_open_project">Please open a project first</string>
     <string name="build_github_not_set">GitHub account not set. Configure it in settings first.</string>
     <string name="build_started">Cloud build started…</string>
     <string name="build_success">Build successful</string>
     <string name="build_failed">Build failed</string>
     <string name="console_ready">Ready. Press Run to assembleDebug.</string>
+
+    <!-- Main editor (activity_main) — ตัวที่เคย missing -->
+    <string name="no_file_open">No file open</string>
+    <string name="saved">Saved</string>
+    <string name="search_hint">Search…</string>
+    <string name="replace_hint">Replace with…</string>
+    <string name="btn_replace">Replace</string>
+    <string name="btn_replace_all">All</string>
+    <string name="case_sensitive">Match case</string>
+    <string name="open_file_from_drawer">Open a file from the left menu</string>
+    <string name="project_structure">Project structure</string>
 
     <!-- Preview -->
     <string name="preview_xml_only">Preview supports .xml (layout) files only</string>
