@@ -150,9 +150,9 @@ public class BuildSummaryAnalyzer {
             hasError = true;
             if ("UNKNOWN".equals(errorType)) {
                 errorType = "BUILD_COMPILE_FAILED";
-                errorDetails = "กระบวนการคอมไพล์ล้มเหลว";
+                errorDetails = "Build / compile failed";
             }
-            return true;
+            return false; // เก็บ error ต่อ อย่าหยุดอ่าน
         }
 
         return false;
@@ -175,7 +175,7 @@ public class BuildSummaryAnalyzer {
                 if (existing.file.equals(file)
                         && existing.line == lineNumber
                         && existing.message.equals(message)) {
-                    return true;
+                    return false; // ซ้ำ — ไม่หยุดอ่าน
                 }
             }
 
@@ -185,7 +185,7 @@ public class BuildSummaryAnalyzer {
             hasError = true;
             errorType = typeStr;
             errorDetails = message;
-            return true;
+            return false; // เจอ error แล้ว แต่ให้อ่าน log ต่อ
         } catch (Exception e) {
             e.printStackTrace();
         }

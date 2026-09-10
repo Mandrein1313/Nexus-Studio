@@ -7,11 +7,13 @@ import android.os.Looper;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.zip.GZIPInputStream;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -141,7 +143,9 @@ public class BuildTaskManager {
                         sendProgress("Pipeline status: [" + status.toUpperCase() + "]\n", COLOR_WARNING);
 
                         if ("completed".equals(status)) {
-                            String conclusion = latestRun.getString("conclusion");
+                            String conclusion = latestRun.optString("conclusion", "unknown");
+                            sendProgress("Conclusion: [" + conclusion.toUpperCase() + "]\n", COLOR_WARNING);
+
                             if ("success".equals(conclusion)) {
                                 sendProgress("> Task :app:processDebugManifest\n", COLOR_TASK);
                                 sendProgress("> Task :app:compileDebugJavaWithJavac\n", COLOR_TASK);
@@ -165,6 +169,8 @@ public class BuildTaskManager {
                                                     sendProgress(
                                                             "APK → " + apkFile.getAbsolutePath() + "\n",
                                                             COLOR_INFO);
+                                                } else if (!success) {
+                                                    sendProgress("APK download failed\n", COLOR_ERROR);
                                                 }
                                                 postUiEvent(l -> l.onBuildFinished(
                                                         success,
@@ -174,9 +180,18 @@ public class BuildTaskManager {
                                 downloadTask.startFetchAndInstall();
 
                             } else {
+                                // ===== ล้มเหลว → ฟ้อง error =====
                                 sendProgress("\nBUILD FAILED\n", COLOR_ERROR);
-                                sendProgress("Fetching error logs from server...\n", COLOR_ERROR);
+                                sendProgress("Conclusion: " + conclusion + "\n", COLOR_ERROR);
+                                sendProgress("Fetching error logs from GitHub Actions...\n", COLOR_ERROR);
+
                                 fetchAndParseBuildLogs(token, repoPath, runId);
+
+                                sendProgress(
+                                        "Full log: https://github.com/" + repoPath
+                                                + "/actions/runs/" + runId + "\n",
+                                        COLOR_INFO);
+
                                 postUiEvent(l -> l.onBuildFinished(false, null));
                             }
                             return;
@@ -196,49 +211,97 @@ public class BuildTaskManager {
 
     private void fetchAndParseBuildLogs(String token, String repoPath, long runId) {
         try {
-            String jobsUrl = "https://api.github.com/repos/" + repoPath + "/actions/runs/" + runId + "/jobs";
+            String jobsUrl = "https://api.github.com/repos/" + repoPath
+                    + "/actions/runs/" + runId + "/jobs";
             HttpURLConnection conn = (HttpURLConnection) new URL(jobsUrl).openConnection();
             conn.setRequestProperty("Authorization", "Bearer " + token);
+            conn.setRequestProperty("Accept", "application/vnd.github.v3+json");
 
-            if (conn.getResponseCode() == 200) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) sb.append(line);
-                reader.close();
+            if (conn.getResponseCode() != 200) {
+                sendProgress("Could not list jobs (HTTP " + conn.getResponseCode() + ")\n", COLOR_ERROR);
+                return;
+            }
 
-                JSONObject json = new JSONObject(sb.toString());
-                JSONArray jobs = json.getJSONArray("jobs");
-                if (jobs.length() > 0) {
-                    JSONObject job = jobs.getJSONObject(0);
-                    long jobId = job.getLong("id");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) sb.append(line);
+            reader.close();
 
-                    String logUrl = "https://api.github.com/repos/" + repoPath + "/actions/jobs/" + jobId + "/logs";
-                    HttpURLConnection logConn = (HttpURLConnection) new URL(logUrl).openConnection();
-                    logConn.setRequestProperty("Authorization", "Bearer " + token);
+            JSONObject json = new JSONObject(sb.toString());
+            JSONArray jobs = json.getJSONArray("jobs");
+            if (jobs.length() == 0) {
+                sendProgress("No jobs found in this run\n", COLOR_ERROR);
+                return;
+            }
 
-                    if (logConn.getResponseCode() == 200) {
-                        BufferedReader logReader =
-                                new BufferedReader(new InputStreamReader(logConn.getInputStream()));
-                        final BuildSummaryAnalyzer analyzer =
-                                (externalAnalyzer != null) ? externalAnalyzer : new BuildSummaryAnalyzer();
+            JSONObject job = jobs.getJSONObject(0);
+            long jobId = job.getLong("id");
+            String jobConclusion = job.optString("conclusion", "unknown");
+            sendProgress("Job conclusion: " + jobConclusion + "\n", COLOR_WARNING);
 
-                        while ((line = logReader.readLine()) != null) {
-                            boolean shouldStop = analyzer.analyzeLine(line, COLOR_WARNING, (txt, col) -> {
-                                // keep internal only
-                            });
-                            if (shouldStop) break;
-                        }
-                        logReader.close();
+            String logUrl = "https://api.github.com/repos/" + repoPath
+                    + "/actions/jobs/" + jobId + "/logs";
+            HttpURLConnection logConn = (HttpURLConnection) new URL(logUrl).openConnection();
+            logConn.setRequestProperty("Authorization", "Bearer " + token);
+            logConn.setRequestProperty("Accept", "application/vnd.github.v3+json");
+            logConn.setRequestProperty("Accept-Encoding", "gzip, deflate");
 
-                        analyzer.printSummary((txt, col) -> sendProgress(txt, col));
-                        return;
-                    }
+            int logCode = logConn.getResponseCode();
+            if (logCode != 200) {
+                sendProgress("Could not fetch job logs (HTTP " + logCode + ")\n", COLOR_ERROR);
+                sendProgress("Open Actions tab on GitHub to see compile errors\n", COLOR_INFO);
+                return;
+            }
+
+            InputStream raw = logConn.getInputStream();
+            String encoding = logConn.getContentEncoding();
+            if (encoding != null && encoding.toLowerCase().contains("gzip")) {
+                raw = new GZIPInputStream(raw);
+            }
+
+            BufferedReader logReader = new BufferedReader(new InputStreamReader(raw, "UTF-8"));
+            final BuildSummaryAnalyzer analyzer =
+                    (externalAnalyzer != null) ? externalAnalyzer : new BuildSummaryAnalyzer();
+            analyzer.clearErrors();
+
+            int errorLinesShown = 0;
+            final int MAX_RAW_ERROR_LINES = 40;
+
+            while ((line = logReader.readLine()) != null) {
+                // เก็บเข้า analyzer — ไม่หยุดอ่านเร็วเกินไป
+                analyzer.analyzeLine(line, COLOR_WARNING, (txt, col) -> { /* internal */ });
+
+                String lower = line.toLowerCase();
+                boolean looksError = lower.contains("error:")
+                        || lower.contains("e: ")
+                        || lower.contains("failure:")
+                        || lower.contains("what went wrong")
+                        || lower.contains("execution failed")
+                        || lower.contains("aapt")
+                        || (line.contains(".java:") && lower.contains("error"))
+                        || (line.contains(".kt:") && lower.contains("error"))
+                        || (line.contains(".xml:") && lower.contains("error"));
+
+                if (looksError && errorLinesShown < MAX_RAW_ERROR_LINES) {
+                    sendProgress(line + "\n", COLOR_ERROR);
+                    errorLinesShown++;
                 }
             }
-            sendProgress("Could not fetch build logs from GitHub\n", COLOR_ERROR);
+            logReader.close();
+
+            if (analyzer.hasError()) {
+                analyzer.printSummary((txt, col) -> sendProgress(txt, col));
+            } else if (errorLinesShown == 0) {
+                sendProgress("No parseable error lines found in log\n", COLOR_WARNING);
+                sendProgress("Check the Actions tab on GitHub for full details\n", COLOR_INFO);
+            } else {
+                sendProgress("\n(See error lines above)\n", COLOR_WARNING);
+            }
+
         } catch (Exception e) {
             sendProgress("Log parse error: " + e.getMessage() + "\n", COLOR_ERROR);
+            sendProgress("Open GitHub → Actions to view the full build log\n", COLOR_INFO);
         }
     }
 

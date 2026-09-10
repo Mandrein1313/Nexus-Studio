@@ -1368,34 +1368,32 @@ private void toggleXmlPreview() {
                         boolean isErrorLine = lowerText.contains("error:")
                                 || lowerText.contains("failed:")
                                 || lowerText.contains("build failed")
-                                || color == Color.RED;
+                                || color == Color.RED
+                                || color == Color.parseColor("#FF8A80");
 
-                        boolean hasFailed = analyzer.analyzeLine(text, color,
-                                new BuildSummaryAnalyzer.LogOutputListener() {
-                                    @Override
-                                    public void onAppendLog(String logText, int logColor) {
-                                        appendLog(logText, logColor);
-                                    }
-                                });
-
-                        if (hasFailed) {
-                            isPipelineStopped[0] = true;
-                            showToast("Build failed (Exit Code 1)");
-                            return;
-                        }
+                        // เก็บ error ไว้วิเคราะห์ — แต่ไม่หยุดแสดง log
+                        analyzer.analyzeLine(text, color, new BuildSummaryAnalyzer.LogOutputListener() {
+                            @Override
+                            public void onAppendLog(String logText, int logColor) {
+                                // ไม่ append ซ้ำจากตรงนี้
+                            }
+                        });
 
                         // ข้ามข้อความภายในบางแบบ
                         if (text != null && (text.startsWith("📍") || text.startsWith("💬"))) {
                             return;
                         }
 
+                        // แสดงทุกบรรทัด
                         if (color == Color.GREEN
                                 || lowerText.contains("success")
                                 || lowerText.contains("build successful")) {
                             appendLog(text, TerminalColor.SUGGEST_GREEN);
-                        } else if (color == Color.YELLOW) {
+                        } else if (color == Color.YELLOW
+                                || color == Color.parseColor("#FFB74D")) {
                             appendLog(text, TerminalColor.TARGET_YELLOW);
-                        } else if (color == Color.CYAN) {
+                        } else if (color == Color.CYAN
+                                || color == Color.parseColor("#4FC3F7")) {
                             appendLog(text, TerminalColor.LOG_CYAN);
                         } else if (isErrorLine) {
                             appendLog(text, TerminalColor.DETAIL_RED);
@@ -1432,24 +1430,7 @@ private void toggleXmlPreview() {
                             });
                         } else {
                             showToast("Build failed");
-                            appendLog("\nBUILD FAILED\n", TerminalColor.ERROR_RED);
-
-                            if (analyzer != null) {
-                                analyzer.printSummary(
-                                        new BuildSummaryAnalyzer.LogOutputListener() {
-                                            @Override
-                                            public void onAppendLog(String text, int color) {
-                                                if (tvConsole == null && consolePanel != null) {
-                                                    tvConsole = consolePanel.findViewById(R.id.tvConsole);
-                                                }
-                                                if (dialogPanelAdapter != null) {
-                                                    TextView t = dialogPanelAdapter.getTvConsole();
-                                                    if (t != null) tvConsole = t;
-                                                }
-                                                appendColoredText(tvConsole, text, color);
-                                            }
-                                        });
-                            }
+                            // ไม่ต้อง append "BUILD FAILED" ซ้ำ — BuildTaskManager พิมพ์แล้ว
 
                             final ParsedError err = analyzer.getLastError();
                             if (err != null) {
