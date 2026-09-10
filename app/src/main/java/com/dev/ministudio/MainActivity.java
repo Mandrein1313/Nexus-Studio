@@ -1572,12 +1572,10 @@ public void openFile(File file) {
         }
     }
 
-    /** แสดงข้อความลง Console พร้อมสี (int ARGB) */
-private void appendLog(String text, int color) {
+ private void appendLog(String text, int color) {
     if (text == null || text.isEmpty()) return;
 
     runOnUiThread(() -> {
-        // ผูก tvConsole ถ้ายังไม่มี
         if (tvConsole == null && consolePanel != null) {
             tvConsole = consolePanel.findViewById(R.id.tvConsole);
         }
@@ -1595,7 +1593,6 @@ private void appendLog(String text, int color) {
         );
         tvConsole.append(spannable);
 
-        // auto-scroll ลงล่าง
         if (consoleScrollView != null) {
             consoleScrollView.post(() -> consoleScrollView.fullScroll(View.FOCUS_DOWN));
         } else {
@@ -1603,39 +1600,6 @@ private void appendLog(String text, int color) {
         }
     });
 }
-
-/** ใช้กับ TerminalColor เดิม (ถ้ายังมีที่เรียกแบบเก่า) */
-private void appendLog(String text, TerminalColor termColor) {
-    int color;
-    switch (termColor) {
-        case SUGGEST_GREEN:
-            color = Color.parseColor("#9ECE6A");
-            break;
-        case TARGET_YELLOW:
-            color = Color.parseColor("#E0AF68");
-            break;
-        case LOG_CYAN:
-            color = Color.parseColor("#7DCFFF");
-            break;
-        case DETAIL_RED:
-        case ERROR_RED:
-            color = Color.parseColor("#F7768E");
-            break;
-        case BORDER_BLUE:
-            color = Color.parseColor("#7AA2F7");
-            break;
-        case LOG_GRAY:
-            color = Color.parseColor("#565F89");
-            break;
-        case LOG_WHITE:
-        case TEXT_WHITE:
-        default:
-            color = Color.parseColor("#A9B1D6");
-            break;
-    }
-    appendLog(text, color);
-}
-
 private void setupShortcutBar() {
     LinearLayout shortcutBar = findViewById(R.id.shortcutBar);
     LinearLayout aiShortcutBar = findViewById(R.id.aiShortcutBar);
