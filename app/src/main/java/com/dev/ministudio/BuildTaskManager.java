@@ -35,11 +35,15 @@ public class BuildTaskManager {
     private final BuildListener listener;
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
 
-    private final int COLOR_INFO = Color.parseColor("#4FC3F7");
-    private final int COLOR_SUCCESS = Color.parseColor("#81C784");
-    private final int COLOR_ERROR = Color.parseColor("#FF8A80");
-    private final int COLOR_WARNING = Color.parseColor("#FFB74D");
-    private final int COLOR_TASK = Color.parseColor("#A9B1D6");
+    // ===== Tokyo Night colors =====
+    private final int COLOR_CMD     = Color.parseColor("#7DCFFF"); // ฟ้าอ่อน — คำสั่ง $
+    private final int COLOR_INFO    = Color.parseColor("#7AA2F7"); // ฟ้า
+    private final int COLOR_SUCCESS = Color.parseColor("#9ECE6A"); // เขียว
+    private final int COLOR_ERROR   = Color.parseColor("#F7768E"); // แดง
+    private final int COLOR_WARNING = Color.parseColor("#E0AF68"); // ส้ม
+    private final int COLOR_TASK    = Color.parseColor("#BB9AF7"); // ม่วง — > Task
+    private final int COLOR_MUTED   = Color.parseColor("#565F89"); // เทา
+    private final int COLOR_APK     = Color.parseColor("#73DACA"); // มิ้นต์ — APK path
 
     private BuildSummaryAnalyzer externalAnalyzer;
 
@@ -60,8 +64,8 @@ public class BuildTaskManager {
 
         new Thread(() -> {
             try {
-                sendProgress("$ ./gradlew :app:assembleDebug\n", COLOR_INFO);
-                sendProgress("Starting Gradle Daemon...\n", COLOR_INFO);
+                sendProgress("$ ./gradlew :app:assembleDebug\n", COLOR_CMD);
+                sendProgress("Starting Gradle Daemon...\n", COLOR_MUTED);
 
                 File projectDir = new File(projectPath);
 
@@ -115,7 +119,7 @@ public class BuildTaskManager {
         try {
             String urlStr = "https://api.github.com/repos/" + repoPath + "/actions/runs?per_page=1";
             sendProgress("> Task :app:mergeDebugResources\n", COLOR_TASK);
-            sendProgress("Waiting for GitHub Actions runner...\n", COLOR_INFO);
+            sendProgress("Waiting for GitHub Actions runner...\n", COLOR_MUTED);
 
             long startTime = System.currentTimeMillis();
             long runId = -1;
@@ -140,27 +144,33 @@ public class BuildTaskManager {
                         runId = latestRun.getLong("id");
                         String status = latestRun.getString("status");
 
-                        sendProgress("Pipeline status: [" + status.toUpperCase() + "]\n", COLOR_WARNING);
+                        if ("in_progress".equals(status) || "queued".equals(status)) {
+                            sendProgress("Pipeline status: [" + status.toUpperCase() + "]\n", COLOR_WARNING);
+                        } else {
+                            sendProgress("Pipeline status: [" + status.toUpperCase() + "]\n", COLOR_INFO);
+                        }
 
                         if ("completed".equals(status)) {
                             String conclusion = latestRun.optString("conclusion", "unknown");
-                            sendProgress("Conclusion: [" + conclusion.toUpperCase() + "]\n", COLOR_WARNING);
+                            boolean ok = "success".equals(conclusion);
+                            sendProgress("Conclusion: [" + conclusion.toUpperCase() + "]\n",
+                                    ok ? COLOR_SUCCESS : COLOR_ERROR);
 
-                            if ("success".equals(conclusion)) {
+                            if (ok) {
                                 sendProgress("> Task :app:processDebugManifest\n", COLOR_TASK);
                                 sendProgress("> Task :app:compileDebugJavaWithJavac\n", COLOR_TASK);
                                 sendProgress("> Task :app:dexBuilderDebug\n", COLOR_TASK);
                                 sendProgress("> Task :app:packageDebug\n", COLOR_TASK);
                                 sendProgress("> Task :app:assembleDebug\n", COLOR_TASK);
                                 sendProgress("\nBUILD SUCCESSFUL\n", COLOR_SUCCESS);
-                                sendProgress("Fetching APK artifact...\n", COLOR_SUCCESS);
+                                sendProgress("Fetching APK artifact...\n", COLOR_INFO);
 
                                 DownloadTaskManager downloadTask = new DownloadTaskManager(
                                         context, projectName,
                                         new DownloadTaskManager.DownloadListener() {
                                             @Override
                                             public void onDownloadLog(String text, int color) {
-                                                sendProgress(text + "\n", color);
+                                                sendProgress(text.endsWith("\n") ? text : text + "\n", color);
                                             }
 
                                             @Override
@@ -168,7 +178,7 @@ public class BuildTaskManager {
                                                 if (success && apkFile != null) {
                                                     sendProgress(
                                                             "APK → " + apkFile.getAbsolutePath() + "\n",
-                                                            COLOR_INFO);
+                                                            COLOR_APK);
                                                 } else if (!success) {
                                                     sendProgress("APK download failed\n", COLOR_ERROR);
                                                 }
@@ -180,10 +190,9 @@ public class BuildTaskManager {
                                 downloadTask.startFetchAndInstall();
 
                             } else {
-                                // ===== ล้มเหลว → ฟ้อง error =====
                                 sendProgress("\nBUILD FAILED\n", COLOR_ERROR);
                                 sendProgress("Conclusion: " + conclusion + "\n", COLOR_ERROR);
-                                sendProgress("Fetching error logs from GitHub Actions...\n", COLOR_ERROR);
+                                sendProgress("Fetching error logs from GitHub Actions...\n", COLOR_WARNING);
 
                                 fetchAndParseBuildLogs(token, repoPath, runId);
 
@@ -269,7 +278,6 @@ public class BuildTaskManager {
             final int MAX_RAW_ERROR_LINES = 40;
 
             while ((line = logReader.readLine()) != null) {
-                // เก็บเข้า analyzer — ไม่หยุดอ่านเร็วเกินไป
                 analyzer.analyzeLine(line, COLOR_WARNING, (txt, col) -> { /* internal */ });
 
                 String lower = line.toLowerCase();

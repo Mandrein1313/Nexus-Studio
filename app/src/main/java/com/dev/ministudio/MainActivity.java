@@ -1340,8 +1340,18 @@ private void toggleXmlPreview() {
     final boolean[] isPipelineStopped = {false};
     final String projectName = currentProject.getProjectName();
 
+    // สี Tokyo Night
+    final int C_PURPLE = Color.parseColor("#BB9AF7");
+    final int C_BLUE   = Color.parseColor("#7AA2F7");
+    final int C_CYAN   = Color.parseColor("#7DCFFF");
+    final int C_GREEN  = Color.parseColor("#9ECE6A");
+    final int C_MINT   = Color.parseColor("#73DACA");
+    final int C_ORANGE = Color.parseColor("#E0AF68");
+    final int C_RED    = Color.parseColor("#F7768E");
+    final int C_MUTED  = Color.parseColor("#565F89");
+    final int C_TEXT   = Color.parseColor("#A9B1D6");
+
     new Handler(Looper.getMainLooper()).postDelayed(() -> {
-        // ผูก tvConsole จากแผงล่าง (หรือ dialog ถ้ายังใช้)
         if (tvConsole == null && consolePanel != null) {
             tvConsole = consolePanel.findViewById(R.id.tvConsole);
         }
@@ -1351,10 +1361,11 @@ private void toggleXmlPreview() {
         }
         if (tvConsole != null) tvConsole.setText("");
 
-        // Header สไตล์ IDE
-        appendLog("Nexus Studio  ·  Gradle 8.2  ·  " + projectName + "\n", TerminalColor.LOG_GRAY);
-        appendLog("Ready. Press Run to assembleDebug.\n\n", TerminalColor.TEXT_WHITE);
-
+        // Header มีสี
+        appendLog("Nexus Studio", Color.parseColor("#BB9AF7"));
+        appendLog("  ·  Gradle 8.2  ·  ", Color.parseColor("#565F89"));
+        appendLog(projectName + "\n", Color.parseColor("#7AA2F7"));
+        appendLog("Ready. Press Run to assembleDebug.\n\n", Color.parseColor("#A9B1D6"));
         BuildTaskManager buildTask = new BuildTaskManager(
                 MainActivity.this,
                 currentProject.getRootPath(),
@@ -1363,49 +1374,84 @@ private void toggleXmlPreview() {
                     @Override
                     public void onLogAppend(final String text, final int color) {
                         if (isPipelineStopped[0]) return;
+                        if (text == null) return;
 
-                        String lowerText = text != null ? text.toLowerCase() : "";
-                        boolean isErrorLine = lowerText.contains("error:")
-                                || lowerText.contains("failed:")
-                                || lowerText.contains("build failed")
-                                || color == Color.RED
-                                || color == Color.parseColor("#FF8A80");
+                        String lowerText = text.toLowerCase();
 
-                        // เก็บ error ไว้วิเคราะห์ — แต่ไม่หยุดแสดง log
-                        analyzer.analyzeLine(text, color, new BuildSummaryAnalyzer.LogOutputListener() {
-                            @Override
-                            public void onAppendLog(String logText, int logColor) {
-                                // ไม่ append ซ้ำจากตรงนี้
-                            }
-                        });
+                        // เก็บ error ไว้วิเคราะห์ — ไม่หยุดแสดง log
+                        analyzer.analyzeLine(text, color,
+                                new BuildSummaryAnalyzer.LogOutputListener() {
+                                    @Override
+                                    public void onAppendLog(String logText, int logColor) {
+                                        // ไม่ append ซ้ำ
+                                    }
+                                });
 
-                        // ข้ามข้อความภายในบางแบบ
-                        if (text != null && (text.startsWith("📍") || text.startsWith("💬"))) {
+                        if (text.startsWith("📍") || text.startsWith("💬")) {
                             return;
                         }
 
-                        // แสดงทุกบรรทัด
-                        if (color == Color.GREEN
-                                || lowerText.contains("success")
-                                || lowerText.contains("build successful")) {
-                            appendLog(text, TerminalColor.SUGGEST_GREEN);
+                        // เลือกสี: keyword ก่อน แล้วค่อยใช้สีจาก BuildTaskManager
+                        int finalColor = color;
+
+                        if (lowerText.contains("build successful")) {
+                            finalColor = C_GREEN;
+                        } else if (lowerText.contains("build failed")
+                                || lowerText.contains("error:")
+                                || lowerText.startsWith("e: ")
+                                || lowerText.contains("execution failed")) {
+                            finalColor = C_RED;
+                        } else if (text.startsWith("$ ")) {
+                            finalColor = C_CYAN;
+                        } else if (text.startsWith("> Task")
+                                || text.startsWith("> Configure")) {
+                            finalColor = C_PURPLE;
+                        } else if (lowerText.startsWith("apk →")
+                                || lowerText.startsWith("apk ->")) {
+                            finalColor = C_MINT;
+                        } else if (lowerText.contains("pipeline status")
+                                || lowerText.contains("in_progress")
+                                || lowerText.contains("waiting")) {
+                            finalColor = C_ORANGE;
+                        } else if (lowerText.contains("conclusion: [success]")
+                                || lowerText.contains("sources uploaded")) {
+                            finalColor = C_GREEN;
+                        } else if (lowerText.contains("conclusion: [failure]")
+                                || lowerText.contains("conclusion: failure")) {
+                            finalColor = C_RED;
+                        } else if (lowerText.startsWith("full log:")
+                                || lowerText.contains("fetching")) {
+                            finalColor = C_BLUE;
+                        } else if (color == Color.GREEN) {
+                            finalColor = C_GREEN;
+                        } else if (color == Color.RED
+                                || color == Color.parseColor("#FF8A80")
+                                || color == Color.parseColor("#F7768E")) {
+                            finalColor = C_RED;
                         } else if (color == Color.YELLOW
-                                || color == Color.parseColor("#FFB74D")) {
-                            appendLog(text, TerminalColor.TARGET_YELLOW);
+                                || color == Color.parseColor("#FFB74D")
+                                || color == Color.parseColor("#E0AF68")) {
+                            finalColor = C_ORANGE;
                         } else if (color == Color.CYAN
-                                || color == Color.parseColor("#4FC3F7")) {
-                            appendLog(text, TerminalColor.LOG_CYAN);
-                        } else if (isErrorLine) {
-                            appendLog(text, TerminalColor.DETAIL_RED);
-                        } else {
-                            appendLog(text, TerminalColor.TEXT_WHITE);
+                                || color == Color.parseColor("#4FC3F7")
+                                || color == Color.parseColor("#7AA2F7")) {
+                            finalColor = C_BLUE;
+                        } else if (color == Color.parseColor("#BB9AF7")) {
+                            finalColor = C_PURPLE;
+                        } else if (color == Color.parseColor("#565F89")) {
+                            finalColor = C_MUTED;
+                        } else if (color == Color.parseColor("#A9B1D6")
+                                || color == Color.WHITE
+                                || color == Color.LTGRAY) {
+                            finalColor = C_TEXT;
                         }
+
+                        appendLog(text, finalColor);
                     }
 
                     @Override
                     public void onBuildStarted() {
                         showToast("Cloud build started...");
-                        // ข้อความหลักมาจาก BuildTaskManager แล้ว ไม่ต้องซ้ำ
                     }
 
                     @Override
@@ -1414,14 +1460,13 @@ private void toggleXmlPreview() {
 
                         if (success) {
                             showToast("Build successful");
-                            appendLog("12 actionable tasks: executed on cloud\n",
-                                    TerminalColor.TEXT_WHITE);
+                            appendLog("12 actionable tasks: executed on cloud\n", C_TEXT);
                             if (apkPath != null && !apkPath.isEmpty()) {
-                                appendLog("APK → " + apkPath + "\n", TerminalColor.LOG_CYAN);
+                                appendLog("APK → " + apkPath + "\n", C_MINT);
                             } else {
                                 appendLog("APK → app/build/outputs/apk/debug/"
                                                 + projectName + "-debug.apk\n",
-                                        TerminalColor.LOG_CYAN);
+                                        C_MINT);
                             }
                             runOnUiThread(() -> {
                                 if (rvErrorPanel != null) {
@@ -1430,7 +1475,7 @@ private void toggleXmlPreview() {
                             });
                         } else {
                             showToast("Build failed");
-                            // ไม่ต้อง append "BUILD FAILED" ซ้ำ — BuildTaskManager พิมพ์แล้ว
+                            // ไม่พิมพ์ BUILD FAILED ซ้ำ
 
                             final ParsedError err = analyzer.getLastError();
                             if (err != null) {
@@ -1449,7 +1494,6 @@ private void toggleXmlPreview() {
         buildTask.setAnalyzer(analyzer);
     }, 300);
 }
-
     private void executeJumpToError(final ParsedError errorItem) {
         if (errorItem == null || currentProject == null) return;
 
@@ -1528,16 +1572,69 @@ public void openFile(File file) {
         }
     }
 
-    private void appendLog(final String text, final int color) {
-        runOnUiThread(() -> {
-            if (dialogPanelAdapter != null) {
-                tvConsole = dialogPanelAdapter.getTvConsole();
-            }
-            if (tvConsole != null) {
-                appendColoredText(tvConsole, text + "\n", color);
-            }
-        });
+    /** แสดงข้อความลง Console พร้อมสี (int ARGB) */
+private void appendLog(String text, int color) {
+    if (text == null || text.isEmpty()) return;
+
+    runOnUiThread(() -> {
+        // ผูก tvConsole ถ้ายังไม่มี
+        if (tvConsole == null && consolePanel != null) {
+            tvConsole = consolePanel.findViewById(R.id.tvConsole);
+        }
+        if (tvConsole == null && dialogPanelAdapter != null) {
+            tvConsole = dialogPanelAdapter.getTvConsole();
+        }
+        if (tvConsole == null) return;
+
+        android.text.SpannableString spannable = new android.text.SpannableString(text);
+        spannable.setSpan(
+                new android.text.style.ForegroundColorSpan(color),
+                0,
+                text.length(),
+                android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
+        tvConsole.append(spannable);
+
+        // auto-scroll ลงล่าง
+        if (consoleScrollView != null) {
+            consoleScrollView.post(() -> consoleScrollView.fullScroll(View.FOCUS_DOWN));
+        } else {
+            autoScrollTabContainer(tvConsole);
+        }
+    });
+}
+
+/** ใช้กับ TerminalColor เดิม (ถ้ายังมีที่เรียกแบบเก่า) */
+private void appendLog(String text, TerminalColor termColor) {
+    int color;
+    switch (termColor) {
+        case SUGGEST_GREEN:
+            color = Color.parseColor("#9ECE6A");
+            break;
+        case TARGET_YELLOW:
+            color = Color.parseColor("#E0AF68");
+            break;
+        case LOG_CYAN:
+            color = Color.parseColor("#7DCFFF");
+            break;
+        case DETAIL_RED:
+        case ERROR_RED:
+            color = Color.parseColor("#F7768E");
+            break;
+        case BORDER_BLUE:
+            color = Color.parseColor("#7AA2F7");
+            break;
+        case LOG_GRAY:
+            color = Color.parseColor("#565F89");
+            break;
+        case LOG_WHITE:
+        case TEXT_WHITE:
+        default:
+            color = Color.parseColor("#A9B1D6");
+            break;
     }
+    appendLog(text, color);
+}
 
 private void setupShortcutBar() {
     LinearLayout shortcutBar = findViewById(R.id.shortcutBar);
