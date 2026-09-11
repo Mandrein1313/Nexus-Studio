@@ -106,4 +106,24 @@
 <string name="import_no_destination">Import destination not found</string>
 <string name="import_success">Imported: %1$s</string>
 <string name="import_failed">Import failed: %1$s</string>
+  <!-- ProjectDialogManager -->
+<string name="dialog_create_file_title">New file</string>
+<string name="dialog_create_file_hint">e.g. MainActivity.java, activity_main.xml</string>
+<string name="dialog_create_file_btn">Create file</string>
+<string name="dialog_create_file_ok">File created</string>
+<string name="dialog_create_file_fail">Could not create file (name exists or no permission)</string>
+
+<string name="dialog_create_folder_title">New folder</string>
+<string name="dialog_create_folder_hint">Folder name…</string>
+<string name="dialog_create_folder_btn">Create</string>
+<string name="dialog_create_folder_ok">Folder created</string>
+<string name="dialog_create_folder_fail">Could not create folder (name exists or no permission)</string>
+
+<string name="dialog_rename_title">Rename</string>
+<string name="dialog_rename_ok">Renamed successfully</string>
+<string name="dialog_rename_fail">Rename failed (name already exists)</string>
+
+<string name="dialog_delete_message">Delete %1$s?</string>
+<string name="dialog_image_load_fail">Could not load image</string>
+<string name="dialog_close">Close</string>
 </resources>
