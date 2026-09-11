@@ -93,4 +93,17 @@
     <string name="preview_mode">Layout Preview</string>
     <string name="preview_phone">โทรศัพท์</string>
     <string name="preview_tablet">แท็บเล็ต</string>
+    <!-- เมนูจัดการไฟล์/โฟลเดอร์ -->
+<string name="manage_folder">จัดการโฟลเดอร์: %1$s</string>
+<string name="manage_file">จัดการไฟล์: %1$s</string>
+<string name="menu_new_file">สร้างไฟล์ใหม่</string>
+<string name="menu_new_folder">สร้างโฟลเดอร์ใหม่</string>
+<string name="menu_rename">เปลี่ยนชื่อ</string>
+<string name="menu_delete">ลบ</string>
+<string name="menu_import_file">นำเข้าไฟล์ (Import)</string>
+<string name="delete_success">ลบสำเร็จแล้ว</string>
+<string name="delete_failed">ลบไม่สำเร็จ</string>
+<string name="import_no_destination">ไม่พบตำแหน่งที่ตั้งสำหรับนำเข้าไฟล์</string>
+<string name="import_success">นำเข้าไฟล์สำเร็จ: %1$s</string>
+<string name="import_failed">การนำเข้าไฟล์ล้มเหลว: %1$s</string>
 </resources>

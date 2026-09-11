@@ -93,4 +93,17 @@
     <string name="preview_mode">Layout Preview</string>
     <string name="preview_phone">Phone</string>
     <string name="preview_tablet">Tablet</string>
+    <!-- File tree / bottom sheet menu -->
+   <string name="manage_folder">Manage folder: %1$s</string>
+   <string name="manage_file">Manage file: %1$s</string>
+   <string name="menu_new_file">New file</string>
+   <string name="menu_new_folder">New folder</string>
+  <string name="menu_rename">Rename</string>
+  <string name="menu_delete">Delete</string>
+  <string name="menu_import_file">Import file</string>
+  <string name="delete_success">Deleted successfully</string>
+  <string name="delete_failed">Delete failed</string>
+<string name="import_no_destination">Import destination not found</string>
+<string name="import_success">Imported: %1$s</string>
+<string name="import_failed">Import failed: %1$s</string>
 </resources>

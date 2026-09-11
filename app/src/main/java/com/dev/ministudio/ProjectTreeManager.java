@@ -43,7 +43,7 @@ public class ProjectTreeManager {
         if (currentProject == null) return;
 
         File projectRoot = new File(currentProject.getRootPath());
-        
+
         // 🌟 ปรับปรุง: กรองไฟล์/โฟลเดอร์ที่ขึ้นต้นด้วยจุด (.) ออกตั้งแต่หน้าแรกสุด (ซ่อน .git)
         List<FileNode> rawRootList = FileSystemManager.loadRootDirectory(projectRoot);
         masterFileList = new ArrayList<>();
@@ -64,7 +64,7 @@ public class ProjectTreeManager {
             if (selectedNode.isDirectory) {
                 if (!selectedNode.isExpanded) {
                     selectedNode.isExpanded = true;
-                    
+
                     // 🌟 ปรับปรุง: กรองไฟล์ระบบซ่อนออกจากโฟลเดอร์ลูกหลานตอนที่น้ากดกางใช้งาน
                     List<FileNode> rawChildren = FileSystemManager.loadChildren(selectedNode.file, selectedNode.depth);
                     List<FileNode> children = new ArrayList<>();
@@ -84,7 +84,7 @@ public class ProjectTreeManager {
                     }
                 }
                 fileTreeAdapter.notifyDataSetChanged();
-                
+
             } else {
                 String fileName = selectedNode.file.getName().toLowerCase();
                 if (fileName.endsWith(".png") || fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".webp")) {
@@ -110,17 +110,32 @@ public class ProjectTreeManager {
             TextView tvHeader = dialogView.findViewById(R.id.tvDialogHeader);
             LinearLayout menuContainer = dialogView.findViewById(R.id.menuContainer);
 
-            tvHeader.setText(selectedNode.isDirectory ? "จัดการโฟลเดอร์: " + currentFile.getName() : "จัดการไฟล์: " + currentFile.getName());
+            // 🌟 แก้ไข: ใช้ String Resources แทนข้อความ Hardcoded
+            tvHeader.setText(selectedNode.isDirectory
+                    ? activity.getString(R.string.manage_folder, currentFile.getName())
+                    : activity.getString(R.string.manage_file, currentFile.getName()));
 
             List<MainActivity.MenuOption> options = new ArrayList<>();
-            options.add(new MainActivity.MenuOption("สร้างไฟล์ใหม่", android.R.drawable.ic_menu_add));
-            options.add(new MainActivity.MenuOption("สร้างโฟลเดอร์ใหม่", android.R.drawable.ic_menu_preferences)); 
-            options.add(new MainActivity.MenuOption("เปลี่ยนชื่อ", android.R.drawable.ic_menu_edit));
-            options.add(new MainActivity.MenuOption("ลบ", android.R.drawable.ic_menu_delete));
-            
+            options.add(new MainActivity.MenuOption(
+                    activity.getString(R.string.menu_new_file), android.R.drawable.ic_menu_add));
+            options.add(new MainActivity.MenuOption(
+                    activity.getString(R.string.menu_new_folder), android.R.drawable.ic_menu_preferences));
+            options.add(new MainActivity.MenuOption(
+                    activity.getString(R.string.menu_rename), android.R.drawable.ic_menu_edit));
+            options.add(new MainActivity.MenuOption(
+                    activity.getString(R.string.menu_delete), android.R.drawable.ic_menu_delete));
+
             if (selectedNode.isDirectory) {
-                options.add(new MainActivity.MenuOption("นำเข้าไฟล์ (Import)", android.R.drawable.ic_menu_share));
+                options.add(new MainActivity.MenuOption(
+                        activity.getString(R.string.menu_import_file), android.R.drawable.ic_menu_share));
             }
+
+            // 🌟 เก็บ label ไว้เทียบเป็น final เพื่อความแม่นยำในการเปรียบเทียบ
+            final String labelNewFile = activity.getString(R.string.menu_new_file);
+            final String labelNewFolder = activity.getString(R.string.menu_new_folder);
+            final String labelRename = activity.getString(R.string.menu_rename);
+            final String labelDelete = activity.getString(R.string.menu_delete);
+            final String labelImport = activity.getString(R.string.menu_import_file);
 
             for (MainActivity.MenuOption option : options) {
                 View itemView = activity.getLayoutInflater().inflate(R.layout.dialog_menu_item, null);
@@ -131,30 +146,34 @@ public class ProjectTreeManager {
                 imgIcon.setImageResource(option.iconRes);
 
                 itemView.setOnClickListener(v -> {
-                    bottomSheetDialog.dismiss(); 
-                    if (option.title.equals("สร้างไฟล์ใหม่")) {
-                        activity.getDialogManager().showCreateFileDialog(selectedNode.isDirectory ? currentFile : currentFile.getParentFile(), selectedNode.isDirectory ? selectedNode : findParentNode(selectedNode));
-                    } else if (option.title.equals("สร้างโฟลเดอร์ใหม่")) {
-                        activity.getDialogManager().showCreateFolderDialog(selectedNode.isDirectory ? currentFile : currentFile.getParentFile(), selectedNode.isDirectory ? selectedNode : findParentNode(selectedNode));
-                    } else if (option.title.equals("เปลี่ยนชื่อ")) {
+                    bottomSheetDialog.dismiss();
+                    if (option.title.equals(labelNewFile)) {
+                        activity.getDialogManager().showCreateFileDialog(
+                                selectedNode.isDirectory ? currentFile : currentFile.getParentFile(),
+                                selectedNode.isDirectory ? selectedNode : findParentNode(selectedNode));
+                    } else if (option.title.equals(labelNewFolder)) {
+                        activity.getDialogManager().showCreateFolderDialog(
+                                selectedNode.isDirectory ? currentFile : currentFile.getParentFile(),
+                                selectedNode.isDirectory ? selectedNode : findParentNode(selectedNode));
+                    } else if (option.title.equals(labelRename)) {
                         activity.getDialogManager().showRenameDialog(currentFile, selectedNode);
-                    } else if (option.title.equals("ลบ")) {
+                    } else if (option.title.equals(labelDelete)) {
                         activity.getDialogManager().showDeleteConfirmationDialog(currentFile.getName(), () -> {
                             boolean success = FileSystemManager.deleteFileOrFolder(currentFile);
                             if (success) {
-                                activity.showToast("ลบสำเร็จแล้ว");
+                                activity.showToast(activity.getString(R.string.delete_success));
                                 masterFileList.remove(position);
                                 if (fileTreeAdapter != null) {
                                     fileTreeAdapter.setSelectedPosition(-1);
                                     fileTreeAdapter.notifyDataSetChanged();
                                 }
                             } else {
-                                activity.showToast("ลบไม่สำเร็จ");
+                                activity.showToast(activity.getString(R.string.delete_failed));
                             }
                         });
-                    } else if (option.title.equals("นำเข้าไฟล์ (Import)")) {
-                        folderForImport = currentFile; 
-                        activity.openFilePicker(); 
+                    } else if (option.title.equals(labelImport)) {
+                        folderForImport = currentFile;
+                        activity.openFilePicker();
                     }
                 });
                 menuContainer.addView(itemView);
@@ -169,7 +188,7 @@ public class ProjectTreeManager {
         for (int i = lastClickedPosition; i >= 0; i--) {
             FileNode potentialParent = masterFileList.get(i);
             if (potentialParent.isDirectory && potentialParent.depth < childNode.depth) {
-                return potentialParent; 
+                return potentialParent;
             }
         }
         return null;
@@ -202,7 +221,7 @@ public class ProjectTreeManager {
                 }
             }
         }
-        
+
         List<FileNode> rebuiltList = new ArrayList<>();
 
         // 3. ทยอยเอาโครงสร้างย่อยเสียบประกอบคืนตำแหน่งความลึกเดิมอัติโนมัติ
@@ -223,10 +242,10 @@ public class ProjectTreeManager {
 
         for (FileNode node : currentNodes) {
             outputList.add(node);
-            
+
             if (node.isDirectory && node.file != null && expandedPaths.contains(node.file.getAbsolutePath())) {
                 node.isExpanded = true;
-                
+
                 // โหลดลูกหลานของโฟลเดอร์นี้ตามลำดับชั้นความลึก และกรองไฟล์ซ่อนออก
                 List<FileNode> rawChildren = FileSystemManager.loadChildren(node.file, node.depth);
                 List<FileNode> children = new ArrayList<>();
@@ -237,7 +256,7 @@ public class ProjectTreeManager {
                         }
                     }
                 }
-                
+
                 if (!children.isEmpty()) {
                     rebuildTreeRecursive(children, expandedPaths, outputList);
                 }
@@ -252,10 +271,10 @@ public class ProjectTreeManager {
     public java.io.File findFileInProject(String rootPath, String targetFileName) {
         java.io.File root = new java.io.File(rootPath);
         if (!root.exists()) return null;
-        
+
         java.util.Queue<java.io.File> queue = new java.util.LinkedList<>();
         queue.add(root);
-        
+
         while (!queue.isEmpty()) {
             java.io.File current = queue.poll();
             java.io.File[] files = current.listFiles();
@@ -272,54 +291,53 @@ public class ProjectTreeManager {
         return null; // วิ่งหาจนทั่วแล้วไม่พบ
     }
 
-public void openFile(File file) {
-    if (file == null || !file.exists()) return;
-    ProjectModel currentProject = activity.getCurrentProject();
+    public void openFile(File file) {
+        if (file == null || !file.exists()) return;
+        ProjectModel currentProject = activity.getCurrentProject();
 
-    try {
-        activity.getAutoSaveHandler().removeCallbacks(activity.getSaveRunnable());
+        try {
+            activity.getAutoSaveHandler().removeCallbacks(activity.getSaveRunnable());
 
-        if (currentProject != null) {
-            if (!currentProject.getOpenedFiles().contains(file)) {
-                currentProject.getOpenedFiles().add(file);
+            if (currentProject != null) {
+                if (!currentProject.getOpenedFiles().contains(file)) {
+                    currentProject.getOpenedFiles().add(file);
+                }
+                currentProject.setCurrentOpenFile(file);
             }
-            currentProject.setCurrentOpenFile(file);
-        }
 
-        // อ่านไฟล์
-        FileInputStream fis = new FileInputStream(file);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            sb.append(line).append("\n");
-        }
-        reader.close();
-        
-        final String fileContent = sb.toString();
-
-        // 🌟 แก้ไขตรงนี้: บังคับอัปเดตสถานะ UI ก่อน แล้วค่อยใส่ข้อความ
-        activity.runOnUiThread(() -> {
-            // 1. สั่งเปิดหน้าจอ Editor ทันที
-            activity.setEditorActiveState(true); 
-            
-            // 2. ใส่โค้ดลงไป
-            if (activity.getCodeEditor() != null) {
-                activity.getCodeEditor().setText(fileContent);
-                activity.getCodeEditor().setEditorLanguage(new JavaLanguage());
-                activity.getCodeEditor().invalidate(); // บังคับวาดใหม่
+            // อ่านไฟล์
+            FileInputStream fis = new FileInputStream(file);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\n");
             }
-            
-            // 3. อัปเดต Path และ Tab
-            activity.updateFilePathStatus(file);
-            if (activity.getTabAdapter() != null) activity.getTabAdapter().notifyDataSetChanged();
-        });
+            reader.close();
 
-    } catch (Exception e) {
-        e.printStackTrace();
+            final String fileContent = sb.toString();
+
+            // 🌟 แก้ไขตรงนี้: บังคับอัปเดตสถานะ UI ก่อน แล้วค่อยใส่ข้อความ
+            activity.runOnUiThread(() -> {
+                // 1. สั่งเปิดหน้าจอ Editor ทันที
+                activity.setEditorActiveState(true);
+
+                // 2. ใส่โค้ดลงไป
+                if (activity.getCodeEditor() != null) {
+                    activity.getCodeEditor().setText(fileContent);
+                    activity.getCodeEditor().setEditorLanguage(new JavaLanguage());
+                    activity.getCodeEditor().invalidate(); // บังคับวาดใหม่
+                }
+
+                // 3. อัปเดต Path และ Tab
+                activity.updateFilePathStatus(file);
+                if (activity.getTabAdapter() != null) activity.getTabAdapter().notifyDataSetChanged();
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-}
-
 
     public void saveFile() {
         ProjectModel currentProject = activity.getCurrentProject();
@@ -329,18 +347,18 @@ public void openFile(File file) {
             FileOutputStream fos = new FileOutputStream(fileToSave);
             fos.write(activity.getCodeEditor().getText().toString().getBytes("UTF-8"));
             fos.close();
-        } catch (Exception e) { 
-            e.printStackTrace(); 
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     public File getFolderForImport() {
         return folderForImport;
     }
-    
+
     public void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
         if (resultCode != android.app.Activity.RESULT_OK || data == null) return;
-        
+
         android.net.Uri selectedFileUri = data.getData();
         if (selectedFileUri == null) return;
 
@@ -350,8 +368,9 @@ public void openFile(File file) {
             destinationFolder = new java.io.File(currentProject.getRootPath());
         }
 
+        // 🌟 แก้ไข: ใช้ String Resource
         if (destinationFolder == null) {
-            activity.showToast("❌ ไม่พบตำแหน่งที่ตั้งสำหรับนำเข้าไฟล์");
+            activity.showToast(activity.getString(R.string.import_no_destination));
             return;
         }
 
@@ -370,7 +389,7 @@ public void openFile(File file) {
                 }
 
                 java.io.File targetFile = new java.io.File(finalDestFolder, fileName);
-                
+
                 int copyCount = 1;
                 String baseName = fileName;
                 String extension = "";
@@ -386,7 +405,7 @@ public void openFile(File file) {
 
                 java.io.InputStream inputStream = activity.getContentResolver().openInputStream(selectedFileUri);
                 java.io.FileOutputStream outputStream = new java.io.FileOutputStream(targetFile);
-                
+
                 byte[] buffer = new byte[4096];
                 int bytesRead;
                 if (inputStream != null) {
@@ -399,13 +418,15 @@ public void openFile(File file) {
 
                 final String finalFileName = targetFile.getName();
                 activity.runOnUiThread(() -> {
-                    activity.showToast("✨ นำเข้าไฟล์สำเร็จ: " + finalFileName);
+                    // 🌟 แก้ไข: ใช้ String Resource พร้อม args
+                    activity.showToast(activity.getString(R.string.import_success, finalFileName));
                     refreshFileTree();
                 });
 
             } catch (Exception e) {
                 e.printStackTrace();
-                activity.runOnUiThread(() -> activity.showToast("❌ การนำเข้าไฟล์ล้มเหลว: " + e.getMessage()));
+                activity.runOnUiThread(() ->
+                        activity.showToast(activity.getString(R.string.import_failed, e.getMessage())));
             }
         }).start();
     }
