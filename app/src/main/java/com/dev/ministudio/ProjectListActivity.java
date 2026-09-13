@@ -227,32 +227,126 @@ public class ProjectListActivity extends AppCompatActivity {
     }
 
     private void importFromGitHub() {
-        final EditText etUrl = new EditText(this);
-        etUrl.setHint("https://github.com/user/repository.git");
-        etUrl.setPadding(40, 40, 40, 40);
-        etUrl.setTextColor(Color.WHITE);
+    AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        new AlertDialog.Builder(this)
-            .setTitle("นำเข้าโปรเจกต์จาก GitHub")
-            .setMessage("ระบบจะดึงเฉพาะ Commit ล่าสุด (Shallow Clone) เพื่อความรวดเร็ว")
-            .setView(etUrl)
-            .setPositiveButton("ดาวน์โหลด", (dialog, which) -> {
-                String url = etUrl.getText().toString().trim();
-                if (url.isEmpty()) {
-                    Toast.makeText(this, "กรุณาใส่ลิงก์ก่อนครับ", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                
-                String projectName = extractRepoName(url);
-                if (projectName == null || projectName.isEmpty()) {
-                    projectName = "Import_" + System.currentTimeMillis();
-                }
-                
-                downloadAndImportProject(url, projectName);
-            })
-            .setNegativeButton("ยกเลิก", null)
-            .show();
+    LinearLayout mainLayout = new LinearLayout(this);
+    mainLayout.setOrientation(LinearLayout.VERTICAL);
+    int paddingPx = (int) (24 * getResources().getDisplayMetrics().density);
+    mainLayout.setPadding(paddingPx, paddingPx, paddingPx, paddingPx);
+    mainLayout.setBackgroundColor(Color.parseColor("#1E1E1E"));
+
+    // หัวข้อ
+    TextView tvTitle = new TextView(this);
+    tvTitle.setText(getString(R.string.import_github_title));
+    tvTitle.setTextColor(Color.WHITE);
+    tvTitle.setTextSize(18);
+    tvTitle.setTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD));
+    tvTitle.setPadding(0, 0, 0, (int) (8 * getResources().getDisplayMetrics().density));
+    mainLayout.addView(tvTitle);
+
+    // คำอธิบาย
+    TextView tvDesc = new TextView(this);
+    tvDesc.setText(getString(R.string.import_github_message));
+    tvDesc.setTextColor(Color.parseColor("#8E8E93"));
+    tvDesc.setTextSize(13);
+    tvDesc.setLineSpacing(0, 1.25f);
+    tvDesc.setPadding(0, 0, 0, (int) (18 * getResources().getDisplayMetrics().density));
+    mainLayout.addView(tvDesc);
+
+    // ช่องกรอก URL
+    GradientDrawable inputStyle = new GradientDrawable();
+    inputStyle.setColor(Color.parseColor("#252526"));
+    inputStyle.setCornerRadius((int) (8 * getResources().getDisplayMetrics().density));
+    inputStyle.setStroke((int) (1 * getResources().getDisplayMetrics().density),
+            Color.parseColor("#3F3F46"));
+
+    int inputPadding = (int) (12 * getResources().getDisplayMetrics().density);
+
+    final EditText etUrl = new EditText(this);
+    etUrl.setHint(getString(R.string.import_github_hint));
+    etUrl.setHintTextColor(Color.parseColor("#52525B"));
+    etUrl.setTextColor(Color.WHITE);
+    etUrl.setTextSize(14);
+    etUrl.setSingleLine(true);
+    etUrl.setBackground(inputStyle);
+    etUrl.setPadding(inputPadding, inputPadding, inputPadding, inputPadding);
+    etUrl.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+
+    LinearLayout.LayoutParams urlParams = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    urlParams.bottomMargin = (int) (8 * getResources().getDisplayMetrics().density);
+    mainLayout.addView(etUrl, urlParams);
+
+    final AlertDialog dialog = builder.setView(mainLayout).create();
+
+    // ปุ่ม
+    LinearLayout buttonLayout = new LinearLayout(this);
+    buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
+    buttonLayout.setGravity(Gravity.END);
+    LinearLayout.LayoutParams btnLayoutParams = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    btnLayoutParams.topMargin = (int) (16 * getResources().getDisplayMetrics().density);
+    buttonLayout.setLayoutParams(btnLayoutParams);
+
+    android.widget.Button btnCancel = new android.widget.Button(
+            this, null, 0, android.R.style.Widget_Material_Button_Borderless);
+    btnCancel.setText(getString(R.string.btn_cancel));
+    btnCancel.setTextColor(Color.parseColor("#A1A1AA"));
+    btnCancel.setTextSize(14);
+    btnCancel.setAllCaps(false);
+    btnCancel.setOnClickListener(v -> dialog.dismiss());
+    buttonLayout.addView(btnCancel);
+
+    android.widget.Button btnDownload = new android.widget.Button(
+            this, null, 0, android.R.style.Widget_Material_Button_Borderless);
+    btnDownload.setText(getString(R.string.btn_download));
+    btnDownload.setTextColor(Color.WHITE);
+    btnDownload.setTextSize(14);
+    btnDownload.setAllCaps(false);
+
+    GradientDrawable downloadBg = new GradientDrawable();
+    downloadBg.setColor(Color.parseColor("#248A3D"));
+    downloadBg.setCornerRadius((int) (6 * getResources().getDisplayMetrics().density));
+    btnDownload.setBackground(downloadBg);
+
+    LinearLayout.LayoutParams downloadParams = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            (int) (40 * getResources().getDisplayMetrics().density));
+    downloadParams.leftMargin = (int) (12 * getResources().getDisplayMetrics().density);
+    btnDownload.setLayoutParams(downloadParams);
+    btnDownload.setPadding(
+            (int) (16 * getResources().getDisplayMetrics().density), 0,
+            (int) (16 * getResources().getDisplayMetrics().density), 0);
+
+    btnDownload.setOnClickListener(v -> {
+        String url = etUrl.getText().toString().trim();
+        if (url.isEmpty()) {
+            Toast.makeText(this, getString(R.string.import_github_empty_url),
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String projectName = extractRepoName(url);
+        if (projectName == null || projectName.isEmpty()) {
+            projectName = "Import_" + System.currentTimeMillis();
+        }
+
+        dialog.dismiss();
+        downloadAndImportProject(url, projectName);
+    });
+
+    buttonLayout.addView(btnDownload);
+    mainLayout.addView(buttonLayout);
+
+    if (dialog.getWindow() != null) {
+        GradientDrawable dialogBg = new GradientDrawable();
+        dialogBg.setColor(Color.parseColor("#1E1E1E"));
+        dialogBg.setCornerRadius((int) (14 * getResources().getDisplayMetrics().density));
+        dialog.getWindow().setBackgroundDrawable(dialogBg);
     }
+
+    dialog.show();
+}
 
     private String extractRepoName(String url) {
         try {

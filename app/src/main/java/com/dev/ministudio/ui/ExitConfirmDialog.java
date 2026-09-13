@@ -12,6 +12,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.dev.ministudio.R;
+
 /**
  * Dialog ยืนยันออกจากหน้าแก้ไขกลับไปหน้ารายการโปรเจกต์ โทน Tokyo Night
  */
@@ -42,15 +44,16 @@ public final class ExitConfirmDialog {
         root.addView(icon);
 
         TextView title = new TextView(activity);
-        title.setText("กลับหน้ารายการโปรเจกต์");
+        title.setText(activity.getString(R.string.exit_confirm_title));
         title.setTextColor(Color.parseColor("#C0CAF5"));
         title.setTextSize(18);
-        title.setTypeface(android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.BOLD));
+        title.setTypeface(android.graphics.Typeface.create(
+                "sans-serif-medium", android.graphics.Typeface.BOLD));
         title.setGravity(Gravity.CENTER);
         root.addView(title);
 
         TextView msg = new TextView(activity);
-        msg.setText("ต้องการออกจากตัวแก้ไข\nแล้วกลับไปหน้า Projects หรือไม่?");
+        msg.setText(activity.getString(R.string.exit_confirm_message));
         msg.setTextColor(Color.parseColor("#565F89"));
         msg.setTextSize(14);
         msg.setGravity(Gravity.CENTER);
@@ -63,7 +66,7 @@ public final class ExitConfirmDialog {
         buttons.setGravity(Gravity.END);
 
         Button btnCancel = new Button(activity);
-        btnCancel.setText("อยู่ต่อ");
+        btnCancel.setText(activity.getString(R.string.exit_confirm_stay));
         btnCancel.setAllCaps(false);
         btnCancel.setTextColor(Color.parseColor("#A9B1D6"));
         btnCancel.setTextSize(14);
@@ -71,12 +74,13 @@ public final class ExitConfirmDialog {
         cancelBg.setColor(Color.parseColor("#24283B"));
         cancelBg.setCornerRadius(10 * d);
         btnCancel.setBackground(cancelBg);
-        LinearLayout.LayoutParams cancelLp = new LinearLayout.LayoutParams(0, (int) (44 * d), 1f);
+        LinearLayout.LayoutParams cancelLp =
+                new LinearLayout.LayoutParams(0, (int) (44 * d), 1f);
         cancelLp.rightMargin = (int) (8 * d);
         btnCancel.setLayoutParams(cancelLp);
 
         Button btnExit = new Button(activity);
-        btnExit.setText("กลับ");
+        btnExit.setText(activity.getString(R.string.exit_confirm_leave));
         btnExit.setAllCaps(false);
         btnExit.setTextColor(Color.parseColor("#1A1B26"));
         btnExit.setTextSize(14);
@@ -84,7 +88,8 @@ public final class ExitConfirmDialog {
         exitBg.setColor(Color.parseColor("#FF00897B"));
         exitBg.setCornerRadius(10 * d);
         btnExit.setBackground(exitBg);
-        LinearLayout.LayoutParams exitLp = new LinearLayout.LayoutParams(0, (int) (44 * d), 1f);
+        LinearLayout.LayoutParams exitLp =
+                new LinearLayout.LayoutParams(0, (int) (44 * d), 1f);
         exitLp.leftMargin = (int) (8 * d);
         btnExit.setLayoutParams(exitLp);
 
@@ -106,7 +111,6 @@ public final class ExitConfirmDialog {
         btnCancel.setOnClickListener(v -> dialog.dismiss());
         btnExit.setOnClickListener(v -> {
             dialog.dismiss();
-            // กลับไปหน้า Projects (ไม่ปิดแอป)
             Intent intent = new Intent(activity, com.dev.ministudio.ProjectListActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             activity.startActivity(intent);

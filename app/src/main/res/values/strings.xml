@@ -143,4 +143,8 @@
     <string name="ai_get_api_key">No API Key? Create one at console.groq.com</string>
     <string name="ai_settings_saved">AI settings saved</string>
     <string name="ai_open_browser_fail">Could not open browser</string>
+    <string name="exit_confirm_title">Back to project list</string>
+<string name="exit_confirm_message">Leave the editor and return to Projects?</string>
+<string name="exit_confirm_stay">Stay</string>
+<string name="exit_confirm_leave">Back</string>
 </resources>

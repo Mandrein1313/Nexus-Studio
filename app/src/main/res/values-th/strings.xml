@@ -143,4 +143,8 @@
     <string name="ai_get_api_key">ยังไม่มี API Key? สร้างที่ console.groq.com</string>
     <string name="ai_settings_saved">บันทึกการตั้งค่า AI แล้ว</string>
     <string name="ai_open_browser_fail">เปิดเบราว์เซอร์ไม่สำเร็จ</string>
+    <string name="exit_confirm_title">กลับหน้ารายการโปรเจกต์</string>
+<string name="exit_confirm_message">ต้องการออกจากตัวแก้ไข\nแล้วกลับไปหน้า Projects หรือไม่?</string>
+<string name="exit_confirm_stay">อยู่ต่อ</string>
+<string name="exit_confirm_leave">กลับ</string>
 </resources>
