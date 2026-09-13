@@ -126,4 +126,34 @@
 <string name="dialog_delete_message">ต้องการลบ %1$s ใช่หรือไม่?</string>
 <string name="dialog_image_load_fail">ไม่สามารถโหลดรูปภาพได้</string>
 <string name="dialog_close">ปิดหน้าต่าง</string>
+<string name="dialog_delete_title">ยืนยันการลบ</string>
+<string name="dialog_delete_message">ต้องการลบ %1$s ใช่หรือไม่?</string>
+<!-- GitHub Settings -->
+<string name="github_settings_title">ตั้งค่าบัญชี GitHub Sync</string>
+<string name="github_settings_desc">ข้อมูลนี้จะถูกบันทึกเพื่อใช้ส่งซอร์สโค้ดโปรเจกต์ขึ้นไปบิวด์บนคลาวด์อัตโนมัติ</string>
+<string name="github_username">GitHub Username</string>
+<string name="github_username_hint">ระบุชื่อผู้ใช้ GitHub</string>
+<string name="github_email">GitHub Email</string>
+<string name="github_email_hint">ระบุอีเมลที่ผูกกับ GitHub</string>
+<string name="github_token">Personal Access Token (Classic)</string>
+<string name="github_token_hint">วางโทเค็นสิทธิ์เข้าถึง (ghp_…)</string>
+<string name="github_settings_empty">กรุณากรอก Username และ Token</string>
+<string name="github_settings_saved">บันทึกการตั้งค่าสำเร็จ</string>
+<string name="btn_save_data">บันทึกข้อมูล</string>
+
+<!-- AI Settings -->
+<string name="ai_settings_title">AI Settings</string>
+<string name="ai_settings_desc">ตั้งค่า Groq API และโมเดลที่ใช้ตอบแชท / วิเคราะห์รูป</string>
+<string name="ai_api_key_label">Groq API Key</string>
+<string name="ai_api_key_hint">gsk_…</string>
+<string name="ai_api_key_note">คีย์เก็บบนเครื่องเท่านั้น ไม่ถูกอัปขึ้นเซิร์ฟเวอร์ของแอป</string>
+<string name="ai_text_model_label">โมเดลข้อความ</string>
+<string name="ai_text_model_hint">ใช้ตอนแชท เขียนโค้ด วิเคราะห์ error</string>
+<string name="ai_vision_model_label">โมเดลวิเคราะห์รูป</string>
+<string name="ai_vision_model_hint">ใช้ตอนแนบรูปใน AI Assistant</string>
+<string name="ai_save_settings">บันทึกการตั้งค่า</string>
+<string name="ai_save_note">เปลี่ยนโมเดลแล้วคำขอครั้งถัดไปจะใช้ค่าใหม่ทันที</string>
+<string name="ai_get_api_key">ยังไม่มี API Key? สร้างที่ console.groq.com</string>
+<string name="ai_settings_saved">บันทึกการตั้งค่า AI แล้ว</string>
+<string name="ai_open_browser_fail">เปิดเบราว์เซอร์ไม่สำเร็จ</string>
 </resources>

@@ -35,6 +35,7 @@ public class AiSettingsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        applySavedLanguage();
         super.onCreate(savedInstanceState);
 
         WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
@@ -76,7 +77,7 @@ public class AiSettingsActivity extends AppCompatActivity {
                     .putString("groq_vision_model", visionModel != null ? visionModel : VISION_MODELS[0])
                     .apply();
 
-            Toast.makeText(this, "บันทึกการตั้งค่า AI แล้ว", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.ai_settings_saved), Toast.LENGTH_SHORT).show();
             finish();
         });
 
@@ -88,10 +89,22 @@ public class AiSettingsActivity extends AppCompatActivity {
                             Uri.parse("https://console.groq.com/keys")
                     ));
                 } catch (Exception e) {
-                    Toast.makeText(this, "เปิดเบราว์เซอร์ไม่สำเร็จ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.ai_open_browser_fail), Toast.LENGTH_SHORT).show();
                 }
             });
         }
+    }
+
+    private void applySavedLanguage() {
+        String lang = getSharedPreferences("AppSettings", MODE_PRIVATE)
+                .getString("app_lang", "");
+        if (lang.isEmpty()) return;
+
+        java.util.Locale locale = new java.util.Locale(lang);
+        java.util.Locale.setDefault(locale);
+        android.content.res.Configuration config = new android.content.res.Configuration();
+        config.setLocale(locale);
+        getResources().updateConfiguration(config, getResources().getDisplayMetrics());
     }
 
     private void selectSpinnerValue(Spinner spinner, String[] items, String value) {

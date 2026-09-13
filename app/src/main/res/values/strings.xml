@@ -126,4 +126,34 @@
 <string name="dialog_delete_message">Delete %1$s?</string>
 <string name="dialog_image_load_fail">Could not load image</string>
 <string name="dialog_close">Close</string>
+<string name="dialog_delete_title">Confirm delete</string>
+<string name="dialog_delete_message">Delete %1$s?</string>
+<!-- GitHub Settings dialog -->
+<string name="github_settings_title">GitHub Sync Settings</string>
+<string name="github_settings_desc">This data is saved to upload project sources for cloud builds automatically</string>
+<string name="github_username">GitHub Username</string>
+<string name="github_username_hint">Enter your GitHub username</string>
+<string name="github_email">GitHub Email</string>
+<string name="github_email_hint">Email linked to your GitHub account</string>
+<string name="github_token">Personal Access Token (Classic)</string>
+<string name="github_token_hint">Paste access token (ghp_…)</string>
+<string name="github_settings_empty">Please enter Username and Token</string>
+<string name="github_settings_saved">Settings saved</string>
+<string name="btn_save_data">Save</string>
+
+<!-- AI Settings -->
+<string name="ai_settings_title">AI Settings</string>
+<string name="ai_settings_desc">Configure Groq API and models for chat / image analysis</string>
+<string name="ai_api_key_label">Groq API Key</string>
+<string name="ai_api_key_hint">gsk_…</string>
+<string name="ai_api_key_note">Stored on this device only. Not uploaded to our servers.</string>
+<string name="ai_text_model_label">Text model</string>
+<string name="ai_text_model_hint">Used for chat, coding, and error analysis</string>
+<string name="ai_vision_model_label">Vision model</string>
+<string name="ai_vision_model_hint">Used when attaching images in AI Assistant</string>
+<string name="ai_save_settings">Save settings</string>
+<string name="ai_save_note">New requests will use the updated models immediately</string>
+<string name="ai_get_api_key">No API Key? Create one at console.groq.com</string>
+<string name="ai_settings_saved">AI settings saved</string>
+<string name="ai_open_browser_fail">Could not open browser</string>
 </resources>

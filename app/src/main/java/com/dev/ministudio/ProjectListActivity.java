@@ -469,171 +469,180 @@ public class ProjectListActivity extends AppCompatActivity {
     }
 
     private void showGitHubSettingsDialog() {
-        SharedPreferences prefs = getSharedPreferences("GitHubPrefs", Context.MODE_PRIVATE);
-        String savedUsername = prefs.getString("username", "");
-        String savedEmail = prefs.getString("email", "");
-        String savedToken = prefs.getString("token", "");
+    SharedPreferences prefs = getSharedPreferences("GitHubPrefs", Context.MODE_PRIVATE);
+    String savedUsername = prefs.getString("username", "");
+    String savedEmail = prefs.getString("email", "");
+    String savedToken = prefs.getString("token", "");
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        
-        LinearLayout mainLayout = new LinearLayout(this);
-        mainLayout.setOrientation(LinearLayout.VERTICAL);
-        int paddingPx = (int) (24 * getResources().getDisplayMetrics().density);
-        mainLayout.setPadding(paddingPx, paddingPx, paddingPx, paddingPx);
-        mainLayout.setBackgroundColor(Color.parseColor("#1E1E1E"));
+    AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        LinearLayout titleLayout = new LinearLayout(this);
-        titleLayout.setOrientation(LinearLayout.HORIZONTAL);
-        titleLayout.setGravity(Gravity.CENTER_VERTICAL);
-        titleLayout.setPadding(0, 0, 0, (int) (6 * getResources().getDisplayMetrics().density));
+    LinearLayout mainLayout = new LinearLayout(this);
+    mainLayout.setOrientation(LinearLayout.VERTICAL);
+    int paddingPx = (int) (24 * getResources().getDisplayMetrics().density);
+    mainLayout.setPadding(paddingPx, paddingPx, paddingPx, paddingPx);
+    mainLayout.setBackgroundColor(Color.parseColor("#1E1E1E"));
 
-        TextView tvTitle = new TextView(this);
-        tvTitle.setText("⚙️ ตั้งค่าบัญชี GitHub Sync");
-        tvTitle.setTextColor(Color.WHITE);
-        tvTitle.setTextSize(18);
-        tvTitle.setTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD));
-        titleLayout.addView(tvTitle);
-        mainLayout.addView(titleLayout);
+    LinearLayout titleLayout = new LinearLayout(this);
+    titleLayout.setOrientation(LinearLayout.HORIZONTAL);
+    titleLayout.setGravity(Gravity.CENTER_VERTICAL);
+    titleLayout.setPadding(0, 0, 0, (int) (6 * getResources().getDisplayMetrics().density));
 
-        TextView tvDesc = new TextView(this);
-        tvDesc.setText("ข้อมูลนี้จะถูกบันทึกเพื่อใช้ส่งซอร์สโค้ดโปรเจกต์ขึ้นไปบิวด์บนคลาวด์อัตโนมัติ");
-        tvDesc.setTextColor(Color.parseColor("#8E8E93"));
-        tvDesc.setTextSize(13);
-        tvDesc.setLineSpacing(0, 1.2f);
-        tvDesc.setPadding(0, 0, 0, (int) (20 * getResources().getDisplayMetrics().density));
-        mainLayout.addView(tvDesc);
+    TextView tvTitle = new TextView(this);
+    tvTitle.setText(getString(R.string.github_settings_title));
+    tvTitle.setTextColor(Color.WHITE);
+    tvTitle.setTextSize(18);
+    tvTitle.setTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD));
+    titleLayout.addView(tvTitle);
+    mainLayout.addView(titleLayout);
 
-        LinearLayout.LayoutParams boxParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        boxParams.bottomMargin = (int) (14 * getResources().getDisplayMetrics().density);
+    TextView tvDesc = new TextView(this);
+    tvDesc.setText(getString(R.string.github_settings_desc));
+    tvDesc.setTextColor(Color.parseColor("#8E8E93"));
+    tvDesc.setTextSize(13);
+    tvDesc.setLineSpacing(0, 1.2f);
+    tvDesc.setPadding(0, 0, 0, (int) (20 * getResources().getDisplayMetrics().density));
+    mainLayout.addView(tvDesc);
 
-        GradientDrawable inputStyle = new GradientDrawable();
-        inputStyle.setColor(Color.parseColor("#252526"));
-        inputStyle.setCornerRadius((int) (8 * getResources().getDisplayMetrics().density));
-        inputStyle.setStroke((int) (1 * getResources().getDisplayMetrics().density), Color.parseColor("#3F3F46"));
+    LinearLayout.LayoutParams boxParams = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    boxParams.bottomMargin = (int) (14 * getResources().getDisplayMetrics().density);
 
-        int inputPadding = (int) (12 * getResources().getDisplayMetrics().density);
+    GradientDrawable inputStyle = new GradientDrawable();
+    inputStyle.setColor(Color.parseColor("#252526"));
+    inputStyle.setCornerRadius((int) (8 * getResources().getDisplayMetrics().density));
+    inputStyle.setStroke((int) (1 * getResources().getDisplayMetrics().density),
+            Color.parseColor("#3F3F46"));
 
-        TextView labelUsername = new TextView(this);
-        labelUsername.setText("GitHub Username");
-        labelUsername.setTextColor(Color.parseColor("#D4D4D8"));
-        labelUsername.setTextSize(13);
-        labelUsername.setPadding(0, 0, 0, (int) (6 * getResources().getDisplayMetrics().density));
-        mainLayout.addView(labelUsername);
+    int inputPadding = (int) (12 * getResources().getDisplayMetrics().density);
 
-        final EditText etUsername = new EditText(this);
-        etUsername.setHint("ระบุชื่อผู้ใช้ GitHub");
-        etUsername.setHintTextColor(Color.parseColor("#52525B"));
-        etUsername.setText(savedUsername);
-        etUsername.setTextColor(Color.WHITE);
-        etUsername.setTextSize(14);
-        etUsername.setBackground(inputStyle.getConstantState().newDrawable());
-        etUsername.setPadding(inputPadding, inputPadding, inputPadding, inputPadding);
-        mainLayout.addView(etUsername, boxParams);
+    // Username
+    TextView labelUsername = new TextView(this);
+    labelUsername.setText(getString(R.string.github_username));
+    labelUsername.setTextColor(Color.parseColor("#D4D4D8"));
+    labelUsername.setTextSize(13);
+    labelUsername.setPadding(0, 0, 0, (int) (6 * getResources().getDisplayMetrics().density));
+    mainLayout.addView(labelUsername);
 
-        TextView labelEmail = new TextView(this);
-        labelEmail.setText("GitHub Email");
-        labelEmail.setTextColor(Color.parseColor("#D4D4D8"));
-        labelEmail.setTextSize(13);
-        labelEmail.setPadding(0, 0, 0, (int) (6 * getResources().getDisplayMetrics().density));
-        mainLayout.addView(labelEmail);
+    final EditText etUsername = new EditText(this);
+    etUsername.setHint(getString(R.string.github_username_hint));
+    etUsername.setHintTextColor(Color.parseColor("#52525B"));
+    etUsername.setText(savedUsername);
+    etUsername.setTextColor(Color.WHITE);
+    etUsername.setTextSize(14);
+    etUsername.setBackground(inputStyle.getConstantState().newDrawable());
+    etUsername.setPadding(inputPadding, inputPadding, inputPadding, inputPadding);
+    mainLayout.addView(etUsername, boxParams);
 
-        final EditText etEmail = new EditText(this);
-        etEmail.setHint("ระบุอีเมลที่ผูกกับ GitHub");
-        etEmail.setHintTextColor(Color.parseColor("#52525B"));
-        etEmail.setText(savedEmail);
-        etEmail.setTextColor(Color.WHITE);
-        etEmail.setTextSize(14);
-        etEmail.setBackground(inputStyle.getConstantState().newDrawable());
-        etEmail.setPadding(inputPadding, inputPadding, inputPadding, inputPadding);
-        mainLayout.addView(etEmail, boxParams);
+    // Email
+    TextView labelEmail = new TextView(this);
+    labelEmail.setText(getString(R.string.github_email));
+    labelEmail.setTextColor(Color.parseColor("#D4D4D8"));
+    labelEmail.setTextSize(13);
+    labelEmail.setPadding(0, 0, 0, (int) (6 * getResources().getDisplayMetrics().density));
+    mainLayout.addView(labelEmail);
 
-        TextView labelToken = new TextView(this);
-        labelToken.setText("Personal Access Token (Classic)");
-        labelToken.setTextColor(Color.parseColor("#D4D4D8"));
-        labelToken.setTextSize(13);
-        labelToken.setPadding(0, 0, 0, (int) (6 * getResources().getDisplayMetrics().density));
-        mainLayout.addView(labelToken);
+    final EditText etEmail = new EditText(this);
+    etEmail.setHint(getString(R.string.github_email_hint));
+    etEmail.setHintTextColor(Color.parseColor("#52525B"));
+    etEmail.setText(savedEmail);
+    etEmail.setTextColor(Color.WHITE);
+    etEmail.setTextSize(14);
+    etEmail.setBackground(inputStyle.getConstantState().newDrawable());
+    etEmail.setPadding(inputPadding, inputPadding, inputPadding, inputPadding);
+    mainLayout.addView(etEmail, boxParams);
 
-        final EditText etToken = new EditText(this);
-        etToken.setHint("วางโทเค็นสิทธิ์เข้าถึง (ghp_...)");
-        etToken.setHintTextColor(Color.parseColor("#52525B"));
-        etToken.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        etToken.setText(savedToken);
-        etToken.setTextColor(Color.WHITE);
-        etToken.setTextSize(14);
-        etToken.setBackground(inputStyle.getConstantState().newDrawable());
-        etToken.setPadding(inputPadding, inputPadding, inputPadding, inputPadding);
-        mainLayout.addView(etToken, boxParams);
+    // Token
+    TextView labelToken = new TextView(this);
+    labelToken.setText(getString(R.string.github_token));
+    labelToken.setTextColor(Color.parseColor("#D4D4D8"));
+    labelToken.setTextSize(13);
+    labelToken.setPadding(0, 0, 0, (int) (6 * getResources().getDisplayMetrics().density));
+    mainLayout.addView(labelToken);
 
-        final AlertDialog dialog = builder.setView(mainLayout).create();
+    final EditText etToken = new EditText(this);
+    etToken.setHint(getString(R.string.github_token_hint));
+    etToken.setHintTextColor(Color.parseColor("#52525B"));
+    etToken.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+    etToken.setText(savedToken);
+    etToken.setTextColor(Color.WHITE);
+    etToken.setTextSize(14);
+    etToken.setBackground(inputStyle.getConstantState().newDrawable());
+    etToken.setPadding(inputPadding, inputPadding, inputPadding, inputPadding);
+    mainLayout.addView(etToken, boxParams);
 
-        LinearLayout buttonLayout = new LinearLayout(this);
-        buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
-        buttonLayout.setGravity(Gravity.END);
-        LinearLayout.LayoutParams btnLayoutParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        btnLayoutParams.topMargin = (int) (16 * getResources().getDisplayMetrics().density);
-        buttonLayout.setLayoutParams(btnLayoutParams);
+    final AlertDialog dialog = builder.setView(mainLayout).create();
 
-        android.widget.Button btnCancel = new android.widget.Button(this, null, 0, android.R.style.Widget_Material_Button_Borderless);
-        btnCancel.setText("ยกเลิก");
-        btnCancel.setTextColor(Color.parseColor("#A1A1AA"));
-        btnCancel.setTextSize(14);
-        btnCancel.setAllCaps(false);
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
-        buttonLayout.addView(btnCancel);
+    LinearLayout buttonLayout = new LinearLayout(this);
+    buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
+    buttonLayout.setGravity(Gravity.END);
+    LinearLayout.LayoutParams btnLayoutParams = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    btnLayoutParams.topMargin = (int) (16 * getResources().getDisplayMetrics().density);
+    buttonLayout.setLayoutParams(btnLayoutParams);
 
-        android.widget.Button btnSave = new android.widget.Button(this, null, 0, android.R.style.Widget_Material_Button_Borderless);
-        btnSave.setText("บันทึกข้อมูล");
-        btnSave.setTextColor(Color.WHITE);
-        btnSave.setTextSize(14);
-        btnSave.setAllCaps(false);
-        
-        GradientDrawable saveBtnBg = new GradientDrawable();
-        saveBtnBg.setColor(Color.parseColor("#248A3D"));
-        saveBtnBg.setCornerRadius((int) (6 * getResources().getDisplayMetrics().density));
-        btnSave.setBackground(saveBtnBg);
-        
-        LinearLayout.LayoutParams saveBtnParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, (int) (40 * getResources().getDisplayMetrics().density));
-        saveBtnParams.leftMargin = (int) (12 * getResources().getDisplayMetrics().density);
-        btnSave.setLayoutParams(saveBtnParams);
-        btnSave.setPadding((int) (16 * getResources().getDisplayMetrics().density), 0, (int) (16 * getResources().getDisplayMetrics().density), 0);    
+    android.widget.Button btnCancel = new android.widget.Button(
+            this, null, 0, android.R.style.Widget_Material_Button_Borderless);
+    btnCancel.setText(getString(R.string.btn_cancel));
+    btnCancel.setTextColor(Color.parseColor("#A1A1AA"));
+    btnCancel.setTextSize(14);
+    btnCancel.setAllCaps(false);
+    btnCancel.setOnClickListener(v -> dialog.dismiss());
+    buttonLayout.addView(btnCancel);
 
-        btnSave.setOnClickListener(v -> {
-            String username = etUsername.getText().toString().trim();
-            String email = etEmail.getText().toString().trim();
-            String token = etToken.getText().toString().trim();
+    android.widget.Button btnSave = new android.widget.Button(
+            this, null, 0, android.R.style.Widget_Material_Button_Borderless);
+    btnSave.setText(getString(R.string.btn_save_data));
+    btnSave.setTextColor(Color.WHITE);
+    btnSave.setTextSize(14);
+    btnSave.setAllCaps(false);
 
-            if (username.isEmpty() || token.isEmpty()) {
-                Toast.makeText(this, "❌ กรุณากรอก Username และ Token", Toast.LENGTH_LONG).show();
-                return;
-            }
+    GradientDrawable saveBtnBg = new GradientDrawable();
+    saveBtnBg.setColor(Color.parseColor("#248A3D"));
+    saveBtnBg.setCornerRadius((int) (6 * getResources().getDisplayMetrics().density));
+    btnSave.setBackground(saveBtnBg);
 
-            prefs.edit()
+    LinearLayout.LayoutParams saveBtnParams = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            (int) (40 * getResources().getDisplayMetrics().density));
+    saveBtnParams.leftMargin = (int) (12 * getResources().getDisplayMetrics().density);
+    btnSave.setLayoutParams(saveBtnParams);
+    btnSave.setPadding(
+            (int) (16 * getResources().getDisplayMetrics().density), 0,
+            (int) (16 * getResources().getDisplayMetrics().density), 0);
+
+    btnSave.setOnClickListener(v -> {
+        String username = etUsername.getText().toString().trim();
+        String email = etEmail.getText().toString().trim();
+        String token = etToken.getText().toString().trim();
+
+        if (username.isEmpty() || token.isEmpty()) {
+            Toast.makeText(this, getString(R.string.github_settings_empty), Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        prefs.edit()
                 .putString("username", username)
                 .putString("email", email)
                 .putString("token", token)
                 .putBoolean("is_github_setup", true)
                 .apply();
 
-            Toast.makeText(this, "💾 บันทึกการตั้งค่าสำเร็จ", Toast.LENGTH_SHORT).show();
-            dialog.dismiss();
-        });
+        Toast.makeText(this, getString(R.string.github_settings_saved), Toast.LENGTH_SHORT).show();
+        dialog.dismiss();
+    });
 
-        buttonLayout.addView(btnSave);
-        mainLayout.addView(buttonLayout);
+    buttonLayout.addView(btnSave);
+    mainLayout.addView(buttonLayout);
 
-        if (dialog.getWindow() != null) {
-            GradientDrawable dialogBg = new GradientDrawable();
-            dialogBg.setColor(Color.parseColor("#1E1E1E"));
-            dialogBg.setCornerRadius((int) (14 * getResources().getDisplayMetrics().density));
-            dialog.getWindow().setBackgroundDrawable(dialogBg);
-        }
-
-        dialog.show();
+    if (dialog.getWindow() != null) {
+        GradientDrawable dialogBg = new GradientDrawable();
+        dialogBg.setColor(Color.parseColor("#1E1E1E"));
+        dialogBg.setCornerRadius((int) (14 * getResources().getDisplayMetrics().density));
+        dialog.getWindow().setBackgroundDrawable(dialogBg);
     }
+
+    dialog.show();
+}
 
     private void downloadAndImportProject(String githubUrl, String projectName) {
         File targetDir = new File("/sdcard/MiniStudio/" + projectName);

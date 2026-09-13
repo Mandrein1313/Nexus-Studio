@@ -228,50 +228,51 @@ public class ProjectDialogManager {
     }
 
     // 4. ยืนยันการลบ
-    public void showDeleteConfirmationDialog(String targetName, final Runnable onDeleteConfirmed) {
-        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_delete_confirm, null);
+public void showDeleteConfirmationDialog(String targetName, final Runnable onDeleteConfirmed) {
+    View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_delete_confirm, null);
 
-        TextView tvDialogMessage = dialogView.findViewById(R.id.tvDialogMessage);
-        Button btnCancel = dialogView.findViewById(R.id.btnDialogCancel);
-        Button btnConfirm = dialogView.findViewById(R.id.btnDialogConfirm);
+    TextView tvTitle = dialogView.findViewById(R.id.tvDialogTitle);
+    TextView tvDialogMessage = dialogView.findViewById(R.id.tvDialogMessage);
+    Button btnCancel = dialogView.findViewById(R.id.btnDialogCancel);
+    Button btnConfirm = dialogView.findViewById(R.id.btnDialogConfirm);
 
-        tvDialogMessage.setText(context.getString(R.string.dialog_delete_message, targetName));
-        tvDialogMessage.setTextColor(android.graphics.Color.WHITE);
-
-        final AlertDialog dialog = new AlertDialog.Builder(context).create();
-        dialog.setView(dialogView);
-
-        if (dialog.getWindow() != null) {
-            android.graphics.drawable.GradientDrawable dialogBg =
-                    new android.graphics.drawable.GradientDrawable();
-            dialogBg.setColor(android.graphics.Color.parseColor("#1E1E1E"));
-            dialogBg.setCornerRadius(
-                    (int) (14 * context.getResources().getDisplayMetrics().density));
-            dialog.getWindow().setBackgroundDrawable(dialogBg);
-        }
-
-        btnCancel.setText(context.getString(R.string.btn_cancel));
-        btnCancel.setTextColor(android.graphics.Color.parseColor("#A1A1AA"));
-
-        btnConfirm.setText(context.getString(R.string.btn_delete));
-        android.graphics.drawable.GradientDrawable confirmDeleteBg =
-                new android.graphics.drawable.GradientDrawable();
-        confirmDeleteBg.setColor(android.graphics.Color.parseColor("#D32F2F"));
-        confirmDeleteBg.setCornerRadius(
-                (int) (6 * context.getResources().getDisplayMetrics().density));
-        btnConfirm.setBackground(confirmDeleteBg);
-        btnConfirm.setTextColor(android.graphics.Color.WHITE);
-
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
-        btnConfirm.setOnClickListener(v -> {
-            dialog.dismiss();
-            if (onDeleteConfirmed != null) {
-                onDeleteConfirmed.run();
-            }
-        });
-
-        dialog.show();
+    if (tvTitle != null) {
+        tvTitle.setText(context.getString(R.string.dialog_delete_title));
+        tvTitle.setTextColor(android.graphics.Color.WHITE);
     }
+
+    tvDialogMessage.setText(context.getString(R.string.dialog_delete_message, targetName));
+    tvDialogMessage.setTextColor(android.graphics.Color.parseColor("#AAAAAA"));
+
+    final AlertDialog dialog = new AlertDialog.Builder(context).create();
+    dialog.setView(dialogView);
+
+    if (dialog.getWindow() != null) {
+        android.graphics.drawable.GradientDrawable dialogBg =
+                new android.graphics.drawable.GradientDrawable();
+        dialogBg.setColor(android.graphics.Color.parseColor("#1E1E1E"));
+        dialogBg.setCornerRadius(
+                (int) (14 * context.getResources().getDisplayMetrics().density));
+        dialog.getWindow().setBackgroundDrawable(dialogBg);
+    }
+
+    btnCancel.setText(context.getString(R.string.btn_cancel));
+    btnCancel.setTextColor(android.graphics.Color.parseColor("#A1A1AA"));
+
+    btnConfirm.setText(context.getString(R.string.btn_delete));
+    // ปุ่มลบแบบ text button สีแดง (ไม่ทับพื้นหลังทั้งปุ่ม)
+    btnConfirm.setTextColor(android.graphics.Color.parseColor("#FF5252"));
+
+    btnCancel.setOnClickListener(v -> dialog.dismiss());
+    btnConfirm.setOnClickListener(v -> {
+        dialog.dismiss();
+        if (onDeleteConfirmed != null) {
+            onDeleteConfirmed.run();
+        }
+    });
+
+    dialog.show();
+}
 
     // 5. ดูรูปภาพ
     public void showImageViewerDialog(File imageFile) {

@@ -16,7 +16,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="⚙️ AI Settings"
+            android:text="@string/ai_settings_title"
             android:textColor="#C0CAF5"
             android:textSize="22sp"
             android:textStyle="bold"
@@ -25,7 +25,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="ตั้งค่า Groq API และโมเดลที่ใช้ตอบแชท / วิเคราะห์รูป"
+            android:text="@string/ai_settings_desc"
             android:textColor="#565F89"
             android:textSize="13sp"
             android:lineSpacingMultiplier="1.2"
@@ -42,7 +42,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Groq API Key"
+                android:text="@string/ai_api_key_label"
                 android:textColor="#A9B1D6"
                 android:textSize="13sp"
                 android:paddingBottom="8dp" />
@@ -51,7 +51,7 @@
                 android:id="@+id/etApiKey"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:hint="gsk_..."
+                android:hint="@string/ai_api_key_hint"
                 android:textColor="#C0CAF5"
                 android:textColorHint="#565F89"
                 android:textSize="14sp"
@@ -64,7 +64,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="คีย์เก็บบนเครื่องเท่านั้น ไม่ถูกอัปขึ้นเซิร์ฟเวอร์ของแอป"
+                android:text="@string/ai_api_key_note"
                 android:textColor="#565F89"
                 android:textSize="11sp"
                 android:paddingTop="8dp" />
@@ -82,7 +82,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="โมเดลข้อความ"
+                android:text="@string/ai_text_model_label"
                 android:textColor="#A9B1D6"
                 android:textSize="13sp"
                 android:paddingBottom="4dp" />
@@ -90,7 +90,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="ใช้ตอนแชท เขียนโค้ด วิเคราะห์ error"
+                android:text="@string/ai_text_model_hint"
                 android:textColor="#565F89"
                 android:textSize="11sp"
                 android:paddingBottom="8dp" />
@@ -116,7 +116,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="โมเดลวิเคราะห์รูป"
+                android:text="@string/ai_vision_model_label"
                 android:textColor="#A9B1D6"
                 android:textSize="13sp"
                 android:paddingBottom="4dp" />
@@ -124,7 +124,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="ใช้ตอนแนบรูปใน AI Assistant"
+                android:text="@string/ai_vision_model_hint"
                 android:textColor="#565F89"
                 android:textSize="11sp"
                 android:paddingBottom="8dp" />
@@ -143,7 +143,7 @@
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:layout_marginTop="24dp"
-            android:text="บันทึกการตั้งค่า"
+            android:text="@string/ai_save_settings"
             android:textColor="#1A1B26"
             android:textSize="15sp"
             android:textStyle="bold"
@@ -154,7 +154,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="เปลี่ยนโมเดลแล้วคำขอครั้งถัดไปจะใช้ค่าใหม่ทันที"
+            android:text="@string/ai_save_note"
             android:textColor="#565F89"
             android:textSize="11sp"
             android:gravity="center"
@@ -164,7 +164,7 @@
             android:id="@+id/tvGetApiKey"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="ยังไม่มี API Key? สร้างที่ console.groq.com"
+            android:text="@string/ai_get_api_key"
             android:textColor="#7AA2F7"
             android:textSize="13sp"
             android:gravity="center"
