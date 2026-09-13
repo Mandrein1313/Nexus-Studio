@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Nexus Studio</string>
 
-    <!-- Project list screen -->
+    <!-- Project list -->
     <string name="projects_title">Projects</string>
     <string name="projects_subtitle">MOBILE ANDROID IDE</string>
     <string name="projects_description">Choose a template to create a Gradle project, then edit Java/Kotlin and XML from your phone</string>
@@ -20,16 +20,16 @@
     <string name="nav_general">General</string>
     <string name="nav_about">About Nexus Studio</string>
 
-    <!-- Toolbar menu -->
+    <!-- Toolbar -->
     <string name="action_github_settings">GitHub Settings</string>
     <string name="action_toggle_theme">Toggle light/dark theme</string>
 
-    <!-- Language dialog -->
+    <!-- Language -->
     <string name="settings_language">Language</string>
     <string name="lang_english">English</string>
     <string name="lang_thai">ไทย</string>
 
-    <!-- About -->
+    <!-- About / common buttons -->
     <string name="about_title">Nexus Studio</string>
     <string name="about_message">Mobile Android IDE\nWrite, edit, and build apps from your phone</string>
     <string name="btn_ok">OK</string>
@@ -37,24 +37,25 @@
     <string name="btn_delete">Delete</string>
     <string name="btn_save">Save</string>
     <string name="btn_download">Download</string>
+    <string name="btn_save_data">Save</string>
 
     <!-- Delete project -->
     <string name="delete_project_title">Delete project</string>
     <string name="delete_project_message">Delete \"%1$s\"?</string>
     <string name="delete_project_done">Deleted</string>
 
-    <!-- Theme toggle -->
+    <!-- Theme -->
     <string name="theme_light_enabled">Light theme (applies when opening a project)</string>
     <string name="theme_dark_enabled">Dark theme (applies when opening a project)</string>
 
-    <!-- Import from GitHub -->
+    <!-- Import GitHub -->
     <string name="import_github_title">Import project from GitHub</string>
     <string name="import_github_message">Only the latest commit will be fetched (shallow clone) for speed</string>
     <string name="import_github_hint">https://github.com/user/repository.git</string>
     <string name="import_github_empty_url">Please enter a URL first</string>
     <string name="import_github_started">Clone started in the background</string>
 
-    <!-- GitHub Settings dialog -->
+    <!-- GitHub Settings -->
     <string name="github_settings_title">GitHub Sync Settings</string>
     <string name="github_settings_desc">This data is saved to upload project sources for cloud builds automatically</string>
     <string name="github_username">GitHub Username</string>
@@ -77,7 +78,7 @@
     <string name="build_failed">Build failed</string>
     <string name="console_ready">Ready. Press Run to assembleDebug.</string>
 
-    <!-- Main editor (activity_main) — ตัวที่เคย missing -->
+    <!-- Main editor -->
     <string name="no_file_open">No file open</string>
     <string name="saved">Saved</string>
     <string name="search_hint">Search…</string>
@@ -93,67 +94,53 @@
     <string name="preview_mode">Layout Preview</string>
     <string name="preview_phone">Phone</string>
     <string name="preview_tablet">Tablet</string>
-    <!-- File tree / bottom sheet menu -->
-   <string name="manage_folder">Manage folder: %1$s</string>
-   <string name="manage_file">Manage file: %1$s</string>
-   <string name="menu_new_file">New file</string>
-   <string name="menu_new_folder">New folder</string>
-  <string name="menu_rename">Rename</string>
-  <string name="menu_delete">Delete</string>
-  <string name="menu_import_file">Import file</string>
-  <string name="delete_success">Deleted successfully</string>
-  <string name="delete_failed">Delete failed</string>
-<string name="import_no_destination">Import destination not found</string>
-<string name="import_success">Imported: %1$s</string>
-<string name="import_failed">Import failed: %1$s</string>
-  <!-- ProjectDialogManager -->
-<string name="dialog_create_file_title">New file</string>
-<string name="dialog_create_file_hint">e.g. MainActivity.java, activity_main.xml</string>
-<string name="dialog_create_file_btn">Create file</string>
-<string name="dialog_create_file_ok">File created</string>
-<string name="dialog_create_file_fail">Could not create file (name exists or no permission)</string>
 
-<string name="dialog_create_folder_title">New folder</string>
-<string name="dialog_create_folder_hint">Folder name…</string>
-<string name="dialog_create_folder_btn">Create</string>
-<string name="dialog_create_folder_ok">Folder created</string>
-<string name="dialog_create_folder_fail">Could not create folder (name exists or no permission)</string>
+    <!-- File tree menu -->
+    <string name="manage_folder">Manage folder: %1$s</string>
+    <string name="manage_file">Manage file: %1$s</string>
+    <string name="menu_new_file">New file</string>
+    <string name="menu_new_folder">New folder</string>
+    <string name="menu_rename">Rename</string>
+    <string name="menu_delete">Delete</string>
+    <string name="menu_import_file">Import file</string>
+    <string name="delete_success">Deleted successfully</string>
+    <string name="delete_failed">Delete failed</string>
+    <string name="import_no_destination">Import destination not found</string>
+    <string name="import_success">Imported: %1$s</string>
+    <string name="import_failed">Import failed: %1$s</string>
 
-<string name="dialog_rename_title">Rename</string>
-<string name="dialog_rename_ok">Renamed successfully</string>
-<string name="dialog_rename_fail">Rename failed (name already exists)</string>
+    <!-- ProjectDialogManager -->
+    <string name="dialog_create_file_title">New file</string>
+    <string name="dialog_create_file_hint">e.g. MainActivity.java, activity_main.xml</string>
+    <string name="dialog_create_file_btn">Create file</string>
+    <string name="dialog_create_file_ok">File created</string>
+    <string name="dialog_create_file_fail">Could not create file (name exists or no permission)</string>
+    <string name="dialog_create_folder_title">New folder</string>
+    <string name="dialog_create_folder_hint">Folder name…</string>
+    <string name="dialog_create_folder_btn">Create</string>
+    <string name="dialog_create_folder_ok">Folder created</string>
+    <string name="dialog_create_folder_fail">Could not create folder (name exists or no permission)</string>
+    <string name="dialog_rename_title">Rename</string>
+    <string name="dialog_rename_ok">Renamed successfully</string>
+    <string name="dialog_rename_fail">Rename failed (name already exists)</string>
+    <string name="dialog_delete_title">Confirm delete</string>
+    <string name="dialog_delete_message">Delete %1$s?</string>
+    <string name="dialog_image_load_fail">Could not load image</string>
+    <string name="dialog_close">Close</string>
 
-<string name="dialog_delete_message">Delete %1$s?</string>
-<string name="dialog_image_load_fail">Could not load image</string>
-<string name="dialog_close">Close</string>
-<string name="dialog_delete_title">Confirm delete</string>
-<string name="dialog_delete_message">Delete %1$s?</string>
-<!-- GitHub Settings dialog -->
-<string name="github_settings_title">GitHub Sync Settings</string>
-<string name="github_settings_desc">This data is saved to upload project sources for cloud builds automatically</string>
-<string name="github_username">GitHub Username</string>
-<string name="github_username_hint">Enter your GitHub username</string>
-<string name="github_email">GitHub Email</string>
-<string name="github_email_hint">Email linked to your GitHub account</string>
-<string name="github_token">Personal Access Token (Classic)</string>
-<string name="github_token_hint">Paste access token (ghp_…)</string>
-<string name="github_settings_empty">Please enter Username and Token</string>
-<string name="github_settings_saved">Settings saved</string>
-<string name="btn_save_data">Save</string>
-
-<!-- AI Settings -->
-<string name="ai_settings_title">AI Settings</string>
-<string name="ai_settings_desc">Configure Groq API and models for chat / image analysis</string>
-<string name="ai_api_key_label">Groq API Key</string>
-<string name="ai_api_key_hint">gsk_…</string>
-<string name="ai_api_key_note">Stored on this device only. Not uploaded to our servers.</string>
-<string name="ai_text_model_label">Text model</string>
-<string name="ai_text_model_hint">Used for chat, coding, and error analysis</string>
-<string name="ai_vision_model_label">Vision model</string>
-<string name="ai_vision_model_hint">Used when attaching images in AI Assistant</string>
-<string name="ai_save_settings">Save settings</string>
-<string name="ai_save_note">New requests will use the updated models immediately</string>
-<string name="ai_get_api_key">No API Key? Create one at console.groq.com</string>
-<string name="ai_settings_saved">AI settings saved</string>
-<string name="ai_open_browser_fail">Could not open browser</string>
+    <!-- AI Settings -->
+    <string name="ai_settings_title">AI Settings</string>
+    <string name="ai_settings_desc">Configure Groq API and models for chat / image analysis</string>
+    <string name="ai_api_key_label">Groq API Key</string>
+    <string name="ai_api_key_hint">gsk_…</string>
+    <string name="ai_api_key_note">Stored on this device only. Not uploaded to our servers.</string>
+    <string name="ai_text_model_label">Text model</string>
+    <string name="ai_text_model_hint">Used for chat, coding, and error analysis</string>
+    <string name="ai_vision_model_label">Vision model</string>
+    <string name="ai_vision_model_hint">Used when attaching images in AI Assistant</string>
+    <string name="ai_save_settings">Save settings</string>
+    <string name="ai_save_note">New requests will use the updated models immediately</string>
+    <string name="ai_get_api_key">No API Key? Create one at console.groq.com</string>
+    <string name="ai_settings_saved">AI settings saved</string>
+    <string name="ai_open_browser_fail">Could not open browser</string>
 </resources>

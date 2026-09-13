@@ -29,7 +29,7 @@
     <string name="lang_english">English</string>
     <string name="lang_thai">ไทย</string>
 
-    <!-- เกี่ยวกับ -->
+    <!-- เกี่ยวกับ / ปุ่มทั่วไป -->
     <string name="about_title">Nexus Studio</string>
     <string name="about_message">Mobile Android IDE\nเขียน แก้ บิลด์แอปได้จากมือถือ</string>
     <string name="btn_ok">ตกลง</string>
@@ -37,17 +37,18 @@
     <string name="btn_delete">ลบ</string>
     <string name="btn_save">บันทึก</string>
     <string name="btn_download">ดาวน์โหลด</string>
+    <string name="btn_save_data">บันทึกข้อมูล</string>
 
     <!-- ลบโปรเจกต์ -->
     <string name="delete_project_title">ลบโปรเจกต์</string>
     <string name="delete_project_message">ลบ \"%1$s\" หรือไม่?</string>
     <string name="delete_project_done">ลบแล้ว</string>
 
-    <!-- สลับธีม -->
+    <!-- ธีม -->
     <string name="theme_light_enabled">☀️ ธีมสว่าง (ใช้ตอนเปิดโปรเจกต์)</string>
     <string name="theme_dark_enabled">🌙 ธีมมืด (ใช้ตอนเปิดโปรเจกต์)</string>
 
-    <!-- นำเข้าจาก GitHub -->
+    <!-- นำเข้า GitHub -->
     <string name="import_github_title">นำเข้าโปรเจกต์จาก GitHub</string>
     <string name="import_github_message">ระบบจะดึงเฉพาะ Commit ล่าสุด (Shallow Clone) เพื่อความรวดเร็ว</string>
     <string name="import_github_hint">https://github.com/user/repository.git</string>
@@ -77,7 +78,7 @@
     <string name="build_failed">บิวด์ล้มเหลว</string>
     <string name="console_ready">พร้อมแล้ว กด Run เพื่อ assembleDebug</string>
 
-    <!-- Main editor (activity_main) -->
+    <!-- Main editor -->
     <string name="no_file_open">ยังไม่ได้เปิดไฟล์</string>
     <string name="saved">บันทึกแล้ว</string>
     <string name="search_hint">ค้นหา…</string>
@@ -93,67 +94,53 @@
     <string name="preview_mode">Layout Preview</string>
     <string name="preview_phone">โทรศัพท์</string>
     <string name="preview_tablet">แท็บเล็ต</string>
-    <!-- เมนูจัดการไฟล์/โฟลเดอร์ -->
-<string name="manage_folder">จัดการโฟลเดอร์: %1$s</string>
-<string name="manage_file">จัดการไฟล์: %1$s</string>
-<string name="menu_new_file">สร้างไฟล์ใหม่</string>
-<string name="menu_new_folder">สร้างโฟลเดอร์ใหม่</string>
-<string name="menu_rename">เปลี่ยนชื่อ</string>
-<string name="menu_delete">ลบ</string>
-<string name="menu_import_file">นำเข้าไฟล์ (Import)</string>
-<string name="delete_success">ลบสำเร็จแล้ว</string>
-<string name="delete_failed">ลบไม่สำเร็จ</string>
-<string name="import_no_destination">ไม่พบตำแหน่งที่ตั้งสำหรับนำเข้าไฟล์</string>
-<string name="import_success">นำเข้าไฟล์สำเร็จ: %1$s</string>
-<string name="import_failed">การนำเข้าไฟล์ล้มเหลว: %1$s</string>
-<!-- ProjectDialogManager -->
-<string name="dialog_create_file_title">สร้างไฟล์ใหม่</string>
-<string name="dialog_create_file_hint">ตัวอย่าง: MainActivity.java, activity_main.xml</string>
-<string name="dialog_create_file_btn">สร้างไฟล์</string>
-<string name="dialog_create_file_ok">สร้างไฟล์สำเร็จ</string>
-<string name="dialog_create_file_fail">ไม่สามารถสร้างไฟล์ได้ (ชื่อซ้ำหรือสิทธิ์ไม่พอ)</string>
 
-<string name="dialog_create_folder_title">สร้างโฟลเดอร์ใหม่</string>
-<string name="dialog_create_folder_hint">ตั้งชื่อโฟลเดอร์…</string>
-<string name="dialog_create_folder_btn">สร้าง</string>
-<string name="dialog_create_folder_ok">สร้างโฟลเดอร์สำเร็จ</string>
-<string name="dialog_create_folder_fail">ไม่สามารถสร้างโฟลเดอร์ได้ (ชื่อซ้ำหรือสิทธิ์ไม่พอ)</string>
+    <!-- เมนูจัดการไฟล์ -->
+    <string name="manage_folder">จัดการโฟลเดอร์: %1$s</string>
+    <string name="manage_file">จัดการไฟล์: %1$s</string>
+    <string name="menu_new_file">สร้างไฟล์ใหม่</string>
+    <string name="menu_new_folder">สร้างโฟลเดอร์ใหม่</string>
+    <string name="menu_rename">เปลี่ยนชื่อ</string>
+    <string name="menu_delete">ลบ</string>
+    <string name="menu_import_file">นำเข้าไฟล์ (Import)</string>
+    <string name="delete_success">ลบสำเร็จแล้ว</string>
+    <string name="delete_failed">ลบไม่สำเร็จ</string>
+    <string name="import_no_destination">ไม่พบตำแหน่งที่ตั้งสำหรับนำเข้าไฟล์</string>
+    <string name="import_success">นำเข้าไฟล์สำเร็จ: %1$s</string>
+    <string name="import_failed">การนำเข้าไฟล์ล้มเหลว: %1$s</string>
 
-<string name="dialog_rename_title">เปลี่ยนชื่อ</string>
-<string name="dialog_rename_ok">เปลี่ยนชื่อสำเร็จ</string>
-<string name="dialog_rename_fail">เปลี่ยนชื่อล้มเหลว (ชื่อซ้ำกัน)</string>
+    <!-- ProjectDialogManager -->
+    <string name="dialog_create_file_title">สร้างไฟล์ใหม่</string>
+    <string name="dialog_create_file_hint">ตัวอย่าง: MainActivity.java, activity_main.xml</string>
+    <string name="dialog_create_file_btn">สร้างไฟล์</string>
+    <string name="dialog_create_file_ok">สร้างไฟล์สำเร็จ</string>
+    <string name="dialog_create_file_fail">ไม่สามารถสร้างไฟล์ได้ (ชื่อซ้ำหรือสิทธิ์ไม่พอ)</string>
+    <string name="dialog_create_folder_title">สร้างโฟลเดอร์ใหม่</string>
+    <string name="dialog_create_folder_hint">ตั้งชื่อโฟลเดอร์…</string>
+    <string name="dialog_create_folder_btn">สร้าง</string>
+    <string name="dialog_create_folder_ok">สร้างโฟลเดอร์สำเร็จ</string>
+    <string name="dialog_create_folder_fail">ไม่สามารถสร้างโฟลเดอร์ได้ (ชื่อซ้ำหรือสิทธิ์ไม่พอ)</string>
+    <string name="dialog_rename_title">เปลี่ยนชื่อ</string>
+    <string name="dialog_rename_ok">เปลี่ยนชื่อสำเร็จ</string>
+    <string name="dialog_rename_fail">เปลี่ยนชื่อล้มเหลว (ชื่อซ้ำกัน)</string>
+    <string name="dialog_delete_title">ยืนยันการลบ</string>
+    <string name="dialog_delete_message">ต้องการลบ %1$s ใช่หรือไม่?</string>
+    <string name="dialog_image_load_fail">ไม่สามารถโหลดรูปภาพได้</string>
+    <string name="dialog_close">ปิดหน้าต่าง</string>
 
-<string name="dialog_delete_message">ต้องการลบ %1$s ใช่หรือไม่?</string>
-<string name="dialog_image_load_fail">ไม่สามารถโหลดรูปภาพได้</string>
-<string name="dialog_close">ปิดหน้าต่าง</string>
-<string name="dialog_delete_title">ยืนยันการลบ</string>
-<string name="dialog_delete_message">ต้องการลบ %1$s ใช่หรือไม่?</string>
-<!-- GitHub Settings -->
-<string name="github_settings_title">ตั้งค่าบัญชี GitHub Sync</string>
-<string name="github_settings_desc">ข้อมูลนี้จะถูกบันทึกเพื่อใช้ส่งซอร์สโค้ดโปรเจกต์ขึ้นไปบิวด์บนคลาวด์อัตโนมัติ</string>
-<string name="github_username">GitHub Username</string>
-<string name="github_username_hint">ระบุชื่อผู้ใช้ GitHub</string>
-<string name="github_email">GitHub Email</string>
-<string name="github_email_hint">ระบุอีเมลที่ผูกกับ GitHub</string>
-<string name="github_token">Personal Access Token (Classic)</string>
-<string name="github_token_hint">วางโทเค็นสิทธิ์เข้าถึง (ghp_…)</string>
-<string name="github_settings_empty">กรุณากรอก Username และ Token</string>
-<string name="github_settings_saved">บันทึกการตั้งค่าสำเร็จ</string>
-<string name="btn_save_data">บันทึกข้อมูล</string>
-
-<!-- AI Settings -->
-<string name="ai_settings_title">AI Settings</string>
-<string name="ai_settings_desc">ตั้งค่า Groq API และโมเดลที่ใช้ตอบแชท / วิเคราะห์รูป</string>
-<string name="ai_api_key_label">Groq API Key</string>
-<string name="ai_api_key_hint">gsk_…</string>
-<string name="ai_api_key_note">คีย์เก็บบนเครื่องเท่านั้น ไม่ถูกอัปขึ้นเซิร์ฟเวอร์ของแอป</string>
-<string name="ai_text_model_label">โมเดลข้อความ</string>
-<string name="ai_text_model_hint">ใช้ตอนแชท เขียนโค้ด วิเคราะห์ error</string>
-<string name="ai_vision_model_label">โมเดลวิเคราะห์รูป</string>
-<string name="ai_vision_model_hint">ใช้ตอนแนบรูปใน AI Assistant</string>
-<string name="ai_save_settings">บันทึกการตั้งค่า</string>
-<string name="ai_save_note">เปลี่ยนโมเดลแล้วคำขอครั้งถัดไปจะใช้ค่าใหม่ทันที</string>
-<string name="ai_get_api_key">ยังไม่มี API Key? สร้างที่ console.groq.com</string>
-<string name="ai_settings_saved">บันทึกการตั้งค่า AI แล้ว</string>
-<string name="ai_open_browser_fail">เปิดเบราว์เซอร์ไม่สำเร็จ</string>
+    <!-- AI Settings -->
+    <string name="ai_settings_title">AI Settings</string>
+    <string name="ai_settings_desc">ตั้งค่า Groq API และโมเดลที่ใช้ตอบแชท / วิเคราะห์รูป</string>
+    <string name="ai_api_key_label">Groq API Key</string>
+    <string name="ai_api_key_hint">gsk_…</string>
+    <string name="ai_api_key_note">คีย์เก็บบนเครื่องเท่านั้น ไม่ถูกอัปขึ้นเซิร์ฟเวอร์ของแอป</string>
+    <string name="ai_text_model_label">โมเดลข้อความ</string>
+    <string name="ai_text_model_hint">ใช้ตอนแชท เขียนโค้ด วิเคราะห์ error</string>
+    <string name="ai_vision_model_label">โมเดลวิเคราะห์รูป</string>
+    <string name="ai_vision_model_hint">ใช้ตอนแนบรูปใน AI Assistant</string>
+    <string name="ai_save_settings">บันทึกการตั้งค่า</string>
+    <string name="ai_save_note">เปลี่ยนโมเดลแล้วคำขอครั้งถัดไปจะใช้ค่าใหม่ทันที</string>
+    <string name="ai_get_api_key">ยังไม่มี API Key? สร้างที่ console.groq.com</string>
+    <string name="ai_settings_saved">บันทึกการตั้งค่า AI แล้ว</string>
+    <string name="ai_open_browser_fail">เปิดเบราว์เซอร์ไม่สำเร็จ</string>
 </resources>
