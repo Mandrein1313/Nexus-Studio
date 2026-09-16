@@ -147,4 +147,15 @@
 <string name="exit_confirm_message">Leave the editor and return to Projects?</string>
 <string name="exit_confirm_stay">Stay</string>
 <string name="exit_confirm_leave">Back</string>
+<!-- Logcat / Crash -->
+<string name="btn_logcat">Logcat</string>
+<string name="btn_logcat_stop">⏹ Stop</string>
+<string name="btn_copy_crash">Copy crash</string>
+<string name="logcat_started">Logcat crash mode (quiet if no error)</string>
+<string name="logcat_filter">Filter: %1$s</string>
+<string name="logcat_stopped">Logcat stopped</string>
+<string name="logcat_auto_started">Logcat started after successful build</string>
+<string name="crash_copied">Crash log copied</string>
+<string name="crash_empty">No crash log yet</string>
+<string name="crash_detected">CRASH DETECTED</string>
 </resources>

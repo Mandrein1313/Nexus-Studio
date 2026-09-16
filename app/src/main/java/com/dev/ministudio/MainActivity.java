@@ -124,6 +124,9 @@ public class MainActivity extends AppCompatActivity {
     private LogcatReader logcatReader;
     private View consolePanel;
     private ScrollView consoleScrollView;
+    private final StringBuilder lastCrashBuffer = new StringBuilder();
+    private boolean capturingCrash = false;
+    private static final int CRASH_BUFFER_MAX = 120;
 // tvConsole มีอยู่แล้วก็ใช้ตัวเดิมได้
     /** ใช้ string ตามภาษาที่ตั้งไว้ */
 private String t(int resId) {
@@ -1490,36 +1493,45 @@ private void toggleXmlPreview() {
                         showToast("Cloud build started...");
                     }
 
-                    @Override
-                    public void onBuildFinished(boolean success, String apkPath) {
-                        if (isPipelineStopped[0]) return;
+         @Override
+public void onBuildFinished(boolean success, String apkPath) {
+    if (isPipelineStopped[0]) return;
 
-                        if (success) {
-                            showToast("Build successful");
-                            appendLog("12 actionable tasks: executed on cloud\n", C_TEXT);
-                            if (apkPath != null && !apkPath.isEmpty()) {
-                                appendLog("APK → " + apkPath + "\n", C_MINT);
-                            } else {
-                                appendLog("APK → app/build/outputs/apk/debug/"
-                                                + projectName + "-debug.apk\n",
-                                        C_MINT);
-                            }
-                            runOnUiThread(() -> {
-                                if (rvErrorPanel != null) {
-                                    rvErrorPanel.setVisibility(View.GONE);
-                                }
-                            });
-                        } else {
-                            showToast("Build failed");
-
-                            final ParsedError err = analyzer.getLastError();
-                            if (err != null) {
-                                runOnUiThread(() -> executeJumpToError(err));
-                            }
-                        }
-                    }
-                }
-        );
+    if (success) {
+        showToast(getString(R.string.build_success));
+        appendLog("12 actionable tasks: executed on cloud\n", C_TEXT);
+        if (apkPath != null && !apkPath.isEmpty()) {
+            appendLog("APK → " + apkPath + "\n", C_MINT);
+        } else {
+            appendLog("APK → app/build/outputs/apk/debug/"
+                            + projectName + "-debug.apk\n",
+                    C_MINT);
+        }
+        runOnUiThread(() -> {
+            if (rvErrorPanel != null) {
+                rvErrorPanel.setVisibility(View.GONE);
+            }
+            // ข้อ 1: เริ่ม Logcat อัตโนมัติหลังบิวด์สำเร็จ
+            String pkg = null;
+            if (currentProject != null) {
+                pkg = readProjectPackageName(currentProject.getRootPath());
+            }
+            if (pkg == null || pkg.isEmpty()) {
+                pkg = "com.dev.ministudio";
+            }
+            appendLog(getString(R.string.logcat_auto_started) + "\n", C_BLUE);
+            startLogcatMonitor(pkg);
+        });
+    } else {
+        showToast(getString(R.string.build_failed));
+        final ParsedError err = analyzer.getLastError();
+        if (err != null) {
+            runOnUiThread(() -> executeJumpToError(err));
+        }
+    }
+}
+           //     }
+     //   );
 
         String githubToken = savedToken;
         String repoUrl = "https://github.com/" + username + "/" + projectName + ".git";
@@ -2808,17 +2820,21 @@ private void startActualPushService(String projectName) {
     }
 
     Toast.makeText(this, "📥 เริ่มอัปโหลดแล้ว! รูดหน้าจอลงมาดู % บน Status Bar ได้เลยครับ", Toast.LENGTH_LONG).show();
-}private void startLogcatMonitor(String packageName) {
+}
+private void startLogcatMonitor(String packageName) {
     if (logcatReader == null) logcatReader = new LogcatReader();
     logcatReader.stop();
 
-    // เปิดแผง Console ด้านล่าง
+    lastCrashBuffer.setLength(0);
+    capturingCrash = false;
+    hideCopyCrashButton();
+
     showConsolePanel();
 
-    appendConsoleLine("📡 Logcat โหมด Crash (เงียบถ้าไม่มี Error)\n",
+    appendConsoleLine(getString(R.string.logcat_started) + "\n",
             android.graphics.Color.parseColor("#7AA2F7"));
     if (packageName != null && !packageName.isEmpty()) {
-        appendConsoleLine("กรอง: " + packageName + "\n",
+        appendConsoleLine(getString(R.string.logcat_filter, packageName) + "\n",
                 android.graphics.Color.parseColor("#565F89"));
     }
 
@@ -2826,16 +2842,32 @@ private void startActualPushService(String projectName) {
         @Override
         public void onLine(String line) {
             int color;
-            if (line.contains("FATAL") || line.contains("Fatal signal")) {
-                color = android.graphics.Color.parseColor("#FF5555");
-            } else if (line.contains("Caused by:") || line.contains("\tat ")) {
-                color = android.graphics.Color.parseColor("#E0AF68");
-            } else if (line.contains("AndroidRuntime")
+            boolean isFatal = line.contains("FATAL") || line.contains("Fatal signal");
+            boolean isStack = line.contains("Caused by:") || line.contains("\tat ");
+            boolean isErr = line.contains("AndroidRuntime")
                     || line.contains(" E/")
-                    || line.contains(" F/")) {
+                    || line.contains(" F/");
+
+            if (isFatal) {
+                color = android.graphics.Color.parseColor("#FF5555");
+                capturingCrash = true;
+                lastCrashBuffer.setLength(0);
+                lastCrashBuffer.append(getString(R.string.crash_detected)).append('\n');
+                lastCrashBuffer.append(line).append('\n');
+                showCopyCrashButton();
+            } else if (isStack) {
+                color = android.graphics.Color.parseColor("#E0AF68");
+                if (capturingCrash) appendCrashLine(line);
+            } else if (isErr) {
                 color = android.graphics.Color.parseColor("#F7768E");
+                if (capturingCrash) appendCrashLine(line);
             } else {
                 color = android.graphics.Color.parseColor("#A9B1D6");
+                if (capturingCrash) appendCrashLine(line);
+            }
+
+            if (isFatal) {
+                appendConsoleLine("\n" + getString(R.string.crash_detected) + "\n", color);
             }
             appendConsoleLine(line + "\n", color);
         }
@@ -2848,20 +2880,73 @@ private void startActualPushService(String projectName) {
 
         @Override
         public void onStopped() {
-            appendConsoleLine("⏹ หยุด Logcat\n",
+            appendConsoleLine(getString(R.string.logcat_stopped) + "\n",
                     android.graphics.Color.parseColor("#565F89"));
-
-            // อัปเดตปุ่ม Logcat ถ้ามีใน layout (layout ใหม่ไม่มีก็ข้ามได้)
-            if (consolePanel != null) {
-                TextView btn = consolePanel.findViewById(R.id.btnLogcat);
-                if (btn != null) {
-                    updateLogcatButtonUi(btn);
+            capturingCrash = false;
+            runOnUiThread(() -> {
+                if (consolePanel != null) {
+                    TextView btn = consolePanel.findViewById(R.id.btnLogcat);
+                    if (btn != null) updateLogcatButtonUi(btn);
                 }
-            }
+            });
+        }
+    });
+
+    runOnUiThread(() -> {
+        if (consolePanel != null) {
+            TextView btn = consolePanel.findViewById(R.id.btnLogcat);
+            if (btn != null) updateLogcatButtonUi(btn);
         }
     });
 }
-//
+
+private void appendCrashLine(String line) {
+    if (lastCrashBuffer.length() / 80 > CRASH_BUFFER_MAX) return;
+    lastCrashBuffer.append(line).append('\n');
+}
+
+private void showCopyCrashButton() {
+    runOnUiThread(() -> {
+        if (consolePanel == null) return;
+        TextView btn = consolePanel.findViewById(R.id.btnCopyCrash);
+        if (btn != null) btn.setVisibility(View.VISIBLE);
+    });
+}
+
+private void hideCopyCrashButton() {
+    runOnUiThread(() -> {
+        if (consolePanel == null) return;
+        TextView btn = consolePanel.findViewById(R.id.btnCopyCrash);
+        if (btn != null) btn.setVisibility(View.GONE);
+    });
+}
+
+private void copyLastCrashToClipboard() {
+    String text = lastCrashBuffer.toString().trim();
+    if (text.isEmpty()) {
+        showToast(getString(R.string.crash_empty));
+        return;
+    }
+    android.content.ClipboardManager cm =
+            (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+    if (cm != null) {
+        cm.setPrimaryClip(android.content.ClipData.newPlainText("crash", text));
+        showToast(getString(R.string.crash_copied));
+    }
+}
+
+private void updateLogcatButtonUi(TextView btnLogcat) {
+    if (btnLogcat == null) return;
+    boolean on = logcatReader != null && logcatReader.isRunning();
+    if (on) {
+        btnLogcat.setText(getString(R.string.btn_logcat_stop));
+        btnLogcat.setTextColor(android.graphics.Color.parseColor("#F7768E"));
+    } else {
+        btnLogcat.setText(getString(R.string.btn_logcat));
+        btnLogcat.setTextColor(android.graphics.Color.parseColor("#7AA2F7"));
+    }
+}
+//ระวังผิด
 private void showConsolePanel() {
     if (consolePanel == null) {
         consolePanel = findViewById(R.id.consolePanel);

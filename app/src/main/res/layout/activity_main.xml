@@ -443,6 +443,33 @@
                     android:background="@drawable/bg_btn_console_secondary" />
 
                 <TextView
+                    android:id="@+id/btnLogcat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:text="@string/btn_logcat"
+                    android:textColor="#7AA2F7"
+                    android:textSize="13sp"
+                    android:background="@drawable/bg_btn_console_secondary" />
+
+                <TextView
+                    android:id="@+id/btnCopyCrash"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:text="@string/btn_copy_crash"
+                    android:textColor="#E0AF68"
+                    android:textSize="13sp"
+                    android:visibility="gone"
+                    android:background="@drawable/bg_btn_console_secondary" />
+
+                <TextView
                     android:id="@+id/tvConsoleMeta"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -537,4 +564,3 @@
     </com.google.android.material.navigation.NavigationView>
 
 </androidx.drawerlayout.widget.DrawerLayout>
-

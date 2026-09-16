@@ -147,4 +147,15 @@
 <string name="exit_confirm_message">ต้องการออกจากตัวแก้ไข\nแล้วกลับไปหน้า Projects หรือไม่?</string>
 <string name="exit_confirm_stay">อยู่ต่อ</string>
 <string name="exit_confirm_leave">กลับ</string>
+<!-- Logcat / Crash -->
+<string name="btn_logcat">Logcat</string>
+<string name="btn_logcat_stop">⏹ หยุด</string>
+<string name="btn_copy_crash">คัดลอก crash</string>
+<string name="logcat_started">Logcat โหมด Crash (เงียบถ้าไม่มี Error)</string>
+<string name="logcat_filter">กรอง: %1$s</string>
+<string name="logcat_stopped">หยุด Logcat</string>
+<string name="logcat_auto_started">เริ่ม Logcat หลังบิวด์สำเร็จ</string>
+<string name="crash_copied">คัดลอก crash แล้ว</string>
+<string name="crash_empty">ยังไม่มี crash log</string>
+<string name="crash_detected">ตรวจพบ CRASH</string> 
 </resources>
