@@ -1356,7 +1356,7 @@ private void toggleXmlPreview() {
 
    public void startCloudBuildPipeline() {
     if (currentProject == null) {
-        showToast("Please open a project first");
+        showToast(getString(R.string.build_please_open_project));
         return;
     }
 
@@ -1365,12 +1365,12 @@ private void toggleXmlPreview() {
     String savedToken = prefs.getString("token", "");
 
     if (username.isEmpty() || savedToken.isEmpty()) {
-        showToast("GitHub account not set. Configure it in settings first.");
+        showToast(getString(R.string.build_github_not_set));
         return;
     }
 
     saveFile();
-    showFullPanelDialog(0); // หรือ showConsolePanel() ถ้าใช้แผงล่างแล้ว
+    showFullPanelDialog(0);
 
     final BuildSummaryAnalyzer analyzer = new BuildSummaryAnalyzer();
     analyzer.clearErrors();
@@ -1378,7 +1378,6 @@ private void toggleXmlPreview() {
     final boolean[] isPipelineStopped = {false};
     final String projectName = currentProject.getProjectName();
 
-    // สี Tokyo Night
     final int C_PURPLE = Color.parseColor("#BB9AF7");
     final int C_BLUE   = Color.parseColor("#7AA2F7");
     final int C_CYAN   = Color.parseColor("#7DCFFF");
@@ -1399,11 +1398,10 @@ private void toggleXmlPreview() {
         }
         if (tvConsole != null) tvConsole.setText("");
 
-        // Header มีสี
         appendLog("Nexus Studio", C_PURPLE);
         appendLog("  ·  Gradle 8.2  ·  ", C_MUTED);
         appendLog(projectName + "\n", C_BLUE);
-        appendLog("Ready. Press Run to assembleDebug.\n\n", C_TEXT);
+        appendLog(getString(R.string.console_ready) + "\n\n", C_TEXT);
 
         BuildTaskManager buildTask = new BuildTaskManager(
                 MainActivity.this,
@@ -1417,7 +1415,6 @@ private void toggleXmlPreview() {
 
                         String lowerText = text.toLowerCase();
 
-                        // เก็บ error ไว้วิเคราะห์ — ไม่หยุดแสดง log
                         analyzer.analyzeLine(text, color,
                                 new BuildSummaryAnalyzer.LogOutputListener() {
                                     @Override
@@ -1430,7 +1427,6 @@ private void toggleXmlPreview() {
                             return;
                         }
 
-                        // เลือกสีตามประเภทข้อความ
                         int finalColor = color;
 
                         if (lowerText.contains("build successful")) {
@@ -1461,28 +1457,6 @@ private void toggleXmlPreview() {
                         } else if (lowerText.startsWith("full log:")
                                 || lowerText.contains("fetching")) {
                             finalColor = C_BLUE;
-                        } else if (color == Color.GREEN) {
-                            finalColor = C_GREEN;
-                        } else if (color == Color.RED
-                                || color == Color.parseColor("#FF8A80")
-                                || color == Color.parseColor("#F7768E")) {
-                            finalColor = C_RED;
-                        } else if (color == Color.YELLOW
-                                || color == Color.parseColor("#FFB74D")
-                                || color == Color.parseColor("#E0AF68")) {
-                            finalColor = C_ORANGE;
-                        } else if (color == Color.CYAN
-                                || color == Color.parseColor("#4FC3F7")
-                                || color == Color.parseColor("#7AA2F7")) {
-                            finalColor = C_BLUE;
-                        } else if (color == Color.parseColor("#BB9AF7")) {
-                            finalColor = C_PURPLE;
-                        } else if (color == Color.parseColor("#565F89")) {
-                            finalColor = C_MUTED;
-                        } else if (color == Color.parseColor("#A9B1D6")
-                                || color == Color.WHITE
-                                || color == Color.LTGRAY) {
-                            finalColor = C_TEXT;
                         }
 
                         appendLog(text, finalColor);
@@ -1490,52 +1464,55 @@ private void toggleXmlPreview() {
 
                     @Override
                     public void onBuildStarted() {
-                        showToast("Cloud build started...");
+                        showToast(getString(R.string.build_started));
                     }
 
-         @Override
-public void onBuildFinished(boolean success, String apkPath) {
-    if (isPipelineStopped[0]) return;
+                    @Override
+                    public void onBuildFinished(boolean success, String apkPath) {
+                        if (isPipelineStopped[0]) return;
 
-    if (success) {
-        showToast(getString(R.string.build_success));
-        appendLog("12 actionable tasks: executed on cloud\n", C_TEXT);
-        if (apkPath != null && !apkPath.isEmpty()) {
-            appendLog("APK → " + apkPath + "\n", C_MINT);
-        } else {
-            appendLog("APK → app/build/outputs/apk/debug/"
-                            + projectName + "-debug.apk\n",
-                    C_MINT);
-        }
-        runOnUiThread(() -> {
-            if (rvErrorPanel != null) {
-                rvErrorPanel.setVisibility(View.GONE);
-            }
-            // ข้อ 1: เริ่ม Logcat อัตโนมัติหลังบิวด์สำเร็จ
-            String pkg = null;
-            if (currentProject != null) {
-                pkg = readProjectPackageName(currentProject.getRootPath());
-            }
-            if (pkg == null || pkg.isEmpty()) {
-                pkg = "com.dev.ministudio";
-            }
-            appendLog(getString(R.string.logcat_auto_started) + "\n", C_BLUE);
-            startLogcatMonitor(pkg);
-        });
-    } else {
-        showToast(getString(R.string.build_failed));
-        final ParsedError err = analyzer.getLastError();
-        if (err != null) {
-            runOnUiThread(() -> executeJumpToError(err));
-        }
-    }
-}
-           //     }
-     //   );
+                        if (success) {
+                            showToast(getString(R.string.build_success));
+                            appendLog("12 actionable tasks: executed on cloud\n", C_TEXT);
+                            if (apkPath != null && !apkPath.isEmpty()) {
+                                appendLog("APK → " + apkPath + "\n", C_MINT);
+                            } else {
+                                appendLog("APK → app/build/outputs/apk/debug/"
+                                                + projectName + "-debug.apk\n",
+                                        C_MINT);
+                            }
+                            runOnUiThread(() -> {
+                                if (rvErrorPanel != null) {
+                                    rvErrorPanel.setVisibility(View.GONE);
+                                }
+                                String pkg = null;
+                                if (currentProject != null) {
+                                    pkg = readProjectPackageName(currentProject.getRootPath());
+                                }
+                                if (pkg == null || pkg.isEmpty()) {
+                                    pkg = "com.dev.ministudio";
+                                }
+                                appendLog(getString(R.string.logcat_auto_started) + "\n", C_BLUE);
+                                startLogcatMonitor(pkg);
+                            });
+                        } else {
+                            showToast(getString(R.string.build_failed));
+                            final ParsedError err = analyzer.getLastError();
+                            if (err != null) {
+                                runOnUiThread(() -> executeJumpToError(err));
+                            }
+                        }
+                    }
+                }
+        );
 
         String githubToken = savedToken;
         String repoUrl = "https://github.com/" + username + "/" + projectName + ".git";
         String packageName = "com.dev.ministudio";
+        if (currentProject != null) {
+            String pkg = readProjectPackageName(currentProject.getRootPath());
+            if (pkg != null && !pkg.isEmpty()) packageName = pkg;
+        }
 
         buildTask.startCloudBuild(githubToken, repoUrl, projectName, packageName);
         buildTask.setAnalyzer(analyzer);
