@@ -2890,14 +2890,14 @@ private void updateLogcatButtonUi(TextView btnLogcat) {
     if (btnLogcat == null) return;
     boolean on = logcatReader != null && logcatReader.isRunning();
     if (on) {
-        btnLogcat.setText(getString(R.string.btn_logcat_stop));
+        // ชัดว่าหยุด Logcat ไม่ใช่หยุด Build
+        btnLogcat.setText(getString(R.string.btn_logcat_stop)); // เช่น "⏹ Logcat"
         btnLogcat.setTextColor(android.graphics.Color.parseColor("#F7768E"));
     } else {
-        btnLogcat.setText(getString(R.string.btn_logcat));
+        btnLogcat.setText(getString(R.string.btn_logcat)); // "Logcat"
         btnLogcat.setTextColor(android.graphics.Color.parseColor("#7AA2F7"));
     }
 }
-//ระวังผิด
 private void showConsolePanel() {
     if (consolePanel == null) {
         consolePanel = findViewById(R.id.consolePanel);
