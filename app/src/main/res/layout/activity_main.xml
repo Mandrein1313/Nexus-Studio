@@ -190,6 +190,7 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- Editor Container -->
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -226,7 +227,147 @@
                 android:visibility="gone" />
         </FrameLayout>
 
-        <!-- แถบล่าง -->
+        <!-- consolePanel (ย้ายมาไว้ใต้ Editor ดันพื้นที่ขึ้นลงแยกชั้นชัดเจน) -->
+        <LinearLayout
+            android:id="@+id/consolePanel"
+            android:layout_width="match_parent"
+            android:layout_height="280dp"
+            android:orientation="vertical"
+            android:background="#1A1B26"
+            android:elevation="8dp"
+            android:visibility="gone">
+
+            <!-- แถบปุ่ม consoleToolbar -->
+            <LinearLayout
+                android:id="@+id/consoleToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="10dp"
+                android:paddingEnd="6dp"
+                android:background="#16161E">
+
+                <HorizontalScrollView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:scrollbars="none"
+                    android:fillViewport="true">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/btnConsoleRun"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:gravity="center"
+                            android:paddingStart="14dp"
+                            android:paddingEnd="14dp"
+                            android:text="@string/btn_run"
+                            android:textColor="#FFFFFF"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:background="@drawable/bg_btn_console_run" />
+
+                        <TextView
+                            android:id="@+id/btnConsoleStop"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_marginStart="6dp"
+                            android:gravity="center"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:text="@string/btn_stop"
+                            android:textColor="#C0CAF5"
+                            android:textSize="13sp"
+                            android:background="@drawable/bg_btn_console_secondary" />
+
+                        <TextView
+                            android:id="@+id/btnConsoleClear"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_marginStart="6dp"
+                            android:gravity="center"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:text="@string/btn_clear"
+                            android:textColor="#C0CAF5"
+                            android:textSize="13sp"
+                            android:background="@drawable/bg_btn_console_secondary" />
+
+                        <TextView
+                            android:id="@+id/btnLogcat"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_marginStart="6dp"
+                            android:gravity="center"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:text="@string/btn_logcat"
+                            android:textColor="#7AA2F7"
+                            android:textSize="13sp"
+                            android:background="@drawable/bg_btn_console_secondary" />
+
+                        <TextView
+                            android:id="@+id/btnCopyCrash"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_marginStart="6dp"
+                            android:gravity="center"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:text="@string/btn_copy_crash"
+                            android:textColor="#E0AF68"
+                            android:textSize="13sp"
+                            android:visibility="gone"
+                            android:background="@drawable/bg_btn_console_secondary" />
+                    </LinearLayout>
+                </HorizontalScrollView>
+
+                <ImageButton
+                    android:id="@+id/btnCloseConsole"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_menu_close_clear_cancel"
+                    android:contentDescription="ปิด"
+                    android:padding="8dp"
+                    app:tint="#F7768E" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#292E42" />
+
+            <!-- พื้นที่ log -->
+            <ScrollView
+                android:id="@+id/consoleScrollView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:fillViewport="true"
+                android:background="#1A1B26">
+
+                <TextView
+                    android:id="@+id/tvConsole"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:textColor="#A9B1D6"
+                    android:textSize="12sp"
+                    android:typeface="monospace"
+                    android:textIsSelectable="true"
+                    android:lineSpacingExtra="2dp" />
+            </ScrollView>
+        </LinearLayout>
+
+        <!-- แถบล่าง (Shortcuts) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -381,143 +522,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- consolePanel ใหม่ -->
-        <LinearLayout
-            android:id="@+id/consolePanel"
-            android:layout_width="match_parent"
-            android:layout_height="240dp"
-            android:orientation="vertical"
-            android:background="#1A1B26"
-            android:visibility="gone">
-
-            <!-- แถบปุ่ม Run / Stop / Clear -->
-            <LinearLayout
-                android:id="@+id/consoleToolbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:background="#16161E">
-
-                <TextView
-                    android:id="@+id/btnConsoleRun"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:gravity="center"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:text="@string/btn_run"
-                    android:textColor="#FFFFFF"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:background="@drawable/bg_btn_console_run" />
-
-                <TextView
-                    android:id="@+id/btnConsoleStop"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:layout_marginStart="8dp"
-                    android:gravity="center"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    android:text="@string/btn_stop"
-                    android:textColor="#C0CAF5"
-                    android:textSize="13sp"
-                    android:background="@drawable/bg_btn_console_secondary" />
-
-                <TextView
-                    android:id="@+id/btnConsoleClear"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:layout_marginStart="8dp"
-                    android:gravity="center"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    android:text="@string/btn_clear"
-                    android:textColor="#C0CAF5"
-                    android:textSize="13sp"
-                    android:background="@drawable/bg_btn_console_secondary" />
-
-                <TextView
-                    android:id="@+id/btnLogcat"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:layout_marginStart="8dp"
-                    android:gravity="center"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:text="@string/btn_logcat"
-                    android:textColor="#7AA2F7"
-                    android:textSize="13sp"
-                    android:background="@drawable/bg_btn_console_secondary" />
-
-                <TextView
-                    android:id="@+id/btnCopyCrash"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:layout_marginStart="8dp"
-                    android:gravity="center"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:text="@string/btn_copy_crash"
-                    android:textColor="#E0AF68"
-                    android:textSize="13sp"
-                    android:visibility="gone"
-                    android:background="@drawable/bg_btn_console_secondary" />
-
-                <TextView
-                    android:id="@+id/tvConsoleMeta"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="end|center_vertical"
-                    android:paddingStart="8dp"
-                    android:text="minSdk 24 · java"
-                    android:textColor="#565F89"
-                    android:textSize="11sp" />
-
-                <!-- ปุ่มปิดแผง -->
-                <ImageButton
-                    android:id="@+id/btnCloseConsole"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_marginStart="4dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@android:drawable/ic_menu_close_clear_cancel"
-                    android:contentDescription="ปิด"
-                    app:tint="#F7768E" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#292E42" />
-
-            <ScrollView
-                android:id="@+id/consoleScrollView"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:fillViewport="true"
-                android:background="#1A1B26">
-
-                <TextView
-                    android:id="@+id/tvConsole"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="12dp"
-                    android:textColor="#A9B1D6"
-                    android:textSize="12sp"
-                    android:typeface="monospace"
-                    android:textIsSelectable="true"
-                    android:lineSpacingExtra="2dp" />
-            </ScrollView>
-        </LinearLayout>
-
         <!-- Error panel -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvErrorPanel"
@@ -526,7 +530,7 @@
             android:background="#2A1F24"
             android:visibility="gone" />
 
-    </LinearLayout>   <!-- ปิด LinearLayout หลัก -->
+    </LinearLayout>
 
     <!-- Drawer โครงสร้างโปรเจกต์ -->
     <com.google.android.material.navigation.NavigationView
