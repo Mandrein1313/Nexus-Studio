@@ -61,6 +61,8 @@ import com.dev.ministudio.ai.AiChatActivity;
 import android.content.Intent;
 import com.dev.ministudio.utils.LogcatReader;
 import com.dev.ministudio.ui.ExitConfirmDialog;
+import io.github.rosemoe.sora.lang.diagnostic.DiagnosticRegion;
+import io.github.rosemoe.sora.lang.diagnostic.DiagnosticsContainer;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -133,6 +135,7 @@ private View errorPanel;
 private TextView tvErrorPanelTitle;
 private ErrorPanelAdapter errorPanelAdapter;
     /** ใช้ string ตามภาษาที่ตั้งไว้ */
+    private java.util.List<ParsedError> lastBuildErrors = new java.util.ArrayList<>();
 private String t(int resId) {
     return getString(resId);
 }
@@ -1412,8 +1415,10 @@ private void toggleXmlPreview() {
     saveFile();
     showFullPanelDialog(0);
 
-    // ซ่อน Panel ข้อผิดพลาดเดิมก่อนเริ่มบิวด์ใหม่
+    // ล้าง error เดิมก่อนบิวด์ใหม่
     hideErrorPanel();
+    clearEditorErrorUnderlines();
+    lastBuildErrors = new java.util.ArrayList<>();
 
     final BuildSummaryAnalyzer analyzer = new BuildSummaryAnalyzer();
     analyzer.clearErrors();
@@ -1525,7 +1530,10 @@ private void toggleXmlPreview() {
                                         C_MINT);
                             }
                             runOnUiThread(() -> {
-                                showErrorPanel(null); // No errors → ซ่อน
+                                lastBuildErrors = new java.util.ArrayList<>();
+                                showErrorPanel(null);
+                                clearEditorErrorUnderlines(); // ลบขีดแดง
+
                                 String pkg = null;
                                 if (currentProject != null) {
                                     pkg = readProjectPackageName(currentProject.getRootPath());
@@ -1543,9 +1551,18 @@ private void toggleXmlPreview() {
                                     new java.util.ArrayList<>(analyzer.getErrorList());
 
                             runOnUiThread(() -> {
+                                lastBuildErrors = errors;
                                 showErrorPanel(errors);
+                                applyEditorErrorUnderlines(errors); // ขีดแดงใน editor
+
                                 if (!errors.isEmpty()) {
-                                    executeJumpToError(errors.get(0)); // วาร์ปข้อแรก
+                                    executeJumpToError(errors.get(0));
+                                    // วาร์ปแล้วขีดใหม่หลังไฟล์โหลด (กัน timing)
+                                    if (codeEditor != null) {
+                                        codeEditor.postDelayed(
+                                                () -> applyEditorErrorUnderlines(lastBuildErrors),
+                                                400);
+                                    }
                                 }
                             });
                         }
@@ -1564,7 +1581,7 @@ private void toggleXmlPreview() {
         buildTask.startCloudBuild(githubToken, repoUrl, projectName, packageName);
         buildTask.setAnalyzer(analyzer);
     }, 300);
-}
+}}
 
 
     private void executeJumpToError(final ParsedError errorItem) {
@@ -1742,22 +1759,26 @@ private void jumpToLineWhenReady(int line, int column, int displayLine, int atte
 public void openFile(File file) {
     if (file == null) return;
 
-    // 1. สั่งเปิดไฟล์ผ่าน Manager ก่อน
+    // 1. เปิดไฟล์ผ่าน Manager
     if (projectTreeManager != null) {
         projectTreeManager.openFile(file);
     }
 
-    // 2. บังคับอัปเดต UI ทันทีโดยไม่ต้องรอ Callback ที่อาจช้า
+    // 2. อัปเดต path
     updateFilePathStatus(file);
-    
-    // 3. สั่งให้ Editor พร้อมทำงานและ Visible ทันที
+
+    // 3. แสดง editor + ขีด error ของไฟล์นี้ (ถ้ามีจากบิวด์ล่าสุด)
     runOnUiThread(() -> {
         if (codeEditor != null) {
-            // ดึงไฟล์มาโชว์ใน editor (ถ้าคลาส projectTreeManager ไม่ได้ทำไว้)
-            // ตัวอย่างเช่น: codeEditor.setText(FileUtils.read(file));
-            
             if (codeEditor.getVisibility() != View.VISIBLE) {
                 setEditorActiveState(true);
+            }
+            if (lastBuildErrors != null && !lastBuildErrors.isEmpty()) {
+                codeEditor.postDelayed(
+                        () -> applyEditorErrorUnderlines(lastBuildErrors),
+                        300);
+            } else {
+                clearEditorErrorUnderlines();
             }
         }
     });
@@ -2900,6 +2921,95 @@ public void jumpToErrorLocation(String fileName, int lineNumber) {
             
             showToast("🔍 วาร์ปมาบรรทัดที่ " + lineNumber + " ให้แล้ว!");
         }
+    });
+}
+/** ขีดเส้นใต้แดงตาม error ของไฟล์ที่เปิดอยู่ */
+private void applyEditorErrorUnderlines(java.util.List<ParsedError> errors) {
+    if (codeEditor == null) return;
+
+    runOnUiThread(() -> {
+        // ล้างของเก่า
+        codeEditor.setDiagnostics(null);
+
+        if (errors == null || errors.isEmpty() || currentProject == null) {
+            return;
+        }
+
+        // เฉพาะ error ของไฟล์ที่กำลังเปิด
+        File current = currentProject.getCurrentOpenFile();
+        if (current == null) return;
+        String currentName = current.getName();
+
+        DiagnosticsContainer container = new DiagnosticsContainer();
+        long id = 1;
+
+        for (ParsedError e : errors) {
+            if (e == null || e.file == null) continue;
+            // เทียบชื่อไฟล์ (log มักเป็นแค่ MainActivity.java)
+            String errName = e.file;
+            int slash = Math.max(errName.lastIndexOf('/'), errName.lastIndexOf('\\'));
+            if (slash >= 0) errName = errName.substring(slash + 1);
+            if (!currentName.equals(errName)) continue;
+
+            int line = Math.max(0, e.line - 1); // 0-based
+            int col = Math.max(0, e.column);
+
+            try {
+                int lineCount = codeEditor.getText().getLineCount();
+                if (line >= lineCount) continue;
+
+                String lineText = codeEditor.getText().getLineString(line);
+                if (lineText == null) lineText = "";
+
+                if (col > lineText.length()) col = lineText.length();
+
+                // ช่วงขีดเส้นใต้: จาก col ไปอย่างน้อย 1 ตัวอักษร หรือทั้ง token
+                int startCol = col;
+                int endCol = col;
+
+                if (lineText.isEmpty()) {
+                    // บรรทัดว่าง — ขีดตำแหน่งต้นบรรทัดความยาว 1 (index เดียวกัน)
+                    startCol = 0;
+                    endCol = 0;
+                } else if (col >= lineText.length()) {
+                    startCol = Math.max(0, lineText.length() - 1);
+                    endCol = lineText.length();
+                } else {
+                    // ขยายไปจนจบคำ / สัญลักษณ์
+                    endCol = col + 1;
+                    while (endCol < lineText.length()) {
+                        char c = lineText.charAt(endCol);
+                        if (Character.isWhitespace(c) || ";{}()[],.".indexOf(c) >= 0) break;
+                        endCol++;
+                    }
+                    if (endCol <= startCol) endCol = Math.min(startCol + 1, lineText.length());
+                }
+
+                int startIndex = codeEditor.getText().getCharIndex(line, startCol);
+                int endIndex = codeEditor.getText().getCharIndex(line, endCol);
+                if (endIndex <= startIndex) endIndex = startIndex + 1;
+
+                container.addDiagnostic(new DiagnosticRegion(
+                        startIndex,
+                        endIndex,
+                        DiagnosticRegion.SEVERITY_ERROR,
+                        id++
+                ));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        codeEditor.setDiagnostics(container);
+        codeEditor.invalidate();
+    });
+}
+
+private void clearEditorErrorUnderlines() {
+    if (codeEditor == null) return;
+    runOnUiThread(() -> {
+        codeEditor.setDiagnostics(null);
+        codeEditor.invalidate();
     });
 }
 
