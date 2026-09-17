@@ -759,11 +759,11 @@ private void showFullPanelDialog(int initialTabPosition) {
 
 /** ปิดแผง Console ด้านล่าง */
 private void hideConsolePanel() {
+    if (consolePanel == null) {
+        consolePanel = findViewById(R.id.consolePanel);
+    }
     if (consolePanel != null) {
         consolePanel.setVisibility(View.GONE);
-    }
-    if (aiLayoutAnalyzer != null) {
-        aiLayoutAnalyzer.stopSpeaking();
     }
 }
 
@@ -1463,15 +1463,29 @@ private void toggleXmlPreview() {
 
                         String lowerText = text.toLowerCase();
 
+                        // วิเคราะห์ error เก็บใน analyzer อย่างเดียว ไม่โชว์ซ้ำใน console
                         analyzer.analyzeLine(text, color,
                                 new BuildSummaryAnalyzer.LogOutputListener() {
                                     @Override
                                     public void onAppendLog(String logText, int logColor) {
-                                        // ไม่ append ซ้ำ
+                                        // ไม่ append ลง console
                                     }
                                 });
 
-                        if (text.startsWith("📍") || text.startsWith("💬")) {
+                        // กรองข้อความสรุป error / วิเคราะห์ ออกจาก console
+                        if (text.startsWith("📍")
+                                || text.startsWith("💬")
+                                || text.startsWith("🔍")
+                                || text.startsWith("📊")
+                                || text.startsWith("💡")
+                                || text.startsWith("📌")
+                                || text.startsWith("🤖")
+                                || text.startsWith("———")
+                                || text.startsWith("═")
+                                || text.contains("วิเคราะห์สาเหตุ")
+                                || text.contains("พบข้อผิดพลาด:")
+                                || text.contains("รายละเอียด:")
+                                || text.contains("คำแนะนำ:")) {
                             return;
                         }
 
@@ -1532,7 +1546,7 @@ private void toggleXmlPreview() {
                             runOnUiThread(() -> {
                                 lastBuildErrors = new java.util.ArrayList<>();
                                 showErrorPanel(null);
-                                clearEditorErrorUnderlines(); // ลบขีดแดง
+                                clearEditorErrorUnderlines();
 
                                 String pkg = null;
                                 if (currentProject != null) {
@@ -1551,13 +1565,15 @@ private void toggleXmlPreview() {
                                     new java.util.ArrayList<>(analyzer.getErrorList());
 
                             runOnUiThread(() -> {
+                                // ปิด console ก่อน → โชว์เฉพาะแผง Error
+                                hideConsolePanel();
+
                                 lastBuildErrors = errors;
                                 showErrorPanel(errors);
-                                applyEditorErrorUnderlines(errors); // ขีดแดงใน editor
+                                applyEditorErrorUnderlines(errors);
 
                                 if (!errors.isEmpty()) {
                                     executeJumpToError(errors.get(0));
-                                    // วาร์ปแล้วขีดใหม่หลังไฟล์โหลด (กัน timing)
                                     if (codeEditor != null) {
                                         codeEditor.postDelayed(
                                                 () -> applyEditorErrorUnderlines(lastBuildErrors),
@@ -1582,8 +1598,6 @@ private void toggleXmlPreview() {
         buildTask.setAnalyzer(analyzer);
     }, 300);
 }
-
-
     private void executeJumpToError(final ParsedError errorItem) {
     if (errorItem == null || currentProject == null) return;
 
