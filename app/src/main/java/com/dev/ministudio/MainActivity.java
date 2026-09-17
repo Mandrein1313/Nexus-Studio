@@ -1581,7 +1581,7 @@ private void toggleXmlPreview() {
         buildTask.startCloudBuild(githubToken, repoUrl, projectName, packageName);
         buildTask.setAnalyzer(analyzer);
     }, 300);
-}}
+}
 
 
     private void executeJumpToError(final ParsedError errorItem) {
