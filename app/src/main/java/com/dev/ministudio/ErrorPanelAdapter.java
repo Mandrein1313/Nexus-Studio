@@ -128,25 +128,33 @@ public class ErrorPanelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        Row row = rows.get(position);
-        if (row.isHeader) {
-            HeaderVH h = (HeaderVH) holder;
-            h.title.setText(row.fileName);
-            h.count.setText(String.valueOf(row.fileCount));
-        } else {
-            ItemVH h = (ItemVH) holder;
-            ParsedError e = row.error;
-            h.msg.setText("✕  " + (e.message != null ? e.message : ""));
-            h.meta.setText("Line " + e.line
-                    + (e.column > 0 ? "  ·  Col " + e.column : "")
-                    + "  ·  " + shortType(e.type));
+public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+    Row row = rows.get(position);
 
-            h.itemView.setOnClickListener(v -> {
-                if (listener != null && e != null) listener.onErrorClick(e);
-            });
-        }
+    if (row.isHeader) {
+        HeaderVH h = (HeaderVH) holder;
+        h.title.setText(row.fileName);
+        h.count.setText(String.valueOf(row.fileCount));
+        // header ไม่ต้องคลิกวาร์ป
+        h.itemView.setOnClickListener(null);
+        return;
     }
+
+    // ===== ตรงนี้: แถว error แต่ละข้อ =====
+    ItemVH h = (ItemVH) holder;
+    final ParsedError e = row.error;
+
+    h.msg.setText("✕  " + (e.message != null ? e.message : ""));
+    h.meta.setText("Line " + e.line
+            + (e.column > 0 ? "  ·  Col " + e.column : "")
+            + "  ·  " + shortType(e.type));
+
+    h.itemView.setOnClickListener(v -> {
+        if (listener != null && e != null) {
+            listener.onErrorClick(e);   // → ไปเรียก executeJumpToError ใน MainActivity
+        }
+    });
+}
 
     @Override
     public int getItemCount() {

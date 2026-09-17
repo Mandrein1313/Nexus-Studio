@@ -162,4 +162,7 @@
 <string name="error_panel_none">✓  No errors</string>
 <string name="error_panel_count">✕  %1$d error</string>
 <string name="error_panel_count_plural">✕  %1$d errors</string>
+<string name="jump_file_not_found">File not found: %1$s</string>
+<string name="jump_success">Jumped to line %1$d</string>
+<string name="jump_failed">Could not jump to line %1$d</string>
 </resources>

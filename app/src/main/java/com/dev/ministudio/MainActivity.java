@@ -1568,44 +1568,169 @@ private void toggleXmlPreview() {
 
 
     private void executeJumpToError(final ParsedError errorItem) {
-        if (errorItem == null || currentProject == null) return;
+    if (errorItem == null || currentProject == null) return;
 
+    // 1) หาไฟล์จริงในโปรเจกต์
+    File targetFile = resolveErrorFile(errorItem.file);
+    if (targetFile == null || !targetFile.exists()) {
+        showToast(getString(R.string.jump_file_not_found,
+                errorItem.file != null ? errorItem.file : "?"));
+        return;
+    }
+
+    // 2) เปิดไฟล์ (tab + editor)
+    openFile(targetFile);
+
+    // 3) วาร์ปหลัง editor โหลดข้อความแล้ว
+    final int zeroBasedLine = Math.max(0, errorItem.line - 1);
+    final int targetColumn = Math.max(0, errorItem.column);
+    final int displayLine = errorItem.line;
+
+    if (codeEditor == null) return;
+
+    // ลองหลายรอบ กันไฟล์ใหญ่โหลดช้า
+    jumpToLineWhenReady(zeroBasedLine, targetColumn, displayLine, 0);
+}
+
+/** แปลงชื่อไฟล์จาก log → File จริง */
+private File resolveErrorFile(String raw) {
+    if (raw == null || raw.trim().isEmpty() || currentProject == null) {
+        return null;
+    }
+
+    String path = raw.trim().replace('\\', '/');
+
+    // absolute
+    File abs = new File(path);
+    if (abs.isAbsolute() && abs.exists() && abs.isFile()) {
+        return abs;
+    }
+
+    // relative จาก root โปรเจกต์
+    File rel = new File(currentProject.getRootPath(), path);
+    if (rel.exists() && rel.isFile()) {
+        return rel;
+    }
+
+    // เหลือแค่ชื่อไฟล์ → ค้นทั้งโปรเจกต์
+    String nameOnly = path;
+    int slash = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
+    if (slash >= 0 && slash < path.length() - 1) {
+        nameOnly = path.substring(slash + 1);
+    }
+
+    if (projectTreeManager != null) {
+        File found = projectTreeManager.findFileInProject(
+                currentProject.getRootPath(), nameOnly);
+        if (found != null && found.exists()) return found;
+    }
+
+    // fallback BFS ใน MainActivity
+    return findFileNamed(new File(currentProject.getRootPath()), nameOnly);
+}
+
+/**
+ * รอให้ editor มีเนื้อหา แล้วค่อย jump
+ * attempt = 0..8 (delay เพิ่มขึ้น)
+ */
+private void jumpToLineWhenReady(int line, int column, int displayLine, int attempt) {
+    if (codeEditor == null) return;
+    if (attempt > 8) {
+        showToast(getString(R.string.jump_failed, displayLine));
+        return;
+    }
+
+    long delay = 120L + attempt * 80L;
+    codeEditor.postDelayed(() -> {
         try {
-            java.io.File targetFile = new java.io.File(errorItem.file);
-            if (!targetFile.isAbsolute()) {
-                targetFile = new java.io.File(currentProject.getRootPath(), errorItem.file);
+            if (codeEditor.getText() == null) {
+                jumpToLineWhenReady(line, column, displayLine, attempt + 1);
+                return;
             }
 
-            if (targetFile.exists()) {
-                openFile(targetFile); 
-                
-                if (codeEditor != null) {
-                    final int zeroBasedLine = Math.max(0, errorItem.line - 1); 
-                    final int targetColumn = Math.max(0, errorItem.column);
+            int lineCount = codeEditor.getText().getLineCount();
+            if (lineCount <= 0) {
+                jumpToLineWhenReady(line, column, displayLine, attempt + 1);
+                return;
+            }
 
-                    codeEditor.postDelayed(() -> {
-                        try {
-                            if (codeEditor.getSearcher() != null) {
-                                codeEditor.getSearcher().stopSearch();
-                            }
-                            codeEditor.jumpToLine(zeroBasedLine);            
-                            codeEditor.setSelection(zeroBasedLine, targetColumn);
-                            codeEditor.setSelectionRegion(zeroBasedLine, targetColumn, zeroBasedLine, targetColumn + 4);
-                            
-                            if (rvErrorPanel != null) {
-                                rvErrorPanel.setVisibility(View.VISIBLE);
-                            }
-                            showToast("🚨 วาร์ปล็อกเป้าหมายพังในบรรทัดที่ " + errorItem.line + " สำเร็จครับ!");
-                        } catch (Exception layoutEx) {
-                            layoutEx.printStackTrace();
-                        }
-                    }, 200); 
+            // ไฟล์เพิ่งเปิด ยังเป็นว่าง / ยังไม่โหลด
+            if (lineCount == 1
+                    && codeEditor.getText().toString().trim().isEmpty()
+                    && attempt < 5) {
+                jumpToLineWhenReady(line, column, displayLine, attempt + 1);
+                return;
+            }
+
+            int safeLine = Math.min(line, Math.max(0, lineCount - 1));
+            int col = Math.max(0, column);
+
+            // จำกัด column ไม่เกินความยาวบรรทัด
+            try {
+                String lineStr = codeEditor.getText().getLineString(safeLine);
+                if (lineStr != null) {
+                    col = Math.min(col, lineStr.length());
                 }
+            } catch (Exception ignored) {
+                col = 0;
+            }
+
+            try {
+                if (codeEditor.getSearcher() != null) {
+                    codeEditor.getSearcher().stopSearch();
+                }
+            } catch (Exception ignored) {
+            }
+
+            // เลื่อน + เลือกตำแหน่ง (รองรับหลายเวอร์ชัน Sora)
+            boolean jumped = false;
+            try {
+                codeEditor.setSelection(safeLine, col);
+                jumped = true;
+            } catch (Exception e1) {
+                try {
+                    if (codeEditor.getCursor() != null) {
+                        codeEditor.getCursor().setLeft(safeLine, col);
+                        codeEditor.getCursor().setRight(safeLine, col);
+                        jumped = true;
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+
+            try {
+                codeEditor.ensurePositionVisible(safeLine, col);
+            } catch (Exception e2) {
+                try {
+                    codeEditor.jumpToLine(safeLine);
+                } catch (Exception ignored) {
+                }
+            }
+
+            // ไฮไลต์สั้น ๆ ถ้าทำได้
+            try {
+                int endCol = Math.min(col + 1, col + 8);
+                String lineStr = codeEditor.getText().getLineString(safeLine);
+                if (lineStr != null) {
+                    endCol = Math.min(endCol, lineStr.length());
+                }
+                if (endCol > col) {
+                    codeEditor.setSelectionRegion(safeLine, col, safeLine, endCol);
+                }
+            } catch (Exception ignored) {
+            }
+
+            if (jumped) {
+                showToast(getString(R.string.jump_success, displayLine));
+            } else {
+                jumpToLineWhenReady(line, column, displayLine, attempt + 1);
             }
         } catch (Exception e) {
             e.printStackTrace();
+            jumpToLineWhenReady(line, column, displayLine, attempt + 1);
         }
-    }
+    }, delay);
+}
 
     public void openFilePicker() {
         android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_GET_CONTENT);
