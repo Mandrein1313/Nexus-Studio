@@ -165,4 +165,5 @@
 <string name="jump_file_not_found">ไม่พบไฟล์: %1$s</string>
 <string name="jump_success">วาร์ปไปบรรทัด %1$d แล้ว</string>
 <string name="jump_failed">วาร์ปไปบรรทัด %1$d ไม่สำเร็จ</string>
+<string name="child_app_not_installed">ยังไม่ได้ติดตั้งแอปลูก</string>
 </resources>

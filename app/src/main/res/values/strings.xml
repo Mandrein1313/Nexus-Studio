@@ -165,4 +165,5 @@
 <string name="jump_file_not_found">File not found: %1$s</string>
 <string name="jump_success">Jumped to line %1$d</string>
 <string name="jump_failed">Could not jump to line %1$d</string>
+<string name="child_app_not_installed">Child app is not installed yet</string>
 </resources>
