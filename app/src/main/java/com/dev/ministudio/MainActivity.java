@@ -2923,19 +2923,17 @@ public void jumpToErrorLocation(String fileName, int lineNumber) {
         }
     });
 }
-/** ขีดเส้นใต้แดงตาม error ของไฟล์ที่เปิดอยู่ */
+/** ขีดเส้นใต้แดง — เน้นทั้งบรรทัดให้เห็นชัด */
 private void applyEditorErrorUnderlines(java.util.List<ParsedError> errors) {
     if (codeEditor == null) return;
 
     runOnUiThread(() -> {
-        // ล้างของเก่า
         codeEditor.setDiagnostics(null);
 
         if (errors == null || errors.isEmpty() || currentProject == null) {
             return;
         }
 
-        // เฉพาะ error ของไฟล์ที่กำลังเปิด
         File current = currentProject.getCurrentOpenFile();
         if (current == null) return;
         String currentName = current.getName();
@@ -2945,13 +2943,13 @@ private void applyEditorErrorUnderlines(java.util.List<ParsedError> errors) {
 
         for (ParsedError e : errors) {
             if (e == null || e.file == null) continue;
-            // เทียบชื่อไฟล์ (log มักเป็นแค่ MainActivity.java)
+
             String errName = e.file;
             int slash = Math.max(errName.lastIndexOf('/'), errName.lastIndexOf('\\'));
             if (slash >= 0) errName = errName.substring(slash + 1);
             if (!currentName.equals(errName)) continue;
 
-            int line = Math.max(0, e.line - 1); // 0-based
+            int line = Math.max(0, e.line - 1);
             int col = Math.max(0, e.column);
 
             try {
@@ -2961,33 +2959,66 @@ private void applyEditorErrorUnderlines(java.util.List<ParsedError> errors) {
                 String lineText = codeEditor.getText().getLineString(line);
                 if (lineText == null) lineText = "";
 
-                if (col > lineText.length()) col = lineText.length();
+                int startCol;
+                int endCol;
 
-                // ช่วงขีดเส้นใต้: จาก col ไปอย่างน้อย 1 ตัวอักษร หรือทั้ง token
-                int startCol = col;
-                int endCol = col;
+                // error โครงสร้าง / ไม่มี column ชัด → ขีดทั้งเนื้อหาในบรรทัด
+                boolean fullLine = col <= 0
+                        || (e.message != null && (
+                        e.message.contains("class, interface")
+                                || e.message.contains("reached end of file")
+                                || e.message.contains("expected")
+                                || e.message.contains("';")));
 
                 if (lineText.isEmpty()) {
-                    // บรรทัดว่าง — ขีดตำแหน่งต้นบรรทัดความยาว 1 (index เดียวกัน)
                     startCol = 0;
                     endCol = 0;
-                } else if (col >= lineText.length()) {
-                    startCol = Math.max(0, lineText.length() - 1);
+                } else if (fullLine) {
+                    // ขีดจากตัวอักษรแรกที่ไม่ใช่ช่องว่าง → ท้ายบรรทัด
+                    startCol = 0;
+                    while (startCol < lineText.length()
+                            && Character.isWhitespace(lineText.charAt(startCol))) {
+                        startCol++;
+                    }
                     endCol = lineText.length();
+                    // ตัด trailing space
+                    while (endCol > startCol
+                            && Character.isWhitespace(lineText.charAt(endCol - 1))) {
+                        endCol--;
+                    }
+                    if (endCol <= startCol) {
+                        startCol = 0;
+                        endCol = lineText.length();
+                    }
                 } else {
-                    // ขยายไปจนจบคำ / สัญลักษณ์
-                    endCol = col + 1;
+                    // มี column ชัด — ขยายเป็นทั้งคำ / อย่างน้อย 3 ตัวอักษร
+                    if (col > lineText.length()) col = lineText.length();
+                    startCol = col;
+                    // ถอยไปต้นคำ
+                    while (startCol > 0) {
+                        char c = lineText.charAt(startCol - 1);
+                        if (Character.isWhitespace(c) || ";{}()[],.".indexOf(c) >= 0) break;
+                        startCol--;
+                    }
+                    endCol = Math.min(col + 1, lineText.length());
                     while (endCol < lineText.length()) {
                         char c = lineText.charAt(endCol);
                         if (Character.isWhitespace(c) || ";{}()[],.".indexOf(c) >= 0) break;
                         endCol++;
                     }
-                    if (endCol <= startCol) endCol = Math.min(startCol + 1, lineText.length());
+                    // อย่างน้อย 3 ตัว หรือถึงท้ายบรรทัด
+                    if (endCol - startCol < 3) {
+                        endCol = Math.min(startCol + Math.max(3, lineText.length() - startCol),
+                                lineText.length());
+                    }
                 }
 
                 int startIndex = codeEditor.getText().getCharIndex(line, startCol);
                 int endIndex = codeEditor.getText().getCharIndex(line, endCol);
-                if (endIndex <= startIndex) endIndex = startIndex + 1;
+                if (endIndex <= startIndex) {
+                    // บังคับอย่างน้อย 1 char
+                    endIndex = Math.min(startIndex + 1, codeEditor.getText().length());
+                }
 
                 container.addDiagnostic(new DiagnosticRegion(
                         startIndex,
