@@ -127,7 +127,11 @@ public class MainActivity extends AppCompatActivity {
     private final StringBuilder lastCrashBuffer = new StringBuilder();
     private boolean capturingCrash = false;
     private static final int CRASH_BUFFER_MAX = 120;
+    
 // tvConsole มีอยู่แล้วก็ใช้ตัวเดิมได้
+private View errorPanel;
+private TextView tvErrorPanelTitle;
+private ErrorPanelAdapter errorPanelAdapter;
     /** ใช้ string ตามภาษาที่ตั้งไว้ */
 private String t(int resId) {
     return getString(resId);
@@ -338,15 +342,68 @@ private void initViews() {
         });
     }
 
+    // ===== Error Panel & RecyclerView =====
+    errorPanel = findViewById(R.id.errorPanel);
+    tvErrorPanelTitle = findViewById(R.id.tvErrorPanelTitle);
     rvErrorPanel = findViewById(R.id.rvErrorPanel);
+
     if (rvErrorPanel != null) {
         rvErrorPanel.setLayoutManager(new LinearLayoutManager(this));
+        errorPanelAdapter = new ErrorPanelAdapter(this, error -> {
+            if (error != null) {
+                executeJumpToError(error);
+            }
+        });
+        rvErrorPanel.setAdapter(errorPanelAdapter);
     }
 
-    
-    previewContainer = findViewById(R.id.previewContainer);
+    View btnCloseErrorPanel = findViewById(R.id.btnCloseErrorPanel);
+    if (btnCloseErrorPanel != null) {
+        btnCloseErrorPanel.setOnClickListener(v -> hideErrorPanel());
+    }
 
-   
+    previewContainer = findViewById(R.id.previewContainer);
+}
+private void showErrorPanel(java.util.List<ParsedError> errors) {
+    runOnUiThread(() -> {
+        if (errorPanel == null) errorPanel = findViewById(R.id.errorPanel);
+        if (tvErrorPanelTitle == null) {
+            tvErrorPanelTitle = findViewById(R.id.tvErrorPanelTitle);
+        }
+        if (errorPanelAdapter == null || errorPanel == null) return;
+
+        int count = errors != null ? errors.size() : 0;
+        if (count == 0) {
+            tvErrorPanelTitle.setText("✓  No errors");
+            tvErrorPanelTitle.setTextColor(Color.parseColor("#9ECE6A"));
+            errorPanelAdapter.setErrors(null);
+            errorPanel.setVisibility(View.GONE);
+            return;
+        }
+
+        tvErrorPanelTitle.setText("✕  " + count + " error" + (count > 1 ? "s" : ""));
+        tvErrorPanelTitle.setTextColor(Color.parseColor("#F7768E"));
+        errorPanelAdapter.setErrors(errors);
+        errorPanel.setVisibility(View.VISIBLE);
+
+        // จำกัดความสูงไม่ให้กินจอเกิน
+        if (rvErrorPanel != null) {
+            int maxH = (int) (220 * getResources().getDisplayMetrics().density);
+            rvErrorPanel.post(() -> {
+                ViewGroup.LayoutParams lp = rvErrorPanel.getLayoutParams();
+                if (rvErrorPanel.getHeight() > maxH) {
+                    lp.height = maxH;
+                    rvErrorPanel.setLayoutParams(lp);
+                }
+            });
+        }
+    });
+}
+
+private void hideErrorPanel() {
+    runOnUiThread(() -> {
+        if (errorPanel != null) errorPanel.setVisibility(View.GONE);
+    });
 }
 
 private void setupLogic() {
@@ -1346,6 +1403,9 @@ private void toggleXmlPreview() {
     saveFile();
     showFullPanelDialog(0);
 
+    // ซ่อน Panel ข้อผิดพลาดเดิมก่อนเริ่มบิวด์ใหม่
+    hideErrorPanel();
+
     final BuildSummaryAnalyzer analyzer = new BuildSummaryAnalyzer();
     analyzer.clearErrors();
 
@@ -1456,9 +1516,7 @@ private void toggleXmlPreview() {
                                         C_MINT);
                             }
                             runOnUiThread(() -> {
-                                if (rvErrorPanel != null) {
-                                    rvErrorPanel.setVisibility(View.GONE);
-                                }
+                                showErrorPanel(null); // No errors → ซ่อน
                                 String pkg = null;
                                 if (currentProject != null) {
                                     pkg = readProjectPackageName(currentProject.getRootPath());
@@ -1471,10 +1529,16 @@ private void toggleXmlPreview() {
                             });
                         } else {
                             showToast(getString(R.string.build_failed));
-                            final ParsedError err = analyzer.getLastError();
-                            if (err != null) {
-                                runOnUiThread(() -> executeJumpToError(err));
-                            }
+
+                            final java.util.ArrayList<ParsedError> errors =
+                                    new java.util.ArrayList<>(analyzer.getErrorList());
+
+                            runOnUiThread(() -> {
+                                showErrorPanel(errors);
+                                if (!errors.isEmpty()) {
+                                    executeJumpToError(errors.get(0)); // วาร์ปข้อแรก
+                                }
+                            });
                         }
                     }
                 }
@@ -1492,6 +1556,8 @@ private void toggleXmlPreview() {
         buildTask.setAnalyzer(analyzer);
     }, 300);
 }
+
+
     private void executeJumpToError(final ParsedError errorItem) {
         if (errorItem == null || currentProject == null) return;
 

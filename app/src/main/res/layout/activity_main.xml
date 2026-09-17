@@ -227,7 +227,61 @@
                 android:visibility="gone" />
         </FrameLayout>
 
-        <!-- consolePanel (ย้ายมาไว้ใต้ Editor ดันพื้นที่ขึ้นลงแยกชั้นชัดเจน) -->
+        <!-- Error panel แบบจัดกลุ่มตามไฟล์ (นำมาแทนที่ rvErrorPanel เดิม) -->
+        <LinearLayout
+            android:id="@+id/errorPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#1F2335"
+            android:visibility="gone"
+            android:elevation="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="14dp"
+                android:paddingEnd="8dp"
+                android:background="#2A1F24">
+
+                <TextView
+                    android:id="@+id/tvErrorPanelTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="No errors"
+                    android:textColor="#9ECE6A"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <ImageButton
+                    android:id="@+id/btnCloseErrorPanel"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_menu_close_clear_cancel"
+                    android:contentDescription="@string/dialog_close"
+                    app:tint="#A9B1D6"
+                    android:padding="6dp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#292E42" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvErrorPanel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxHeight="220dp"
+                android:background="#1A1B26"
+                android:nestedScrollingEnabled="true" />
+        </LinearLayout>
+
+        <!-- consolePanel -->
         <LinearLayout
             android:id="@+id/consolePanel"
             android:layout_width="match_parent"
@@ -521,14 +575,6 @@
                     android:scaleType="centerInside" />
             </LinearLayout>
         </LinearLayout>
-
-        <!-- Error panel -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvErrorPanel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#2A1F24"
-            android:visibility="gone" />
 
     </LinearLayout>
 
