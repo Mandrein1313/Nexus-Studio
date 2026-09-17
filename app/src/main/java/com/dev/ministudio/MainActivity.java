@@ -374,15 +374,23 @@ private void showErrorPanel(java.util.List<ParsedError> errors) {
 
         int count = errors != null ? errors.size() : 0;
         if (count == 0) {
-            tvErrorPanelTitle.setText("✓  No errors");
-            tvErrorPanelTitle.setTextColor(Color.parseColor("#9ECE6A"));
+            if (tvErrorPanelTitle != null) {
+                tvErrorPanelTitle.setText(getString(R.string.error_panel_none));
+                tvErrorPanelTitle.setTextColor(Color.parseColor("#9ECE6A"));
+            }
             errorPanelAdapter.setErrors(null);
             errorPanel.setVisibility(View.GONE);
             return;
         }
 
-        tvErrorPanelTitle.setText("✕  " + count + " error" + (count > 1 ? "s" : ""));
-        tvErrorPanelTitle.setTextColor(Color.parseColor("#F7768E"));
+        if (tvErrorPanelTitle != null) {
+            String title = (count == 1)
+                    ? getString(R.string.error_panel_count, count)
+                    : getString(R.string.error_panel_count_plural, count);
+            tvErrorPanelTitle.setText(title);
+            tvErrorPanelTitle.setTextColor(Color.parseColor("#F7768E"));
+        }
+
         errorPanelAdapter.setErrors(errors);
         errorPanel.setVisibility(View.VISIBLE);
 
@@ -399,6 +407,7 @@ private void showErrorPanel(java.util.List<ParsedError> errors) {
         }
     });
 }
+
 
 private void hideErrorPanel() {
     runOnUiThread(() -> {

@@ -158,4 +158,8 @@
 <string name="crash_copied">Crash log copied</string>
 <string name="crash_empty">No crash log yet</string>
 <string name="crash_detected">CRASH DETECTED</string>
+<!-- Error panel -->
+<string name="error_panel_none">✓  No errors</string>
+<string name="error_panel_count">✕  %1$d error</string>
+<string name="error_panel_count_plural">✕  %1$d errors</string>
 </resources>
