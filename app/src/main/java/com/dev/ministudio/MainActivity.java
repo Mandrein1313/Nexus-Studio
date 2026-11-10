@@ -2889,7 +2889,7 @@ private void showQuickCreateFolderDialog(java.io.File parentFolder) {
         }
     }, 200);
 }
-/
+
 
 
 private void confirmAndDeleteFile(java.io.File file,
