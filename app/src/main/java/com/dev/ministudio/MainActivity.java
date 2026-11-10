@@ -2368,7 +2368,6 @@ private void showFileSearchDialog() {
     android.widget.ImageButton btnBack = dialog.findViewById(R.id.btnSearchBack);
     android.widget.ImageButton btnClear = dialog.findViewById(R.id.btnSearchClear);
 
-    // --- โหมดค้นหา: false = ชื่อไฟล์/โฟลเดอร์, true = ในโค้ด ---
     final boolean[] contentMode = { false };
     final java.util.List<com.dev.ministudio.fs.FileSystemManager.ContentMatch> contentHits = new java.util.ArrayList<>();
 
@@ -2398,7 +2397,6 @@ private void showFileSearchDialog() {
             etSearch.setHint("ค้นหาไฟล์/โฟลเดอร์...");
         }
     };
-
     updateTabs.run();
 
     btnBack.setOnClickListener(v -> dialog.dismiss());
@@ -2441,12 +2439,15 @@ private void showFileSearchDialog() {
             final java.io.File file;
 
             if (contentMode[0] && position < contentHits.size()) {
-                // --- โหมดค้นหาในเนื้อหาโค้ด ---
+                // --- ค้นหาในโค้ด ---
                 com.dev.ministudio.fs.FileSystemManager.ContentMatch m = contentHits.get(position);
                 file = m.file;
 
                 tvName.setText(file.getName() + "  :" + m.lineNumber);
                 tvMeta.setText(m.lineText != null ? m.lineText.trim() : "");
+
+                imgIcon.setImageResource(android.R.drawable.ic_menu_agenda);
+                imgIcon.setColorFilter(android.graphics.Color.parseColor("#7AA2F7"));
 
                 if (btnDelete != null) {
                     btnDelete.setVisibility(android.view.View.GONE);
@@ -2456,7 +2457,6 @@ private void showFileSearchDialog() {
                     dialog.dismiss();
                     openFile(m.file);
                     if (drawerLayout != null) drawerLayout.closeDrawers();
-
                     if (codeEditor != null) {
                         int line = Math.max(0, m.lineNumber - 1);
                         codeEditor.post(() -> {
@@ -2469,7 +2469,7 @@ private void showFileSearchDialog() {
                 });
 
             } else if (position < resultFiles.size()) {
-                // --- โหมดค้นหาชื่อไฟล์ / โฟลเดอร์ ---
+                // --- ค้นหาชื่อไฟล์ / โฟลเดอร์ ---
                 file = resultFiles.get(position);
 
                 String name = file.getName();
@@ -2500,8 +2500,30 @@ private void showFileSearchDialog() {
                     // ===== โฟลเดอร์ =====
                     tvMeta.setText("📁 โฟลเดอร์");
 
+                    imgIcon.setImageResource(R.drawable.ic_folder);
+                    imgIcon.clearColorFilter();
+
                     if (btnDelete != null) {
-                        btnDelete.setVisibility(android.view.View.GONE);
+                        btnDelete.setVisibility(android.view.View.VISIBLE);
+                        btnDelete.setImageResource(R.drawable.ic_add);
+                        btnDelete.setColorFilter(android.graphics.Color.parseColor("#9ECE6A"));
+                        btnDelete.setFocusable(false);
+                        btnDelete.setFocusableInTouchMode(false);
+                        btnDelete.setContentDescription("สร้างไฟล์");
+                        btnDelete.setOnClickListener(v -> {
+                            String[] options = {"สร้างไฟล์", "สร้างโฟลเดอร์"};
+                            new androidx.appcompat.app.AlertDialog.Builder(MainActivity.this)
+                                    .setTitle("ใน \"" + name + "\"")
+                                    .setItems(options, (d, which) -> {
+                                        if (which == 0) {
+                                            showQuickCreateFileDialog(file);
+                                        } else {
+                                            showQuickCreateFolderDialog(file);
+                                        }
+                                    })
+                                    .setNegativeButton("ยกเลิก", null)
+                                    .show();
+                        });
                     }
 
                     convertView.setOnClickListener(v -> {
@@ -2514,8 +2536,11 @@ private void showFileSearchDialog() {
                         }
                         showToast("📁 " + name);
                     });
+
                 } else {
                     // ===== ไฟล์ =====
+                    imgIcon.setImageResource(android.R.drawable.ic_menu_agenda);
+
                     long size = file.length();
                     String sizeStr;
                     if (size < 1024) sizeStr = size + " B";
@@ -2527,10 +2552,24 @@ private void showFileSearchDialog() {
                     String dateStr = sdf.format(new java.util.Date(file.lastModified()));
                     tvMeta.setText(sizeStr + "    " + dateStr);
 
+                    String lower = name.toLowerCase();
+                    if (lower.endsWith(".java")) {
+                        imgIcon.setColorFilter(android.graphics.Color.parseColor("#7DCFFF"));
+                    } else if (lower.endsWith(".xml")) {
+                        imgIcon.setColorFilter(android.graphics.Color.parseColor("#E0AF68"));
+                    } else if (lower.endsWith(".gradle") || lower.endsWith(".properties")) {
+                        imgIcon.setColorFilter(android.graphics.Color.parseColor("#9ECE6A"));
+                    } else {
+                        imgIcon.setColorFilter(android.graphics.Color.parseColor("#7AA2F7"));
+                    }
+
                     if (btnDelete != null) {
                         btnDelete.setVisibility(android.view.View.VISIBLE);
+                        btnDelete.setImageResource(android.R.drawable.ic_menu_delete);
+                        btnDelete.setColorFilter(android.graphics.Color.parseColor("#F7768E"));
                         btnDelete.setFocusable(false);
                         btnDelete.setFocusableInTouchMode(false);
+                        btnDelete.setContentDescription("ลบไฟล์");
                         btnDelete.setOnClickListener(v ->
                                 confirmAndDeleteFile(file, resultFiles, adapterRef[0], tvHint));
                     }
@@ -2555,22 +2594,6 @@ private void showFileSearchDialog() {
             if (lastSlash >= 0) path = path.substring(0, lastSlash + 1);
             else path = "/";
             tvPath.setText(path);
-
-            // สีไอคอน
-            if (file.isDirectory()) {
-                imgIcon.setColorFilter(android.graphics.Color.parseColor("#E0AF68"));
-            } else {
-                String lower = file.getName().toLowerCase();
-                if (lower.endsWith(".java")) {
-                    imgIcon.setColorFilter(android.graphics.Color.parseColor("#7DCFFF"));
-                } else if (lower.endsWith(".xml")) {
-                    imgIcon.setColorFilter(android.graphics.Color.parseColor("#E0AF68"));
-                } else if (lower.endsWith(".gradle") || lower.endsWith(".properties")) {
-                    imgIcon.setColorFilter(android.graphics.Color.parseColor("#9ECE6A"));
-                } else {
-                    imgIcon.setColorFilter(android.graphics.Color.parseColor("#7AA2F7"));
-                }
-            }
 
             return convertView;
         }
@@ -2639,7 +2662,6 @@ private void showFileSearchDialog() {
                                     : "พบโค้ด · " + found.size() + " จุด · " + resultFiles.size() + " ไฟล์");
                         });
                     } else {
-                        // --- ค้นหาชื่อไฟล์ + โฟลเดอร์ ---
                         java.util.List<java.io.File> found =
                                 com.dev.ministudio.fs.FileSystemManager.searchFilesByName(root, q);
                         runOnUiThread(() -> {
@@ -2681,6 +2703,75 @@ private void showFileSearchDialog() {
     if (imm != null) {
         imm.showSoftInput(etSearch, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
     }
+}
+/** สร้างไฟล์ใหม่ในโฟลเดอร์ที่เลือกจากหน้าค้นหา */
+private void showQuickCreateFileDialog(java.io.File parentFolder) {
+    if (parentFolder == null || !parentFolder.isDirectory()) return;
+
+    final android.widget.EditText input = new android.widget.EditText(this);
+    input.setHint("ชื่อไฟล์ เช่น Main.java");
+    input.setSingleLine(true);
+    input.setTextColor(android.graphics.Color.WHITE);
+    input.setHintTextColor(android.graphics.Color.parseColor("#565F89"));
+    int pad = (int) (20 * getResources().getDisplayMetrics().density);
+    input.setPadding(pad, pad, pad, pad);
+
+    new androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("สร้างไฟล์ใน \"" + parentFolder.getName() + "\"")
+            .setView(input)
+            .setPositiveButton("สร้าง", (d, w) -> {
+                String name = input.getText().toString().trim();
+                if (name.isEmpty()) {
+                    showToast("กรุณาใส่ชื่อไฟล์");
+                    return;
+                }
+                boolean ok = com.dev.ministudio.fs.FileSystemManager
+                        .createNewFile(parentFolder, name);
+                if (ok) {
+                    showToast("✅ สร้าง " + name + " แล้ว");
+                    if (projectTreeManager != null) projectTreeManager.refreshFileTree();
+                    java.io.File created = new java.io.File(parentFolder, name);
+                    if (created.exists()) openFile(created);
+                } else {
+                    showToast("❌ สร้างไม่สำเร็จ (อาจมีชื่อซ้ำ)");
+                }
+            })
+            .setNegativeButton("ยกเลิก", null)
+            .show();
+}
+
+/** สร้างโฟลเดอร์ใหม่ในโฟลเดอร์ที่เลือกจากหน้าค้นหา */
+private void showQuickCreateFolderDialog(java.io.File parentFolder) {
+    if (parentFolder == null || !parentFolder.isDirectory()) return;
+
+    final android.widget.EditText input = new android.widget.EditText(this);
+    input.setHint("ชื่อโฟลเดอร์");
+    input.setSingleLine(true);
+    input.setTextColor(android.graphics.Color.WHITE);
+    input.setHintTextColor(android.graphics.Color.parseColor("#565F89"));
+    int pad = (int) (20 * getResources().getDisplayMetrics().density);
+    input.setPadding(pad, pad, pad, pad);
+
+    new androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("สร้างโฟลเดอร์ใน \"" + parentFolder.getName() + "\"")
+            .setView(input)
+            .setPositiveButton("สร้าง", (d, w) -> {
+                String name = input.getText().toString().trim();
+                if (name.isEmpty()) {
+                    showToast("กรุณาใส่ชื่อโฟลเดอร์");
+                    return;
+                }
+                boolean ok = com.dev.ministudio.fs.FileSystemManager
+                        .createNewFolder(parentFolder, name);
+                if (ok) {
+                    showToast("✅ สร้างโฟลเดอร์ " + name + " แล้ว");
+                    if (projectTreeManager != null) projectTreeManager.refreshFileTree();
+                } else {
+                    showToast("❌ สร้างไม่สำเร็จ (อาจมีชื่อซ้ำ)");
+                }
+            })
+            .setNegativeButton("ยกเลิก", null)
+            .show();
 }
 
 
