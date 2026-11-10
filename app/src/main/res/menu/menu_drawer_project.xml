@@ -32,6 +32,11 @@
     <item android:title="@string/nav_general">
         <menu>
             <item
+                android:id="@+id/nav_crash_log"
+                android:icon="@android:drawable/ic_menu_report_image"
+                android:title="Crash Log" />
+
+            <item
                 android:id="@+id/nav_about"
                 android:icon="@android:drawable/ic_menu_info_details"
                 android:title="@string/nav_about" />

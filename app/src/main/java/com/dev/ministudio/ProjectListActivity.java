@@ -69,6 +69,9 @@ public class ProjectListActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
+        // ===== ติดตั้งระบบจับ Crash =====
+        CrashHandler.install(this);
+
         // ตั้งค่าขอบหน้าจอสำหรับ Android 15+
         androidx.core.view.WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         getWindow().setStatusBarColor(Color.parseColor("#1A1B26"));
@@ -150,6 +153,9 @@ public class ProjectListActivity extends AppCompatActivity {
                     toggleEditorThemePref();
                 } else if (id == R.id.nav_language) {
                     showLanguageDialog();
+                } else if (id == R.id.nav_crash_log) {
+                    // ===== เปิดหน้า Crash Log =====
+                    startActivity(new Intent(this, CrashLogActivity.class));
                 } else if (id == R.id.nav_about) {
                     new AlertDialog.Builder(this)
                             .setTitle("Nexus Studio")
