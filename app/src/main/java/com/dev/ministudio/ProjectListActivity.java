@@ -482,19 +482,28 @@ public class ProjectListActivity extends AppCompatActivity {
     }
 
     private void confirmDeleteProject(String projectName) {
-        File projectDir = new File("/sdcard/MiniStudio/" + projectName);
-        new AlertDialog.Builder(this)
-                .setTitle("ลบโปรเจกต์")
-                .setMessage("ลบ \"" + projectName + "\" หรือไม่?")
-                .setPositiveButton("ลบ", (d, w) -> {
-                    deleteRecursive(projectDir);
-                    refreshProjectList();
-                    updateProjectEmptyState();
-                    Toast.makeText(this, "ลบแล้ว", Toast.LENGTH_SHORT).show();
-                })
-                .setNegativeButton("ยกเลิก", null)
-                .show();
-    }
+    File projectDir = new File("/sdcard/MiniStudio/" + projectName);
+    new AlertDialog.Builder(this)
+            .setTitle("ลบโปรเจกต์")
+            .setMessage("ลบ \"" + projectName + "\" หรือไม่?\nไฟล์ทั้งหมดในโปรเจกต์จะถูกลบถาวร")
+            .setPositiveButton("ลบ", (d, w) -> {
+                deleteRecursive(projectDir);
+
+                if (projectDir.exists()) {
+                    // ยังลบไม่หมด — มักเพราะไม่มีสิทธิ์จัดการไฟล์ทั้งหมด
+                    Toast.makeText(this,
+                            "ลบไม่สำเร็จ ตรวจสอบสิทธิ์ All files access",
+                            Toast.LENGTH_LONG).show();
+                    checkFilePermission();
+                } else {
+                    Toast.makeText(this, "ลบ \"" + projectName + "\" แล้ว", Toast.LENGTH_SHORT).show();
+                }
+                refreshProjectList();
+                updateProjectEmptyState();
+            })
+            .setNegativeButton("ยกเลิก", null)
+            .show();
+}
 
     @Override
     protected void onResume() {
@@ -532,20 +541,25 @@ public class ProjectListActivity extends AppCompatActivity {
     }
 
     private void deleteRecursive(File fileOrDirectory) {
-        if (fileOrDirectory == null || !fileOrDirectory.exists()) return;
-        if (isProjectIgnored(fileOrDirectory.getName())) {
-            return; 
-        }
-        if (fileOrDirectory.isDirectory()) {
-            File[] children = fileOrDirectory.listFiles();
-            if (children != null) {
-                for (File child : children) {
-                    deleteRecursive(child);
-                }
+    if (fileOrDirectory == null || !fileOrDirectory.exists()) return;
+
+    // ตอนลบโปรเจกต์ ต้องลบทุกอย่าง รวม .git / build / .gradle
+    if (fileOrDirectory.isDirectory()) {
+        File[] children = fileOrDirectory.listFiles();
+        if (children != null) {
+            for (File child : children) {
+                deleteRecursive(child);
             }
         }
+    }
+
+    boolean ok = fileOrDirectory.delete();
+    if (!ok) {
+        // บางเครื่องลบไม่ได้เพราะ read-only → ลองเคลียร์ก่อน
+        fileOrDirectory.setWritable(true);
         fileOrDirectory.delete();
     }
+}
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
