@@ -2925,40 +2925,6 @@ private void showQuickCreateFileDialog(java.io.File parentFolder) {
             .show();
 }
 
-/** สร้างโฟลเดอร์ใหม่ในโฟลเดอร์ที่เลือกจากหน้าค้นหา */
-private void showQuickCreateFolderDialog(java.io.File parentFolder) {
-    if (parentFolder == null || !parentFolder.isDirectory()) return;
-
-    final android.widget.EditText input = new android.widget.EditText(this);
-    input.setHint("ชื่อโฟลเดอร์");
-    input.setSingleLine(true);
-    input.setTextColor(android.graphics.Color.WHITE);
-    input.setHintTextColor(android.graphics.Color.parseColor("#565F89"));
-    int pad = (int) (20 * getResources().getDisplayMetrics().density);
-    input.setPadding(pad, pad, pad, pad);
-
-    new androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("สร้างโฟลเดอร์ใน \"" + parentFolder.getName() + "\"")
-            .setView(input)
-            .setPositiveButton("สร้าง", (d, w) -> {
-                String name = input.getText().toString().trim();
-                if (name.isEmpty()) {
-                    showToast("กรุณาใส่ชื่อโฟลเดอร์");
-                    return;
-                }
-                boolean ok = com.dev.ministudio.fs.FileSystemManager
-                        .createNewFolder(parentFolder, name);
-                if (ok) {
-                    showToast("✅ สร้างโฟลเดอร์ " + name + " แล้ว");
-                    if (projectTreeManager != null) projectTreeManager.refreshFileTree();
-                } else {
-                    showToast("❌ สร้างไม่สำเร็จ (อาจมีชื่อซ้ำ)");
-                }
-            })
-            .setNegativeButton("ยกเลิก", null)
-            .show();
-}
-
 
 private void confirmAndDeleteFile(java.io.File file,
                                   java.util.List<java.io.File> resultFiles,
