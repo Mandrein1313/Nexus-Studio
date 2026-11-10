@@ -68,7 +68,7 @@ public class GitHubPushService extends Service {
                 .setOnlyAlertOnce(true)
                 .setOngoing(true)
                 .setProgress(100, 0, true)
-                .addAction(android.R.drawable.ic_menu_close_clear_cancel, "ยกเลิก", pendingCancelIntent); // << ปุ่มยกเลิก
+                .addAction(android.R.drawable.ic_menu_close_clear_cancel, "ยกเลิก", pendingCancelIntent);
 
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
 
@@ -88,7 +88,13 @@ public class GitHubPushService extends Service {
                 if (isCancelled) return;
 
                 updateStatus("[2/4] รวบรวมไฟล์ทั้งหมด...", 0, true);
+                
+                // ===== ส่วนที่แก้ไข =====
+                // Stage ไฟล์ใหม่ + ไฟล์ที่แก้ไข
                 git.add().addFilepattern(".").call();
+                // Stage ไฟล์ที่แก้ไข + ไฟล์ที่ถูกลบ (สำคัญมาก!)
+                git.add().setUpdate(true).addFilepattern(".").call();
+                // ========================
 
                 if (isCancelled) return;
 
@@ -136,7 +142,6 @@ public class GitHubPushService extends Service {
                        @Override
                        public void endTask() {}
 
-                       // 🛑 ส่งค่าสถานะยกเลิกไปยัง JGit เพื่อสั่งหยุดส่งข้อมูลทันที!
                        @Override
                        public boolean isCancelled() {
                            return isCancelled;
