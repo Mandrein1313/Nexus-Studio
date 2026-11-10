@@ -72,7 +72,6 @@ public class FileSystemManager {
         return childNodes;
     }
 
-    // ✨ เติมเต็มระบบ: สร้างโฟลเดอร์ใหม่
     public static boolean createNewFolder(File parentDir, String folderName) {
         File newFolder = new File(parentDir, folderName);
         if (!newFolder.exists()) {
@@ -81,7 +80,6 @@ public class FileSystemManager {
         return false;
     }
 
-    // 🆕 ฟีเจอร์ใหม่: สร้างไฟล์เปล่าใหม่ (เช่น main.py, index.html)
     public static boolean createNewFile(File parentDir, String fileName) {
         File newFile = new File(parentDir, fileName);
         if (!newFile.exists()) {
@@ -95,7 +93,6 @@ public class FileSystemManager {
         return false;
     }
 
-    // 🆕 ฟีเจอร์ใหม่: เปลี่ยนชื่อไฟล์หรือโฟลเดอร์ (Rename)
     public static boolean renameFileOrFolder(File targetFile, String newName) {
         if (targetFile == null || !targetFile.exists()) return false;
         File parent = targetFile.getParentFile();
@@ -131,7 +128,7 @@ public class FileSystemManager {
     }
 
     /**
-     * ค้นหาไฟล์ตามชื่อ (บางส่วนของชื่อก็ได้) ทั่วทั้งโปรเจกต์
+     * ค้นหาไฟล์ + โฟลเดอร์ ตามชื่อ (บางส่วนของชื่อก็ได้) ทั่วทั้งโปรเจกต์
      * ข้ามโฟลเดอร์ที่ไม่จำเป็น เช่น .git, build, .gradle
      */
     public static List<File> searchFilesByName(File rootDir, String query) {
@@ -145,21 +142,29 @@ public class FileSystemManager {
     }
 
     private static void searchRecursive(File dir, String queryLower, List<File> out, int depth) {
-        if (depth > 20 || out.size() >= 100) return; // กันลึกเกิน / ผลลัพธ์เยอะเกิน
+        if (depth > 20 || out.size() >= 100) return;
         File[] files = dir.listFiles();
         if (files == null) return;
 
         for (File f : files) {
             String name = f.getName();
-            if (name.startsWith(".") && (name.equals(".git") || name.equals(".gradle") || name.equals(".idea"))) {
+
+            // ข้ามโฟลเดอร์ระบบ
+            if (name.equals(".git") || name.equals(".gradle") || name.equals(".idea")
+                    || name.equals("build") || name.equals("node_modules")
+                    || name.equals(".thumbnails")) {
                 continue;
             }
+
             if (f.isDirectory()) {
-                if (name.equals("build") || name.equals("node_modules") || name.equals(".thumbnails")) {
-                    continue;
+                // ===== ค้นหาโฟลเดอร์ด้วย =====
+                if (name.toLowerCase().contains(queryLower)) {
+                    out.add(f);
                 }
+                // ค้นต่อในโฟลเดอร์ย่อย
                 searchRecursive(f, queryLower, out, depth + 1);
             } else {
+                // ไฟล์
                 if (name.toLowerCase().contains(queryLower)) {
                     out.add(f);
                 }
@@ -214,7 +219,6 @@ public class FileSystemManager {
 
     private static void scanFileContent(File file, String queryLower,
                                        List<ContentMatch> out, int maxResults) {
-        // ข้ามไฟล์ใหญ่เกิน ~1.5MB
         if (file.length() > 1_500_000) return;
         try {
             java.io.BufferedReader br = new java.io.BufferedReader(

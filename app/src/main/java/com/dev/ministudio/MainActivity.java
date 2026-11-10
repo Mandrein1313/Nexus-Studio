@@ -2368,10 +2368,10 @@ private void showFileSearchDialog() {
     android.widget.ImageButton btnBack = dialog.findViewById(R.id.btnSearchBack);
     android.widget.ImageButton btnClear = dialog.findViewById(R.id.btnSearchClear);
 
-    // --- เพิ่มส่วนประกอบโหมดค้นหา ---
-    final boolean[] contentMode = { false }; // false = ชื่อไฟล์, true = ในโค้ด
+    // --- โหมดค้นหา: false = ชื่อไฟล์/โฟลเดอร์, true = ในโค้ด ---
+    final boolean[] contentMode = { false };
     final java.util.List<com.dev.ministudio.fs.FileSystemManager.ContentMatch> contentHits = new java.util.ArrayList<>();
-    
+
     android.widget.TextView tabName = dialog.findViewById(R.id.tabSearchName);
     android.widget.TextView tabContent = dialog.findViewById(R.id.tabSearchContent);
 
@@ -2395,11 +2395,11 @@ private void showFileSearchDialog() {
                 tabContent.setTextColor(0xFF565F89);
                 tabContent.setBackgroundColor(0x00000000);
             }
-            etSearch.setHint("ค้นหาไฟล์...");
+            etSearch.setHint("ค้นหาไฟล์/โฟลเดอร์...");
         }
     };
 
-    updateTabs.run(); // ตั้งค่าสถานะเริ่มต้นของ UI Tab
+    updateTabs.run();
 
     btnBack.setOnClickListener(v -> dialog.dismiss());
     btnClear.setOnClickListener(v -> etSearch.setText(""));
@@ -2441,7 +2441,7 @@ private void showFileSearchDialog() {
             final java.io.File file;
 
             if (contentMode[0] && position < contentHits.size()) {
-                // --- การแสดงผลโหมด ค้นหาในเนื้อหาโค้ด ---
+                // --- โหมดค้นหาในเนื้อหาโค้ด ---
                 com.dev.ministudio.fs.FileSystemManager.ContentMatch m = contentHits.get(position);
                 file = m.file;
 
@@ -2449,15 +2449,14 @@ private void showFileSearchDialog() {
                 tvMeta.setText(m.lineText != null ? m.lineText.trim() : "");
 
                 if (btnDelete != null) {
-                    btnDelete.setVisibility(android.view.View.GONE); // ซ่อนปุ่มลบในโหมดค้นหาโค้ด
+                    btnDelete.setVisibility(android.view.View.GONE);
                 }
 
-                // กดรายการ -> เปิดไฟล์ + Jump ไปยังบรรทัด
                 convertView.setOnClickListener(v -> {
                     dialog.dismiss();
                     openFile(m.file);
                     if (drawerLayout != null) drawerLayout.closeDrawers();
-                    
+
                     if (codeEditor != null) {
                         int line = Math.max(0, m.lineNumber - 1);
                         codeEditor.post(() -> {
@@ -2470,11 +2469,12 @@ private void showFileSearchDialog() {
                 });
 
             } else if (position < resultFiles.size()) {
-                // --- การแสดงผลโหมด ค้นตามชื่อไฟล์ (แบบเดิม) ---
+                // --- โหมดค้นหาชื่อไฟล์ / โฟลเดอร์ ---
                 file = resultFiles.get(position);
 
                 String name = file.getName();
                 String q = etSearch.getText().toString().trim();
+                boolean isFolder = file.isDirectory();
 
                 if (!q.isEmpty() && name.toLowerCase().contains(q.toLowerCase())) {
                     android.text.SpannableString span = new android.text.SpannableString(name);
@@ -2496,37 +2496,56 @@ private void showFileSearchDialog() {
                     tvName.setText(name);
                 }
 
-                long size = file.length();
-                String sizeStr;
-                if (size < 1024) sizeStr = size + " B";
-                else if (size < 1024 * 1024) sizeStr = String.format("%.2f KB", size / 1024.0);
-                else sizeStr = String.format("%.2f MB", size / (1024.0 * 1024.0));
+                if (isFolder) {
+                    // ===== โฟลเดอร์ =====
+                    tvMeta.setText("📁 โฟลเดอร์");
 
-                java.text.SimpleDateFormat sdf =
-                        new java.text.SimpleDateFormat("dd/MM/yy HH:mm", java.util.Locale.getDefault());
-                String dateStr = sdf.format(new java.util.Date(file.lastModified()));
-                tvMeta.setText(sizeStr + "    " + dateStr);
+                    if (btnDelete != null) {
+                        btnDelete.setVisibility(android.view.View.GONE);
+                    }
 
-                // ปุ่มลบไฟล์
-                if (btnDelete != null) {
-                    btnDelete.setVisibility(android.view.View.VISIBLE);
-                    btnDelete.setFocusable(false);
-                    btnDelete.setFocusableInTouchMode(false);
-                    btnDelete.setOnClickListener(v ->
-                            confirmAndDeleteFile(file, resultFiles, adapterRef[0], tvHint));
+                    convertView.setOnClickListener(v -> {
+                        dialog.dismiss();
+                        if (drawerLayout != null) {
+                            drawerLayout.openDrawer(androidx.core.view.GravityCompat.START);
+                        }
+                        if (projectTreeManager != null) {
+                            projectTreeManager.refreshFileTree();
+                        }
+                        showToast("📁 " + name);
+                    });
+                } else {
+                    // ===== ไฟล์ =====
+                    long size = file.length();
+                    String sizeStr;
+                    if (size < 1024) sizeStr = size + " B";
+                    else if (size < 1024 * 1024) sizeStr = String.format("%.2f KB", size / 1024.0);
+                    else sizeStr = String.format("%.2f MB", size / (1024.0 * 1024.0));
+
+                    java.text.SimpleDateFormat sdf =
+                            new java.text.SimpleDateFormat("dd/MM/yy HH:mm", java.util.Locale.getDefault());
+                    String dateStr = sdf.format(new java.util.Date(file.lastModified()));
+                    tvMeta.setText(sizeStr + "    " + dateStr);
+
+                    if (btnDelete != null) {
+                        btnDelete.setVisibility(android.view.View.VISIBLE);
+                        btnDelete.setFocusable(false);
+                        btnDelete.setFocusableInTouchMode(false);
+                        btnDelete.setOnClickListener(v ->
+                                confirmAndDeleteFile(file, resultFiles, adapterRef[0], tvHint));
+                    }
+
+                    convertView.setOnClickListener(v -> {
+                        dialog.dismiss();
+                        openFile(file);
+                        if (drawerLayout != null) drawerLayout.closeDrawers();
+                    });
                 }
-
-                // กดรายการ -> เปิดไฟล์
-                convertView.setOnClickListener(v -> {
-                    dialog.dismiss();
-                    openFile(file);
-                    if (drawerLayout != null) drawerLayout.closeDrawers();
-                });
             } else {
                 return convertView;
             }
 
-            // คำนวณ Path สำหรับแสดงผล (ใช้ร่วมกันทั้งสองโหมด)
+            // Path
             String path = file.getAbsolutePath();
             if (path.startsWith(rootPath)) {
                 path = path.substring(rootPath.length());
@@ -2537,16 +2556,20 @@ private void showFileSearchDialog() {
             else path = "/";
             tvPath.setText(path);
 
-            // สีของ Icon ตามชนิดไฟล์ (ใช้ร่วมกันทั้งสองโหมด)
-            String lower = file.getName().toLowerCase();
-            if (lower.endsWith(".java")) {
-                imgIcon.setColorFilter(android.graphics.Color.parseColor("#7DCFFF"));
-            } else if (lower.endsWith(".xml")) {
+            // สีไอคอน
+            if (file.isDirectory()) {
                 imgIcon.setColorFilter(android.graphics.Color.parseColor("#E0AF68"));
-            } else if (lower.endsWith(".gradle") || lower.endsWith(".properties")) {
-                imgIcon.setColorFilter(android.graphics.Color.parseColor("#9ECE6A"));
             } else {
-                imgIcon.setColorFilter(android.graphics.Color.parseColor("#7AA2F7"));
+                String lower = file.getName().toLowerCase();
+                if (lower.endsWith(".java")) {
+                    imgIcon.setColorFilter(android.graphics.Color.parseColor("#7DCFFF"));
+                } else if (lower.endsWith(".xml")) {
+                    imgIcon.setColorFilter(android.graphics.Color.parseColor("#E0AF68"));
+                } else if (lower.endsWith(".gradle") || lower.endsWith(".properties")) {
+                    imgIcon.setColorFilter(android.graphics.Color.parseColor("#9ECE6A"));
+                } else {
+                    imgIcon.setColorFilter(android.graphics.Color.parseColor("#7AA2F7"));
+                }
             }
 
             return convertView;
@@ -2557,13 +2580,12 @@ private void showFileSearchDialog() {
     android.os.Handler searchHandler = new android.os.Handler(android.os.Looper.getMainLooper());
     final Runnable[] searchTask = new Runnable[1];
 
-    // ผูก Event การคลิก Tab สลับโหมด
     if (tabName != null) {
         tabName.setOnClickListener(v -> {
             if (contentMode[0]) {
                 contentMode[0] = false;
                 updateTabs.run();
-                etSearch.setText(etSearch.getText()); // trigger ค้นหาใหม่
+                etSearch.setText(etSearch.getText());
             }
         });
     }
@@ -2573,7 +2595,7 @@ private void showFileSearchDialog() {
             if (!contentMode[0]) {
                 contentMode[0] = true;
                 updateTabs.run();
-                etSearch.setText(etSearch.getText()); // trigger ค้นหาใหม่
+                etSearch.setText(etSearch.getText());
             }
         });
     }
@@ -2602,7 +2624,6 @@ private void showFileSearchDialog() {
                 tvHint.setText("กำลังค้นหา...");
                 new Thread(() -> {
                     if (contentMode[0]) {
-                        // --- ค้นหาในเนื้อหาโค้ด ---
                         java.util.List<com.dev.ministudio.fs.FileSystemManager.ContentMatch> found =
                                 com.dev.ministudio.fs.FileSystemManager.searchContentInProject(root, q, 200);
                         runOnUiThread(() -> {
@@ -2618,7 +2639,7 @@ private void showFileSearchDialog() {
                                     : "พบโค้ด · " + found.size() + " จุด · " + resultFiles.size() + " ไฟล์");
                         });
                     } else {
-                        // --- ค้นหาตามชื่อไฟล์ ---
+                        // --- ค้นหาชื่อไฟล์ + โฟลเดอร์ ---
                         java.util.List<java.io.File> found =
                                 com.dev.ministudio.fs.FileSystemManager.searchFilesByName(root, q);
                         runOnUiThread(() -> {
@@ -2626,9 +2647,23 @@ private void showFileSearchDialog() {
                             resultFiles.clear();
                             resultFiles.addAll(found);
                             adapterRef[0].notifyDataSetChanged();
-                            tvHint.setText(found.isEmpty()
-                                    ? "ไม่พบไฟล์ที่ตรงกับ \"" + q + "\""
-                                    : "ผลการค้นหา · " + found.size() + " ไฟล์");
+
+                            int folderCount = 0;
+                            for (java.io.File ff : found) {
+                                if (ff.isDirectory()) folderCount++;
+                            }
+                            int fileCount = found.size() - folderCount;
+                            String msg;
+                            if (found.isEmpty()) {
+                                msg = "ไม่พบไฟล์/โฟลเดอร์ที่ตรงกับ \"" + q + "\"";
+                            } else if (folderCount > 0 && fileCount > 0) {
+                                msg = "ผลการค้นหา · " + fileCount + " ไฟล์ · " + folderCount + " โฟลเดอร์";
+                            } else if (folderCount > 0) {
+                                msg = "ผลการค้นหา · " + folderCount + " โฟลเดอร์";
+                            } else {
+                                msg = "ผลการค้นหา · " + fileCount + " ไฟล์";
+                            }
+                            tvHint.setText(msg);
                         });
                     }
                 }).start();
@@ -2647,6 +2682,7 @@ private void showFileSearchDialog() {
         imm.showSoftInput(etSearch, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
     }
 }
+
 
 private void confirmAndDeleteFile(java.io.File file,
                                   java.util.List<java.io.File> resultFiles,
