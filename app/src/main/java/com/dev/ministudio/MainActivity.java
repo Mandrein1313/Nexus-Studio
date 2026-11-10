@@ -2890,8 +2890,6 @@ private void showQuickCreateFolderDialog(java.io.File parentFolder) {
     }, 200);
 }
 
-
-
 private void confirmAndDeleteFile(java.io.File file,
                                   java.util.List<java.io.File> resultFiles,
                                   android.widget.BaseAdapter adapter,
