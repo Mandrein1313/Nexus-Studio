@@ -462,22 +462,41 @@ private void setupLogic() {
         };
         autoSaveHandler.postDelayed(saveRunnable, 1500);
 
-        // รีเฟรช Preview อัตโนมัติตอนแก้ XML
-        if (isPreviewMode && previewContainer != null && codeEditor != null) {
-            previewContainer.postDelayed(() -> {
-                if (!isPreviewMode || previewContainer == null || codeEditor == null) return;
-                try {
-                    View v = new XmlPreviewManager(MainActivity.this)
-                            .inflateXml(codeEditor.getText().toString());
-                    previewContainer.removeAllViews();
-                    previewContainer.addView(v, new FrameLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT));
-                } catch (Exception ignored) {
+ // รีเฟรช Preview อัตโนมัติ (XML หรือ เว็บ)
+if (isPreviewMode && previewContainer != null && codeEditor != null) {
+    previewContainer.postDelayed(() -> {
+        if (!isPreviewMode || previewContainer == null) return;
+
+        File cur = currentProject != null ? currentProject.getCurrentOpenFile() : null;
+        String n = cur != null ? cur.getName().toLowerCase() : "";
+
+        // เว็บ → รีโหลด WebView
+        if (n.endsWith(".html") || n.endsWith(".htm")
+                || n.endsWith(".css") || n.endsWith(".js")) {
+            try {
+                saveFile();
+                android.view.View child = previewContainer.getChildCount() > 0
+                        ? previewContainer.getChildAt(0) : null;
+                if (child instanceof android.webkit.WebView) {
+                    ((android.webkit.WebView) child).reload();
                 }
-            }, 600);
+            } catch (Exception ignored) {}
+            return;
         }
-    });
+
+        // XML layout (ของเดิม)
+        try {
+            if (codeEditor == null) return;
+            View v = new XmlPreviewManager(MainActivity.this)
+                    .inflateXml(codeEditor.getText().toString());
+            previewContainer.removeAllViews();
+            previewContainer.addView(v, new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT));
+        } catch (Exception ignored) {
+        }
+    }, 600);
+}
 
     // แสดงสีที่แถบสถานะเมื่อ cursor อยู่บนรหัสสี
     codeEditor.subscribeEvent(
@@ -558,11 +577,17 @@ private void setupLogic() {
     }
 }
 
-/** หา MainActivity.java / .kt ในโปรเจกต์ (优先 app/src/main) */
+/** หาไฟล์เริ่มต้นของโปรเจกต์: index.html (เว็บ) หรือ MainActivity (Android) */
 private File findDefaultMainFile(String rootPath) {
     if (rootPath == null) return null;
 
-    // path ที่พบบ่อย
+    // 1) โปรเจกต์เว็บ → เปิด index.html ที่ root
+    File indexHtml = new File(rootPath, "index.html");
+    if (indexHtml.exists() && indexHtml.isFile()) {
+        return indexHtml;
+    }
+
+    // 2) โปรเจกต์ Android → หา MainActivity.java / .kt
     String[] candidates = {
             rootPath + "/app/src/main/java",
             rootPath + "/app/src/main/kotlin",
@@ -1349,54 +1374,135 @@ private void toggleXmlPreview() {
         return;
     }
 
-    // เข้าโหมด Preview
-    if (!isPreviewMode) {
-        File current = currentProject != null ? currentProject.getCurrentOpenFile() : null;
-        String name = current != null ? current.getName().toLowerCase() : "";
-
-        // แนะนำเฉพาะ layout XML
-        if (!name.endsWith(".xml")) {
-            showToast("⚠️ Preview รองรับไฟล์ .xml (layout)");
-            // ยังอนุญาตต่อได้ถ้าอยาก — หรือ return;
-        }
-        if (name.equals("colors.xml") || name.equals("strings.xml")
-                || name.equals("styles.xml") || name.equals("themes.xml")
-                || name.contains("AndroidManifest")) {
-            showToast("⚠️ ไฟล์นี้ไม่ใช่ layout — ผลพรีวิวอาจว่าง");
-        }
-
-        try {
-            String xml = codeEditor.getText().toString();
-            XmlPreviewManager previewManager = new XmlPreviewManager(this);
-            View generated = previewManager.inflateXml(xml);
-
-            previewContainer.removeAllViews();
-            previewContainer.addView(generated,
-                    new FrameLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT));
-
-            codeEditor.setVisibility(View.GONE);
-            if (emptyStateView != null) emptyStateView.setVisibility(View.GONE);
-            previewContainer.setVisibility(View.VISIBLE);
-
-            isPreviewMode = true;
-            showToast("✨ Preview layout");
-            invalidateOptionsMenu();
-        } catch (Exception e) {
-            showToast("❌ " + e.getMessage());
-        }
-    } else {
-        // กลับไปแก้โค้ด
+    // ===== ปิด Preview → กลับไปแก้โค้ด =====
+    if (isPreviewMode) {
         previewContainer.setVisibility(View.GONE);
         previewContainer.removeAllViews();
         codeEditor.setVisibility(View.VISIBLE);
         isPreviewMode = false;
         invalidateOptionsMenu();
         showToast("✏️ กลับสู่โหมดแก้ไข");
+        return;
+    }
+
+    // ===== เปิด Preview =====
+    File current = currentProject != null ? currentProject.getCurrentOpenFile() : null;
+    String name = current != null ? current.getName().toLowerCase() : "";
+
+    // ---------- เว็บ: .html / .htm / .css / .js ----------
+    if (name.endsWith(".html") || name.endsWith(".htm")
+            || name.endsWith(".css") || name.endsWith(".js")) {
+        showWebPreview(current);
+        return;
+    }
+
+    // ---------- Android XML layout (ของเดิม) ----------
+    if (!name.endsWith(".xml")) {
+        showToast("⚠️ Preview รองรับ .xml (layout) หรือไฟล์เว็บ (.html/.css/.js)");
+        return;
+    }
+    if (name.equals("colors.xml") || name.equals("strings.xml")
+            || name.equals("styles.xml") || name.equals("themes.xml")
+            || name.contains("androidmanifest")) {
+        showToast("⚠️ ไฟล์นี้ไม่ใช่ layout — ผลพรีวิวอาจว่าง");
+    }
+
+    try {
+        String xml = codeEditor.getText().toString();
+        XmlPreviewManager previewManager = new XmlPreviewManager(this);
+        View generated = previewManager.inflateXml(xml);
+
+        previewContainer.removeAllViews();
+        previewContainer.addView(generated,
+                new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT));
+
+        codeEditor.setVisibility(View.GONE);
+        if (emptyStateView != null) emptyStateView.setVisibility(View.GONE);
+        previewContainer.setVisibility(View.VISIBLE);
+
+        isPreviewMode = true;
+        showToast("✨ Preview layout");
+        invalidateOptionsMenu();
+    } catch (Exception e) {
+        showToast("❌ " + e.getMessage());
     }
 }
+/** แสดงหน้าเว็บด้วย WebView ใน previewContainer */
+private void showWebPreview(File currentFile) {
+    try {
+        // บันทึกไฟล์ที่เปิดอยู่ก่อน (ถ้ามี) ให้ preview เป็นค่าล่าสุด
+        saveFile();
 
+        // หาไฟล์ HTML ที่จะโหลด
+        File htmlFile = null;
+        if (currentFile != null) {
+            String n = currentFile.getName().toLowerCase();
+            if (n.endsWith(".html") || n.endsWith(".htm")) {
+                htmlFile = currentFile;
+            }
+        }
+        // ถ้าเปิด css/js หรือหา html ไม่เจอ → ใช้ index.html ที่ root โปรเจกต์
+        if (htmlFile == null && currentProject != null) {
+            htmlFile = new File(currentProject.getRootPath(), "index.html");
+        }
+        if (htmlFile == null || !htmlFile.exists()) {
+            showToast("⚠️ ไม่พบ index.html ในโปรเจกต์");
+            return;
+        }
+
+        android.webkit.WebView webView = new android.webkit.WebView(this);
+        android.webkit.WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setAllowFileAccess(true);
+        settings.setAllowContentAccess(true);
+        // ให้โหลด css/js จากโฟลเดอร์เดียวกันได้
+        settings.setAllowFileAccessFromFileURLs(true);
+        settings.setAllowUniversalAccessFromFileURLs(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setUseWideViewPort(true);
+        settings.setBuiltInZoomControls(true);
+        settings.setDisplayZoomControls(false);
+
+        webView.setBackgroundColor(android.graphics.Color.parseColor("#0F172A"));
+        webView.setWebViewClient(new android.webkit.WebViewClient());
+        webView.setWebChromeClient(new android.webkit.WebChromeClient() {
+            @Override
+            public boolean onJsAlert(android.webkit.WebView view, String url,
+                                    String message, android.webkit.JsResult result) {
+                new androidx.appcompat.app.AlertDialog.Builder(MainActivity.this)
+                        .setTitle("หน้าเว็บ")
+                        .setMessage(message)
+                        .setPositiveButton("ตกลง", (d, w) -> result.confirm())
+                        .setCancelable(false)
+                        .show();
+                return true;
+            }
+        });
+
+        // โหลดจาก path ไฟล์จริง (relative css/js ทำงานได้)
+        String url = "file://" + htmlFile.getAbsolutePath();
+        webView.loadUrl(url);
+
+        previewContainer.removeAllViews();
+        previewContainer.addView(webView,
+                new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT));
+
+        codeEditor.setVisibility(View.GONE);
+        if (emptyStateView != null) emptyStateView.setVisibility(View.GONE);
+        previewContainer.setVisibility(View.VISIBLE);
+
+        isPreviewMode = true;
+        showToast("🌐 Preview เว็บ: " + htmlFile.getName());
+        invalidateOptionsMenu();
+    } catch (Exception e) {
+        showToast("❌ Preview ไม่สำเร็จ: " + e.getMessage());
+    }
+}
    public void startCloudBuildPipeline() {
     if (currentProject == null) {
         showToast(getString(R.string.build_please_open_project));
