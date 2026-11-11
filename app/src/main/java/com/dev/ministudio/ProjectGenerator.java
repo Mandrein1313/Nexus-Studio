@@ -113,6 +113,38 @@ public class ProjectGenerator {
         }
     }
 
+    /**
+     * สร้างโปรเจกต์เว็บพื้นฐาน
+     * โครงสร้าง:
+     *   /sdcard/MiniStudio/{name}/
+     *     index.html
+     *     css/style.css
+     *     js/script.js
+     *     README.md
+     */
+    public static boolean createWeb(String projectName) {
+        try {
+            String root = "/sdcard/MiniStudio/" + projectName;
+            mkdirs(root + "/css");
+            mkdirs(root + "/js");
+
+            write(root + "/index.html", webIndexHtml(projectName));
+            write(root + "/css/style.css", webStyleCss());
+            write(root + "/js/script.js", webScriptJs());
+            write(root + "/README.md",
+                    "# " + projectName + "\n\n" +
+                    "โปรเจกต์เว็บสร้างจาก Nexus Studio\n\n" +
+                    "- `index.html` — หน้าหลัก\n" +
+                    "- `css/style.css` — สไตล์\n" +
+                    "- `js/script.js` — สคริปต์\n");
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     // ========== Helpers ==========
     private static void mkdirs(String path) {
         new File(path).mkdirs();
@@ -126,6 +158,112 @@ public class ProjectGenerator {
                 new FileOutputStream(f), StandardCharsets.UTF_8)) {
             w.write(content);
         }
+    }
+
+    // ========== Web Templates ==========
+    private static String webIndexHtml(String title) {
+        return "<!DOCTYPE html>\n" +
+                "<html lang=\"th\">\n" +
+                "<head>\n" +
+                "  <meta charset=\"UTF-8\">\n" +
+                "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                "  <title>" + title + "</title>\n" +
+                "  <link rel=\"stylesheet\" href=\"css/style.css\">\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "  <header class=\"header\">\n" +
+                "    <h1>" + title + "</h1>\n" +
+                "    <p>เว็บไซต์เริ่มต้นจาก Nexus Studio</p>\n" +
+                "  </header>\n" +
+                "  <main class=\"main\">\n" +
+                "    <section class=\"card\">\n" +
+                "      <h2>ยินดีต้อนรับ</h2>\n" +
+                "      <p>แก้ไขไฟล์ <code>index.html</code>, <code>css/style.css</code> และ <code>js/script.js</code> ได้เลย</p>\n" +
+                "      <button id=\"btnHello\" type=\"button\">กดที่นี่</button>\n" +
+                "    </section>\n" +
+                "  </main>\n" +
+                "  <script src=\"js/script.js\"></script>\n" +
+                "</body>\n" +
+                "</html>\n";
+    }
+
+    private static String webStyleCss() {
+        return "* {\n" +
+                "  box-sizing: border-box;\n" +
+                "  margin: 0;\n" +
+                "  padding: 0;\n" +
+                "}\n\n" +
+                "body {\n" +
+                "  font-family: system-ui, -apple-system, sans-serif;\n" +
+                "  background: #0f172a;\n" +
+                "  color: #e2e8f0;\n" +
+                "  line-height: 1.6;\n" +
+                "  min-height: 100vh;\n" +
+                "}\n\n" +
+                ".header {\n" +
+                "  padding: 2rem 1.25rem;\n" +
+                "  background: #1e293b;\n" +
+                "  border-bottom: 1px solid #334155;\n" +
+                "}\n\n" +
+                ".header h1 {\n" +
+                "  font-size: 1.75rem;\n" +
+                "  color: #38bdf8;\n" +
+                "}\n\n" +
+                ".header p {\n" +
+                "  margin-top: 0.35rem;\n" +
+                "  color: #94a3b8;\n" +
+                "  font-size: 0.95rem;\n" +
+                "}\n\n" +
+                ".main {\n" +
+                "  padding: 1.5rem 1.25rem;\n" +
+                "  max-width: 640px;\n" +
+                "  margin: 0 auto;\n" +
+                "}\n\n" +
+                ".card {\n" +
+                "  background: #1e293b;\n" +
+                "  border: 1px solid #334155;\n" +
+                "  border-radius: 12px;\n" +
+                "  padding: 1.25rem;\n" +
+                "}\n\n" +
+                ".card h2 {\n" +
+                "  font-size: 1.25rem;\n" +
+                "  margin-bottom: 0.5rem;\n" +
+                "}\n\n" +
+                ".card p {\n" +
+                "  color: #94a3b8;\n" +
+                "  margin-bottom: 1rem;\n" +
+                "}\n\n" +
+                "code {\n" +
+                "  background: #0f172a;\n" +
+                "  padding: 0.15rem 0.4rem;\n" +
+                "  border-radius: 4px;\n" +
+                "  font-size: 0.9em;\n" +
+                "  color: #7dd3fc;\n" +
+                "}\n\n" +
+                "button {\n" +
+                "  background: #0ea5e9;\n" +
+                "  color: #0f172a;\n" +
+                "  border: none;\n" +
+                "  border-radius: 8px;\n" +
+                "  padding: 0.65rem 1.1rem;\n" +
+                "  font-size: 1rem;\n" +
+                "  font-weight: 600;\n" +
+                "  cursor: pointer;\n" +
+                "}\n\n" +
+                "button:active {\n" +
+                "  opacity: 0.85;\n" +
+                "}\n";
+    }
+
+    private static String webScriptJs() {
+        return "document.addEventListener('DOMContentLoaded', function () {\n" +
+                "  var btn = document.getElementById('btnHello');\n" +
+                "  if (btn) {\n" +
+                "    btn.addEventListener('click', function () {\n" +
+                "      alert('สวัสดีจาก Nexus Studio!');\n" +
+                "    });\n" +
+                "  }\n" +
+                "});\n";
     }
 
     // ========== Gradle & Manifest ==========

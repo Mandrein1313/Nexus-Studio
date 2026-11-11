@@ -50,7 +50,8 @@ public class NewProjectActivity extends AppCompatActivity {
             new ProjectTemplate("basic", "Basic Project", "MainActivity + FAB", 0xFF00897B),
             new ProjectTemplate("nav_drawer", "Navigation drawer", "Drawer + NavigationView", 0xFF00897B),
             new ProjectTemplate("bottom_nav", "Bottom Navigation", "BottomNav + Fragments", 0xFF5C6BC0),
-            new ProjectTemplate("tabs", "Tabbed Activity", "TabLayout + ViewPager2", 0xFF26A69A)
+            new ProjectTemplate("tabs", "Tabbed Activity", "TabLayout + ViewPager2", 0xFF26A69A),
+            new ProjectTemplate("web", "Web Site", "HTML + CSS + JS เริ่มต้น", 0xFFE0AF68)
     );
 
     @Override
@@ -110,6 +111,9 @@ public class NewProjectActivity extends AppCompatActivity {
         if (rvTemplates != null) rvTemplates.setVisibility(View.GONE);
         View exitBtn = findViewById(R.id.btnExit);
         if (exitBtn != null) exitBtn.setVisibility(View.GONE);
+
+        // เช็คว่าเป็นโปรเจกต์เว็บหรือไม่
+        final boolean isWeb = "web".equals(selectedTemplate.id);
 
         // ===== ใช้ ScrollView เพื่อให้เลื่อนดูเนื้อหาได้เมื่อคีย์บอร์ดเด้งหรือจอเล็ก =====
         ScrollView scrollView = new ScrollView(this);
@@ -203,110 +207,126 @@ public class NewProjectActivity extends AppCompatActivity {
         root.addView(spacer1, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, (int) (20 * d)));
 
-        // ===== Application name =====
-        root.addView(makeLabel("Application name"));
-        final EditText etAppName = makeInput("MyApplication");
-        etAppName.setText("MyApplication");
+        // ===== Project / Application name =====
+        root.addView(makeLabel(isWeb ? "Project name" : "Application name"));
+        final EditText etAppName = makeInput(isWeb ? "MyWebsite" : "MyApplication");
+        etAppName.setText(isWeb ? "MyWebsite" : "MyApplication");
         root.addView(etAppName, fieldLp(d));
 
-        // ===== Package name =====
-        root.addView(makeLabel("Package name"));
-        final EditText etPackage = makeInput("com.example.myapplication");
-        etPackage.setText("com.example.myapplication");
-        root.addView(etPackage, fieldLp(d));
+        final EditText etPackage;
+        final Spinner spinSdk;
 
-        // Auto change package name on app name edit
-        etAppName.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
-            @Override public void onTextChanged(CharSequence s, int st, int b, int c) {
-                String clean = s.toString().trim().toLowerCase().replaceAll("[^a-z0-9]", "");
-                if (!clean.isEmpty()) etPackage.setText("com.example." + clean);
-            }
-            @Override public void afterTextChanged(Editable s) {}
-        });
+        // ถ้าไม่ใช่ Web ถึงจะแสดงช่อง Package name และ Minimum SDK
+        if (!isWeb) {
+            // ===== Package name =====
+            root.addView(makeLabel("Package name"));
+            etPackage = makeInput("com.example.myapplication");
+            etPackage.setText("com.example.myapplication");
+            root.addView(etPackage, fieldLp(d));
 
-        // ===== Language =====
-        root.addView(makeLabel("Language"));
-        LinearLayout langRow = new LinearLayout(this);
-        langRow.setOrientation(LinearLayout.HORIZONTAL);
-        langRow.setPadding(0, (int) (6 * d), 0, (int) (4 * d));
+            // Auto change package name on app name edit
+            etAppName.addTextChangedListener(new TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
+                @Override public void onTextChanged(CharSequence s, int st, int b, int c) {
+                    String clean = s.toString().trim().toLowerCase().replaceAll("[^a-z0-9]", "");
+                    if (!clean.isEmpty()) etPackage.setText("com.example." + clean);
+                }
+                @Override public void afterTextChanged(Editable s) {}
+            });
 
-        final TextView btnJava = makeLangButton("Java", true, d);
-        final TextView btnKotlin = makeLangButton("Kotlin", false, d);
+            // ===== Language =====
+            root.addView(makeLabel("Language"));
+            LinearLayout langRow = new LinearLayout(this);
+            langRow.setOrientation(LinearLayout.HORIZONTAL);
+            langRow.setPadding(0, (int) (6 * d), 0, (int) (4 * d));
 
-        btnJava.setOnClickListener(v -> {
-            selectedLanguage = "Java";
-            styleLangButton(btnJava, true, d);
-            styleLangButton(btnKotlin, false, d);
-        });
-        btnKotlin.setOnClickListener(v -> {
-            selectedLanguage = "Kotlin";
-            styleLangButton(btnJava, false, d);
-            styleLangButton(btnKotlin, true, d);
-        });
+            final TextView btnJava = makeLangButton("Java", true, d);
+            final TextView btnKotlin = makeLangButton("Kotlin", false, d);
 
-        LinearLayout.LayoutParams half = new LinearLayout.LayoutParams(
-                0, (int) (42 * d), 1f);
-        half.rightMargin = (int) (8 * d);
-        langRow.addView(btnJava, half);
-        LinearLayout.LayoutParams half2 = new LinearLayout.LayoutParams(
-                0, (int) (42 * d), 1f);
-        langRow.addView(btnKotlin, half2);
-        root.addView(langRow);
+            btnJava.setOnClickListener(v -> {
+                selectedLanguage = "Java";
+                styleLangButton(btnJava, true, d);
+                styleLangButton(btnKotlin, false, d);
+            });
+            btnKotlin.setOnClickListener(v -> {
+                selectedLanguage = "Kotlin";
+                styleLangButton(btnJava, false, d);
+                styleLangButton(btnKotlin, true, d);
+            });
 
-        // ===== Minimum SDK =====
-        View spacer2 = new View(this);
-        root.addView(spacer2, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, (int) (16 * d)));
+            LinearLayout.LayoutParams half = new LinearLayout.LayoutParams(
+                    0, (int) (42 * d), 1f);
+            half.rightMargin = (int) (8 * d);
+            langRow.addView(btnJava, half);
+            LinearLayout.LayoutParams half2 = new LinearLayout.LayoutParams(
+                    0, (int) (42 * d), 1f);
+            langRow.addView(btnKotlin, half2);
+            root.addView(langRow);
 
-        root.addView(makeLabel("Minimum SDK"));
-        final Spinner spinSdk = new Spinner(this);
-        GradientDrawable sdkBg = new GradientDrawable();
-        sdkBg.setColor(Color.parseColor("#1A1B26"));
-        sdkBg.setCornerRadius(12 * d);
-        sdkBg.setStroke((int) d, Color.parseColor("#3B4261"));
-        spinSdk.setBackground(sdkBg);
-        spinSdk.setPadding((int) (14 * d), (int) (10 * d), (int) (14 * d), (int) (10 * d));
+            // ===== Minimum SDK =====
+            View spacer2 = new View(this);
+            root.addView(spacer2, new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, (int) (16 * d)));
 
-        String[] sdks = {
-                "API 21 (Lollipop)",
-                "API 23 (Marshmallow)",
-                "API 24 (Nougat)",
-                "API 26 (Oreo)",
-                "API 29 (Android 10)",
-                "API 33 (Android 13)"
-        };
-        ArrayAdapter<String> sdkAdapter = new ArrayAdapter<String>(
-                this, android.R.layout.simple_spinner_item, sdks) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                TextView tv = (TextView) super.getView(position, convertView, parent);
-                tv.setTextColor(Color.parseColor("#C0CAF5"));
-                tv.setTextSize(14);
-                return tv;
-            }
-            @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                TextView tv = (TextView) super.getDropDownView(position, convertView, parent);
-                tv.setTextColor(Color.parseColor("#C0CAF5"));
-                tv.setBackgroundColor(Color.parseColor("#1A1B26"));
-                int p = (int) (14 * d);
-                tv.setPadding(p, p, p, p);
-                return tv;
-            }
-        };
-        sdkAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinSdk.setAdapter(sdkAdapter);
-        spinSdk.setSelection(2); // ค่าเริ่มต้น API 24
-        LinearLayout.LayoutParams sdkLp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        sdkLp.topMargin = (int) (6 * d);
-        sdkLp.bottomMargin = (int) (20 * d);
-        root.addView(spinSdk, sdkLp);
+            root.addView(makeLabel("Minimum SDK"));
+            spinSdk = new Spinner(this);
+            GradientDrawable sdkBg = new GradientDrawable();
+            sdkBg.setColor(Color.parseColor("#1A1B26"));
+            sdkBg.setCornerRadius(12 * d);
+            sdkBg.setStroke((int) d, Color.parseColor("#3B4261"));
+            spinSdk.setBackground(sdkBg);
+            spinSdk.setPadding((int) (14 * d), (int) (10 * d), (int) (14 * d), (int) (10 * d));
+
+            String[] sdks = {
+                    "API 21 (Lollipop)",
+                    "API 23 (Marshmallow)",
+                    "API 24 (Nougat)",
+                    "API 26 (Oreo)",
+                    "API 29 (Android 10)",
+                    "API 33 (Android 13)"
+            };
+            ArrayAdapter<String> sdkAdapter = new ArrayAdapter<String>(
+                    this, android.R.layout.simple_spinner_item, sdks) {
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    TextView tv = (TextView) super.getView(position, convertView, parent);
+                    tv.setTextColor(Color.parseColor("#C0CAF5"));
+                    tv.setTextSize(14);
+                    return tv;
+                }
+                @Override
+                public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                    TextView tv = (TextView) super.getDropDownView(position, convertView, parent);
+                    tv.setTextColor(Color.parseColor("#C0CAF5"));
+                    tv.setBackgroundColor(Color.parseColor("#1A1B26"));
+                    int p = (int) (14 * d);
+                    tv.setPadding(p, p, p, p);
+                    return tv;
+                }
+            };
+            sdkAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinSdk.setAdapter(sdkAdapter);
+            spinSdk.setSelection(2); // ค่าเริ่มต้น API 24
+            LinearLayout.LayoutParams sdkLp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            sdkLp.topMargin = (int) (6 * d);
+            sdkLp.bottomMargin = (int) (20 * d);
+            root.addView(spinSdk, sdkLp);
+        } else {
+            etPackage = null;
+            spinSdk = null;
+            
+            // เว้นระยะห่างด้านล่างสำหรับหน้าเว็บ
+            View spacerWeb = new View(this);
+            LinearLayout.LayoutParams swLp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, (int) (10 * d));
+            swLp.bottomMargin = (int) (20 * d);
+            root.addView(spacerWeb, swLp);
+        }
 
         // ===== ปุ่ม Create project =====
         TextView btnCreate = new TextView(this);
-        btnCreate.setText("Create project");
+        btnCreate.setText(isWeb ? "Create website" : "Create project");
         btnCreate.setTextColor(Color.WHITE);
         btnCreate.setTextSize(16);
         btnCreate.setTypeface(null, Typeface.BOLD);
@@ -319,15 +339,9 @@ public class NewProjectActivity extends AppCompatActivity {
 
         btnCreate.setOnClickListener(v -> {
             String appName = etAppName.getText().toString().trim();
-            String pkg = etPackage.getText().toString().trim();
-            String sdkStr = (String) spinSdk.getSelectedItem();
 
             if (appName.isEmpty()) {
-                Toast.makeText(this, "กรุณาใส่ชื่อแอป", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (pkg.isEmpty() || !pkg.matches("[a-zA-Z][a-zA-Z0-9_]*(\\.[a-zA-Z][a-zA-Z0-9_]*)+")) {
-                Toast.makeText(this, "Package name ไม่ถูกต้อง", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, isWeb ? "กรุณาใส่ชื่อโปรเจกต์เว็บ" : "กรุณาใส่ชื่อแอป", Toast.LENGTH_SHORT).show();
                 return;
             }
             if (new File("/sdcard/MiniStudio/" + appName).exists()) {
@@ -335,12 +349,24 @@ public class NewProjectActivity extends AppCompatActivity {
                 return;
             }
 
-            int minSdk = 24;
-            try {
-                minSdk = Integer.parseInt(sdkStr.replaceAll("[^0-9]", "").substring(0, 2));
-            } catch (Exception ignored) {}
+            if (isWeb) {
+                // สร้างโปรเจกต์เว็บ
+                createAndOpenWeb(appName);
+            } else {
+                String pkg = etPackage != null ? etPackage.getText().toString().trim() : "";
+                if (pkg.isEmpty() || !pkg.matches("[a-zA-Z][a-zA-Z0-9_]*(\\.[a-zA-Z][a-zA-Z0-9_]*)+")) {
+                    Toast.makeText(this, "Package name ไม่ถูกต้อง", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-            createAndOpen(appName, pkg, selectedTemplate.id, selectedLanguage, minSdk);
+                int minSdk = 24;
+                try {
+                    String sdkStr = (String) spinSdk.getSelectedItem();
+                    minSdk = Integer.parseInt(sdkStr.replaceAll("[^0-9]", "").substring(0, 2));
+                } catch (Exception ignored) {}
+
+                createAndOpen(appName, pkg, selectedTemplate.id, selectedLanguage, minSdk);
+            }
         });
 
         root.addView(btnCreate, new LinearLayout.LayoutParams(
@@ -383,6 +409,26 @@ public class NewProjectActivity extends AppCompatActivity {
                     finish();
                 } else {
                     Toast.makeText(this, "❌ สร้างโปรเจกต์ไม่สำเร็จ", Toast.LENGTH_LONG).show();
+                }
+            });
+        }).start();
+    }
+
+    /** สร้างโปรเจกต์เว็บ แล้วเปิดใน Editor */
+    private void createAndOpenWeb(String projectName) {
+        Toast.makeText(this, "กำลังสร้างเว็บไซต์...", Toast.LENGTH_SHORT).show();
+
+        new Thread(() -> {
+            boolean ok = ProjectGenerator.createWeb(projectName);
+            runOnUiThread(() -> {
+                if (ok) {
+                    Toast.makeText(this, "✅ สร้าง \"" + projectName + "\" สำเร็จ", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(this, MainActivity.class);
+                    intent.putExtra("projectName", projectName);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Toast.makeText(this, "❌ สร้างไม่สำเร็จ", Toast.LENGTH_SHORT).show();
                 }
             });
         }).start();
@@ -454,6 +500,7 @@ public class NewProjectActivity extends AppCompatActivity {
             case "nav_drawer": return "22 files";
             case "bottom_nav": return "24 files";
             case "tabs": return "20 files";
+            case "web": return "4 files";   // ใหม่ (HTML, CSS, JS, etc.)
             default: return "15 files";
         }
     }
@@ -613,6 +660,38 @@ public class NewProjectActivity extends AppCompatActivity {
                 tabCol.addView(tabs, new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT, (int) (28 * d)));
                 content.addView(tabCol, new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT));
+                break;
+
+            case "web":
+                // ไอคอนจำลองหน้าเว็บ (HTML/CSS/JS)
+                LinearLayout webCol = new LinearLayout(this);
+                webCol.setOrientation(LinearLayout.VERTICAL);
+                webCol.setBackgroundColor(Color.parseColor("#FFFBEB"));
+                
+                // แถวจำลอง Browser Address Bar เล็กๆ
+                View browserBar = new View(this);
+                browserBar.setBackgroundColor(Color.parseColor("#FDE68A"));
+                webCol.addView(browserBar, new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, (int) (10 * d)));
+
+                // ตัวหนังสือจำลองโค้ด HTML/CSS
+                LinearLayout webLines = new LinearLayout(this);
+                webLines.setOrientation(LinearLayout.VERTICAL);
+                webLines.setPadding((int) (8 * d), (int) (8 * d), (int) (8 * d), 0);
+                for (int i = 0; i < 3; i++) {
+                    View wLine = new View(this);
+                    wLine.setBackgroundColor(Color.parseColor("#F59E0B"));
+                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                            i == 1 ? (int) (40 * d) : (int) (60 * d), (int) (5 * d));
+                    lp.bottomMargin = (int) (6 * d);
+                    webLines.addView(wLine, lp);
+                }
+                webCol.addView(webLines, new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                
+                content.addView(webCol, new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT));
                 break;
