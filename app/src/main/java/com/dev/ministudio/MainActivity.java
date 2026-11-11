@@ -445,7 +445,7 @@ private void setupLogic() {
     codeEditor.setUndoEnabled(true);
     codeEditor.setHighlightCurrentBlock(true);
 
-    // Auto-Save + รีเฟรช Preview (ไม่มี AI suggestion แล้ว)
+    // Auto-Save + รีเฟรช Preview
     codeEditor.subscribeEvent(ContentChangeEvent.class, (event, unsubscribe) -> {
         if (tvSaveStatus != null) {
             tvSaveStatus.setText("Editing...");
@@ -462,41 +462,42 @@ private void setupLogic() {
         };
         autoSaveHandler.postDelayed(saveRunnable, 1500);
 
- // รีเฟรช Preview อัตโนมัติ (XML หรือ เว็บ)
-if (isPreviewMode && previewContainer != null && codeEditor != null) {
-    previewContainer.postDelayed(() -> {
-        if (!isPreviewMode || previewContainer == null) return;
+        // รีเฟรช Preview อัตโนมัติ (XML หรือ เว็บ)
+        if (isPreviewMode && previewContainer != null && codeEditor != null) {
+            previewContainer.postDelayed(() -> {
+                if (!isPreviewMode || previewContainer == null) return;
 
-        File cur = currentProject != null ? currentProject.getCurrentOpenFile() : null;
-        String n = cur != null ? cur.getName().toLowerCase() : "";
+                File cur = currentProject != null ? currentProject.getCurrentOpenFile() : null;
+                String n = cur != null ? cur.getName().toLowerCase() : "";
 
-        // เว็บ → รีโหลด WebView
-        if (n.endsWith(".html") || n.endsWith(".htm")
-                || n.endsWith(".css") || n.endsWith(".js")) {
-            try {
-                saveFile();
-                android.view.View child = previewContainer.getChildCount() > 0
-                        ? previewContainer.getChildAt(0) : null;
-                if (child instanceof android.webkit.WebView) {
-                    ((android.webkit.WebView) child).reload();
+                // เว็บ → รีโหลด WebView
+                if (n.endsWith(".html") || n.endsWith(".htm")
+                        || n.endsWith(".css") || n.endsWith(".js")) {
+                    try {
+                        saveFile();
+                        android.view.View child = previewContainer.getChildCount() > 0
+                                ? previewContainer.getChildAt(0) : null;
+                        if (child instanceof android.webkit.WebView) {
+                            ((android.webkit.WebView) child).reload();
+                        }
+                    } catch (Exception ignored) {}
+                    return;
                 }
-            } catch (Exception ignored) {}
-            return;
-        }
 
-        // XML layout (ของเดิม)
-        try {
-            if (codeEditor == null) return;
-            View v = new XmlPreviewManager(MainActivity.this)
-                    .inflateXml(codeEditor.getText().toString());
-            previewContainer.removeAllViews();
-            previewContainer.addView(v, new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT));
-        } catch (Exception ignored) {
+                // XML layout (ของเดิม)
+                try {
+                    if (codeEditor == null) return;
+                    View v = new XmlPreviewManager(MainActivity.this)
+                            .inflateXml(codeEditor.getText().toString());
+                    previewContainer.removeAllViews();
+                    previewContainer.addView(v, new FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT));
+                } catch (Exception ignored) {
+                }
+            }, 600);
         }
-    }, 600);
-}
+    }); // ★ ปิด ContentChangeEvent
 
     // แสดงสีที่แถบสถานะเมื่อ cursor อยู่บนรหัสสี
     codeEditor.subscribeEvent(
@@ -567,7 +568,7 @@ if (isPreviewMode && previewContainer != null && codeEditor != null) {
             projectTreeManager.initializeFileTree();
         }
 
-        // ✅ เปิด MainActivity อัตโนมัติ ถ้ามีในโปรเจกต์
+        // เปิดไฟล์เริ่มต้นอัตโนมัติ (index.html หรือ MainActivity)
         File mainFile = findDefaultMainFile(rootPath);
         if (mainFile != null && mainFile.exists()) {
             openFile(mainFile);
@@ -604,7 +605,6 @@ private File findDefaultMainFile(String rootPath) {
     }
     return null;
 }
-
 private File findFileNamed(File dir, String fileName) {
     if (dir == null || !dir.exists() || !dir.isDirectory()) return null;
     File[] children = dir.listFiles();
